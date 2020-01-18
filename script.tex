@@ -1,0 +1,556 @@
+\documentclass[a4paper]{article}
+
+%quasi-historischer Header:
+\usepackage{verbatim}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{scrextend}
+%\usepackage{algorithm}
+%\usepackage{algorithmicx}[noend]
+\usepackage{bbold}
+\usepackage[noend]{algpseudocode}
+
+\title{\large Großer Beleg\\ \medskip \LARGE Effiziente und stabile Berechnung von Varianzen in Markov Ketten.}
+\author{Maximilian Starke \\ Student der TU Dresden \\ Fakultät Informatik}
+\date{\today}
+
+%\usepackage{wasysym}
+\usepackage{mathtools}
+\usepackage{ragged2e}
+
+%\usepackage[pdftex]{hyperref}
+\usepackage{framed}
+%\usepackage{mdframed}
+
+%\usepackage[inline, shortlabels]{enumitem}
+\usepackage{amsmath, amssymb}
+\usepackage{enumerate}
+%\usepackage{multicol} % multiple collums in enumerate
+%\usepackage{graphicx}
+\usepackage{tabularx}
+
+
+%\usepackage[thmmarks,amsmath,hyperref,noconfig]{ntheorem}
+%\usepackage{listings}
+%\usepackage{fancybox}
+%\usepackage{tikz}
+%\usepackage{struktex}
+
+%\usepackage{array}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+
+%\usepackage{caption}
+%\DeclareCaptionFont{white}{\color{white}}
+
+\usepackage{listings}
+%\usepackage{tcolorbox<}
+%\tcbuselibrary{listings}
+%\usepackage{minted}
+%\tcbuselibrary{minted}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{L}[1]{>{\flushleft\arraybackslash}m{#1}}
+
+
+\usepackage{tikz}
+\usepackage{verbatim}
+
+\usetikzlibrary{%
+	arrows,
+	shapes,
+	shapes.misc,% wg. rounded rectangle
+	shapes.arrows,%
+	chains,%
+	matrix,%
+	positioning,% wg. " of "
+	backgrounds,
+	fit,
+	petri,
+	scopes,%
+	decorations.pathmorphing,% /pgf/decoration/random steps | erste Graphik
+	shadows%
+}
+
+\tikzstyle{vertex}=[circle,fill=lime!90,minimum size=20pt,inner sep=0pt]
+\tikzstyle{selected vertex} = [vertex, fill=red!24]
+\tikzstyle{edge} = [draw,line width=1.8pt,->]
+\tikzstyle{medge} = [draw, line width = 8pt, yellow!50]
+\tikzstyle{weight} = [font=\small]
+\tikzstyle{selected edge} = [draw,line width=5pt,-,red!50]
+\tikzstyle{ignored edge} = [draw,line width=5pt,-,black!20]
+
+
+\usepackage{xcolor}
+% maybe install minted some day and make syntax highlighting###
+
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{enumerate}
+\usepackage{multicol} % multiple collums in enumerate
+
+\usepackage[thmmarks,amsmath,hyperref,noconfig]{ntheorem} 
+% erlaubt es, Sätze, Definitionen etc. einfach durchzunummerieren.
+\newtheorem{satz}{Satz}[section] % Nummerierung nach Abschnitten
+\newtheorem{proposition}[satz]{Proposition}
+\newtheorem{korollar}[satz]{Korollar}
+\newtheorem{lemma}[satz]{Lemma}
+
+\theorembodyfont{\upshape}
+\newtheorem{beispiel}[satz]{Beispiel}
+\newtheorem{bemerkung}[satz]{Bemerkung}
+\newtheorem{definition}[satz]{Definition} %[section]
+\newtheorem{algorithmus}[satz]{Algorithmus}
+
+\theoremstyle{nonumberplain}
+\theoremheaderfont{\itshape}
+\theorembodyfont{\normalfont}
+\theoremseparator{.}
+\theoremsymbol{\ensuremath{_\Box}}
+\newtheorem{beweis}{Beweis}
+\newtheorem{beweiss}{Beweisskizze}
+
+\qedsymbol{\ensuremath{_\Box}}
+
+\usepackage{chngcntr}
+\counterwithin{figure}{section}
+
+\tikzstyle{block} = [rectangle, draw, fill=blue!40, 
+text width=7em, text centered, rounded corners, minimum height=5em, node distance= 4.5cm, line width = 2pt]
+
+
+\tikzstyle{cblock} = [rectangle, draw, fill=blue!40, 
+text width=7em, text centered, rounded corners, minimum height=5em, node distance= 3.0cm, line width = 2pt]
+
+
+\tikzstyle{line} = [draw, -latex', line width = 1pt]
+
+
+\tikzstyle{cloud} = [ fill = white, rectangle, draw, rounded corners, node distance=2cm,
+minimum height=2.5em]
+
+\pgfdeclarelayer{bg}
+%\pgfsetlayers{bg,main}	
+
+\pgfdeclarelayer{foreground}
+\pgfdeclarelayer{background}
+% tell TikZ how to stack them (back to front)
+\pgfsetlayers{bg,background,main,foreground}
+
+
+\def\ftup{$F= (V,E,c,s,t)$ }
+\def\tab{\hspace{5ex}}
+
+\begin{document}
+
+\maketitle
+
+\vspace{2cm}
+
+\tableofcontents
+
+\pagebreak
+
+\newenvironment{meta}
+{\begin{center} \Large \color{red} META: \hspace{2ex} \large \color{blue}}
+{\end{center}}
+
+\section{Motivation}
+
+hier nur die Aufgabenstellung:
+\bigskip 
+
+Markov-Ketten mit Kantengewichten dienen der Modellierung und Analyse einer wichtigen
+Zielgröße in probabilistischen Systemen, z.B. der Dauer eines
+Verbindungsaufbaus in Computernetzwerken. Im Gegensatz zum Erwartungswert der akkumulierten Gewichte bis zum Erreichen eines Zielzustandes wurden die
+Schwankungen der Zielgröße in der wissenschaftlichen Literatur kaum untersucht.
+Dabei sind stark volatile Zielgrößen besonders in sicherheitskritischen Systemen zu
+vermeiden, was wiederum einen stabilen Algorithmus für ihre Berechnung
+erfordert.
+
+Nachdem die grundlegende Terminologie ausgearbeitet wurde, ist die Kernaufgabe
+der Arbeit die formale Erarbeitung und Analyse eines Algorithmus zur Berechnung
+der Varianz von akkumulierten Gewichten auf Basis von [1]. Der Algorithmus soll implementiert und zur experimentellen Analyse von anwendungsorientierten Beispielen herangezogen werden.
+Als weitergehende Forschungsfrage soll außerdem untersucht werden, ob das Verfahren auch zur Berechnung von Kovarianzen geeignet ist oder inwieweit der Algorithmus auf Markov-Entscheidungsprozesse mit Kantengewichten verallgemeinert werden kann.
+
+
+[1] T. Verhoeff, Reward Variance in Markov Chains: A Calculational Approach
+
+\bigskip
+
+\begin{meta}
+	to do...
+	
+	* was gibt es an bisheriger forschung
+	
+	* praktischer Nutzen
+	
+	* Thema und Ziel dieser arbeit
+	
+	* Vorabsummary, was den Leser erwartet
+	
+\end{meta}
+
+\section{Grundlagen der Wahrscheinlichkeitstheorie}
+
+\begin{meta}
+	/theoretische/ Grundlagen
+	 -> Wahrscheinlichkeitstheorie
+	 -> Markovketten
+	 -> MDPs bzw. unendliche summen für Beispiel
+\end{meta}
+
+\newcommand{\probspace}{Wahr\-schein\-lich\-keits\-raum}
+\newcommand{\probspaceexraw}{(\Omega, P)}
+\newcommand{\probspaceex}{$(\Omega, P)$}
+\begin{definition}[\probspace{}] \label{def-probspace}
+	\hspace{1ex} Ein Paar \probspaceex{} heißt genau dann \probspace{}, wenn $\Omega$ eine Menge ist und $P : \Omega \to [0,1] $ eine Funktion mit
+	\begin{equation}
+		\sum_{\omega \in \Omega} P(\omega) = 1 \text{.}
+	\end{equation} Wir nennen $\Omega$ in diesem Zusammenhang auch Ergebnismenge und $P$ eine Wahr\-schein\-lich\-keitsverteilung auf $\Omega$
+\end{definition}
+\newcommand{\rvar}{Zufallsvariable}
+\begin{definition}[\rvar{}] \label{def-rvar}
+	Sei \probspaceex{} ein \probspace{}. Eine Funktion $X : \Omega \to \mathbb{R}$ heißt \rvar{} auf \probspaceex{}. Wir nennen $X$ auch kurz \rvar{}, falls der Kontext \probspaceex{} klar ist.
+\end{definition}
+\newcommand{\expect}{Erwartungswert}
+\begin{definition}[\expect{}] \label{def-expect}
+	\hspace{1ex} Sei \probspaceex{} ein \probspace{} und $X$ eine \rvar{} auf \probspaceex{}.
+	\begin{equation}
+		\mathcal{E}_{\probspaceexraw{}}(X) := \sum_{\omega \in \Omega}{P(\omega) \cdot X(\omega)}
+	\end{equation}
+	ist der \expect{} von $X$ auf \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{E}(X)$.
+\end{definition}
+Es lässt sich leicht die folgende Linearität des \expect{}es beobachten. Seien $X$, $Y$ Zufallsvariablen, $c,d \in \mathbb{R}$. Dann gilt:
+\begin{align}
+	\mathcal{E}(X + cY + d) & = & \sum_{\omega \in \Omega}{P(\omega) \cdot (X + cY + d)(\omega) } \nonumber \\
+	& = & \sum_{\omega \in \Omega}{P(\omega) \cdot X(\omega) + c \cdot P(\omega) \cdot Y(\omega) + d \cdot P(\omega)} \nonumber \\
+	& = & \mathcal{E}(X) + c \mathcal{E}(Y) + d \label{eq-linearity}
+\end{align}
+Dabei ist  $X + cY + d$ die üblich Notation für die \rvar{} gegeben durch $Z : \Omega \to \mathbb{R} : \omega \mapsto X(\omega) + c \cdot Y(\omega)+ d$.
+\newcommand{\var}{Varianz}
+\begin{definition}[\var]\label{def-var}
+	Sei \probspaceex{} ein \probspace{} und $X$ eine \rvar{} auf \probspaceex{}.
+	\begin{equation}
+		\mathcal{V}_{\probspaceexraw{}}(X) :=  \mathcal{E}_{\probspaceexraw{}}\left(\left(X - \mathcal{E}_{\probspaceexraw{}} (X)\right)^{2}\right)
+	\end{equation}
+	ist die \var{} von $X$ auf  \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{V}(X)$.
+\end{definition}
+\newcommand{\cov}{Kovarianz}
+\begin{definition}[\cov]\label{def-cov}
+	Seien \probspaceex{} ein \probspace{} und $X, Y$ \rvar n auf \probspaceex{}. Die Kovarianz $\mathcal{C}_{\probspaceexraw}(X,Y)$ ist definiert durch:
+	\begin{equation}
+		\mathcal{C}_{\probspaceexraw}(X,Y) := \mathcal{E} \Big( \big(X - \mathcal{E}(X)\big)\big(Y - \mathcal{E}(Y) \big)\Big)
+	\end{equation}
+\end{definition}
+
+Offenbar ist die \var{} ein Spezialfall der \cov{}, denn aus den Definitionen folgt unmittelbar $\mathcal{V}_{\probspaceexraw}(X) = \mathcal{C}_{\probspaceexraw}(X,X)$. Wir betrachten nun, wie sich Kovarianzen als Erwartungswerte beschreiben lassen.
+
+\begin{lemma}\label{lemma-cov-exp}
+	Seien $X$ und $Y$ \rvar{}n. Dann gilt:
+\begin{equation}
+	\mathcal{C}(X,Y) = \mathcal{E}(XY) - \mathcal{E}(X)\mathcal{E}(Y)
+\end{equation}
+\end{lemma}
+\begin{beweis}
+\begin{align*}
+\mathcal{C}(X,Y) & = & \mathcal{E}\big( \left(X - \mathcal{E}(X)\right)\left(Y - \mathcal{E}(Y)\right)\big) && \text{(Definition \ref{def-cov})} \\
+& = & \mathcal{E}\big(XY - X \mathcal{E}(Y) - Y \mathcal{E}(E) + \mathcal{E}(X)\mathcal{E}(Y)\big) \\
+& = & \mathcal{E}(XY) - 2 \mathcal{E}(X) \mathcal{E}(Y) + \mathcal{E}(X) \mathcal{E}(Y) && \text{(Linearität (\ref{eq-linearity}))}\\
+& = & \mathcal{E}(XY) - \mathcal{E}(X)\mathcal{E}(Y) \\
+\end{align*}
+\end{beweis}
+
+Der Spezialfall von Lemma \ref{lemma-cov-exp} für \var{}en lautet dann wiefolgt.
+
+\begin{korollar}\label{kor-var-exp}
+	Sei $X$ eine \rvar{}. Dann gilt:
+	\begin{equation}
+		\mathcal{V}(X) = \mathcal{E}(X^{2}) - \mathcal{E}\left(X\right)^{2}
+	\end{equation}
+\end{korollar}
+%\begin{beweis}
+%	\begin{align*}
+%		\mathcal{V}(X) & = & \mathcal{E}\left( \left(X - \mathcal{E}(X)\right)^{2}\right) && \text{(Definition \ref{def-var})} \\
+%		& = & \mathcal{E}(X^{2} - 2 X \mathcal{E}(X) + \mathcal{E}(X)^{2}) \\
+%		& = & \mathcal{E}(X^2) - 2 \mathcal{E}(X) \mathcal{E}(X) + \mathcal{E}(X)^{2} && \text{(Linearität (\ref{eq-linearity}))}\\
+%		& = & \mathcal{E}(X^{2}) - \mathcal{E}\left(X\right)^{2} \\
+% 	\end{align*}
+%\end{beweis}
+Analog zu (\ref{eq-linearity}) lässt sich für \var{}en folgende Beziehung feststellen:
+\begin{lemma}\label{lemma-var-qlinear}
+	Sei $X$ eine \rvar{}, $c,d \in \mathbb{R}$. Dann gilt:
+	\begin{equation}
+		\mathcal{V}(cX + d) = c^2\mathcal{V}(X)
+	\end{equation}
+\end{lemma}
+\begin{beweis}
+	tbd (steht im Paper)
+\end{beweis}
+\begin{meta}
+	das korollar wird nicht benutzt....
+\end{meta}
+\begin{korollar}
+	Sei $X$ eine Zufallsvariable und $c \in \mathbb{R}$. Dann gilt:
+	\begin{equation}
+		\mathcal{E}\left((c+X)^2\right) = (c+ \mathcal{E}(X))^2 + \mathcal{V}(X)
+	\end{equation}
+\end{korollar}
+\begin{beweis}
+Aus Korollar \ref{kor-var-exp} folgt unmittelbar $\mathcal{V}(X+c) = \mathcal{E}\left((X+c)^{2}\right) - \left(\mathcal{E}\left(X+c\right)\right)^{2}$. Dabei kann die linke Seite nach Lemma \ref{lemma-var-qlinear} vereifacht werden zu $\mathcal{V}(X+c) = \mathcal{V}(X)$. Der Subtrahend $\left(\mathcal{E}\left(X+c\right)\right)^{2}$ lässt sich aufgrund der Linearität (Gleichung \ref{eq-linearity}) auch als $\left( \mathcal{E}(X)+c\right)^{2}$ 
+schreiben.
+\end{beweis}
+
+\section{Markovketten}
+
+\newcommand{\mc}{Markovkette}
+\newcommand{\mcex}{$M = (Q, P, I)$}
+\begin{definition}[\mc]\label{def-mc}
+	Eine \mc{} ist ein Tupel \mcex{} mit den Eigenschaften
+	\begin{enumerate}[(a)]
+		\item $Q$ ist eine Menge.
+		\item $P : Q \times Q \to [0,1]$ mit der Eigenschaft $\forall q \in Q : \sum_{q' \in Q}{P(q,q') = 1}$
+		\item $I : Q \to [0,1]$ ist eine Wahrscheinlichkeitsverteilung auf $Q$.
+	\end{enumerate}	
+	Die Bilder von $P$ nennen wir auch Transitionswahrscheinlichkeiten.
+\end{definition}
+\newcommand{\path}{Pfad}
+\begin{definition}[\path]\label{def-path}
+	Sei \mcex{} eine \mc{}. Die Menge aller (endlichen) \path e in $M$ ist definiert durch
+	\begin{equation}
+		\mathrm{Paths}(M) := \{p \in Q^{k} \mid k \in \mathbb{N}_{+}\}
+	\end{equation}
+	Wir nennen einen \path{} $p \in \mathrm{Paths}(M)$ echt, wenn zusätzlich $\mathrm{real}_{M}(p)$ gilt mit:
+	\begin{equation}
+		\mathrm{real}_{M}(p) := \forall 0 \leq i < |p| - 1 : P(p_i,p_{i+1}) > 0
+	\end{equation}
+	Die Wahrscheinlichkeit $\mathrm{P}(p)$ eines Pfades ist gegeben durch
+	\begin{equation}
+		\mathrm{P}(p) := \prod_{i = 0}^{|p| - 2}{P(p_i,p_{i+1})}
+	\end{equation}
+	Insbesondere ist $\mathrm{P}(p) = 1$ für alle Pfade $p$ mit $|p| = 1$ und ein Pfad $p$ ist genau dann echt, wenn $\mathrm{P}(p) > 0$, d.h. wenn $p$ tatsächlich ein Streckenzug im zugrundeliegenden gerichteten Graph von $M$ ist.
+	
+	Für $|p| = 2$ entspricht die Wahrscheinlichkeit $\mathrm{P}(p)$ genau der Wahrscheinlichkeit gegeben durch die Funktion $P$ der Transitionswahrscheinlichkeiten aus der Markovkette. Daher gilt $P \subseteq \mathrm{P}$, $\mathrm{P}$ ergibt sich als eindeutige Fortsetzung von $P$ und wir schreiben im Folgenden einfach $P$.
+\end{definition}
+\newcommand{\reward}{Gewichtsfunktion}
+\begin{definition}[\reward]
+	Sei \mcex{} eine \mc{}. Eine \reward{} auf $M$ ist eine Abbildung
+	\begin{equation}
+	R : Q \times Q \to \mathbb{R}\text{.}
+	\end{equation} 
+\end{definition}
+Offenbar gibt es analog zur Wahrscheinlichkeit $P$ eine eindeutige Fortsetzung für eine \reward{} $R$, gegeben durch Aufsummierung aller Kantengewichte entlang von Pfaden:
+\begin{equation}
+	\mathrm{R} : \bigcup_{k \in \mathbb{N}_+}{Q^k} \to \mathbb{R} : p \mapsto \sum_{i = 0}^{|p| - 2}{R(p_i,p_{i+1})}
+\end{equation}
+Wir schreiben im Folgenden einfach $R$.
+\begin{definition}\label{def-path-to}
+	Sei \mcex{} eine \mc{}, $s \in Q$ ein Startzustand und $A \subseteq Q$ eine Menge von Zielzuständen. Wir bezeichnen die Menge der Pfade, welche in $s$ starten und in $A$ enden, jedoch $A$ nicht zwischenzeitlich schon erreichen mit:
+	\begin{equation}
+		\mathrm{Paths}_{s \rightarrow A}(M) = \{ p \in \mathrm{Paths}(M) \mid p_0 = s \land p_{|p|-1} \in A \land \forall i < |p| - 1 : p_i \notin A \}
+	\end{equation}
+	
+\end{definition}
+
+\begin{meta}
+	[Literaturverweis einfügen:] Wenn A von allen $q \in Q$ erreichbar, dann ...
+\end{meta}
+
+Wir beobachten, dass unter dieser Voraussetzung $(\mathrm{Paths}_{s \rightarrow A}(M), P)$ ein \probspace{} ist und $R$ eine \rvar{} auf $M$.
+
+\begin{definition}\label{def-pmod}
+	Sei \mcex{} eine endliche \mc, $A\subseteq Q$ eine Zielmenge. Dann bezeichnen wir mit $P_{\rightarrow A}$ die folgende Matrix:
+	\begin{equation}
+	P_{\rightarrow A} : Q^2 \to [0,1] : \begin{cases}
+	P(s,t) & \text{falls } s\notin A\\
+	0 & \text{falls } s\in A
+	\end{cases}
+	\end{equation}
+\end{definition}
+
+Diese Modifikation entspricht dem Entfernen von allen ausgehenden Kanten von Zuständen $a\in A$.
+
+\begin{satz}\label{th-unique}
+	Sei \mcex{} eine endliche \mc, $A\subseteq Q$ eine Zielmenge, die von jedem Knoten aus erreichbar ist ($\forall s\in Q: \exists p \in \mathrm{Paths}_{s\rightarrow A}(M) : \mathrm{real}_M(p)$). 
+	Dann ist die Matrix $M := P_{\rightarrow A} - \mathbb{1}$ invertierbar.
+\end{satz}
+\begin{beweis}
+	%Sei $R: Q^2 \to \mathbb{R} : (s,t) \mapsto 0$ die triviale \reward{} auf $M$. 
+	Aus der linearen Algebra ist bekannt, dass $M$ genau dann invertierbar ist, wenn $Mx = 0$ nur die Lösung $x=0$ hat.
+	Nehmen wir also an, $x \in R^Q$ mit $x\neq 0$ erfüllt $Mx = 0$. Dann gilt auch $\forall k \in \mathbb{R}: M (kx) = 0$. Wählen wir ein geeignetes $k$, so erhalten wir eine Lösung $z$ mit einem positiven Eintrag, d.h. $Mz = 0$ und $\exists q \in Q : z_q > 0$. Sei $E \subseteq Q$ die Indexmenge aller maximalen Einträge von $z$, also $e \in E :\Leftrightarrow \forall q \in Q z_q \leq z_e$. Sei $s\in A$. Dann folgt aus $Mx_s = 0_s$, dass $\sum_{q\in Q}{(\widehat{P}- \mathbb{1})_{(s,q)} \cdot z_q} = \sum_{q\in Q}{-\mathbb{1}_{(s,q)} \cdot z_q} = 0$  und damit $z_s = 0$.
+	
+	Sei $s \in E$. Dann ist $z_s > 0$ und daher $s\notin A$. Aus $Mx_s = 0_s$ folgt dann $\sum_{q\in Q}{(\widehat{P}- \mathbb{1})_{(s,q)} \cdot z_q} = 0$. Damit bekommen wir $\sum_{q\in Q}{P_{(s,q)} \cdot z_q} = z_s$. Da nach Definition \ref{def-mc} $q \mapsto P(s,q)$ eine Wahrscheinlichkeitsverteilung auf $Q$ ist, folgt schließlich $\forall q\in Q: P(s,q) > 0 \Rightarrow z_q = z_s$. D.h. für jeder Nachfolgerknoten $t\in Q$ von $s\in E$ in der \mc{} $M$ liegt selbst wieder in $E$. Da ein Knoten $a\in A$ von $s$ aus erreichbar ist, gilt auch $a\in E$. Wir erhalten einen Widerspruch.
+\end{beweis}
+
+
+\section{Formale Herleitung eines Algorithmus}
+
+Ziel ist es nun, Algorithmen zu beschreiben und zu analysieren, welche bei gegebener \mc{} $M$, gegebenem Startzustand $s$ und gegebener Zielzustandsmenge $A$ die Varianz bzw. Kovarianz berechnen. Wir beschränken uns dabei auf den Fall, dass $A$ von jedem Zustand in $M$ aus erreichbar ist.
+
+\subsection{Berechnung von Erwartungswerten}
+
+Seien \mcex{} eine \mc{}, $s \in Q$, $\emptyset \neq A \subseteq Q$ und $\forall s \in Q: \exists p \in \mathrm{Paths}_{s \rightarrow A}(M) : \mathrm{real}_{M}(p)$. Sei $R$ eine  \reward{} auf $M$. Wir betrachten im \probspace{} $(\mathrm{Paths}_{s \rightarrow A}(M), P)$ den Erwartungswert $\mathcal{E}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)}(R)$, im Folgenden kurz $\mathcal{E}_{s}(R)$:
+
+\begin{equation}
+	\mathcal{E}_{s}(R) = \sum_{p \in \mathrm{Paths}_{s \rightarrow A}(M)}{P(p) \cdot R(p)} 
+\end{equation}
+Falls $s \in A$, gilt $|\mathrm{Paths}_{s \rightarrow A}(M)| = 1$ mit dem einzigen enthaltenen Pfad $p = (s)$. Dann sind nach Definition $P(p) = 1$ und $R(p) = 0$. Damit erhalten wir:
+
+\begin{align}
+	\mathcal{E}_{s}(R) = 0 && \text{(falls $s \in A$)}\label{expect_trivial}
+\end{align}
+
+Falls $s \notin A$, besteht jeder Pfad $p \in \mathrm{Paths}_{s \rightarrow A}(M)$ aus mehr als einem Knoten, und wir erhalten:
+\begin{align}
+	\mathcal{E}_{s}(R) & = & \sum_{p \in \mathrm{Paths}_{s \rightarrow A}(M)}{P(s,p_1) \cdot P(p_{\leftarrow 1}) \cdot (R(s,p_1) + R(p_{\leftarrow 1}))} \\
+	& = & \sum_{t \in Q}{ P(s,t) \cdot \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot (R(s,t) + R(p')) } } \\
+	& = & \sum_{t \in Q}{ P(s,t) \cdot \left((R(s,t) + \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot R(p') } \right) } \\
+	& = & \sum_{t \in Q}{ P(s,t) \cdot \left(R(s,t) + \mathcal{E}_{t}(R) \right) } \label{expect_recursive}
+\end{align}
+\begin{meta}
+	TODO: notation erklären $p_{\leftarrow 1}$
+\end{meta}
+Die Gleichungen \ref{expect_trivial} und \ref{expect_recursive} geben uns ein System von $|Q|$ linearen Gleichungen in $|Q|$ Variablen:
+\begin{align}
+\begin{aligned}
+	\mu_{s} & = & 0 && \text{(falls $s \in A$)} \\
+	\mu_{s} & = & \sum_{t \in Q}{ P(s,t) \cdot \left(R(s,t) + \mu_{t} \right) } && \text{(falls $s \notin A$)}
+\end{aligned}\label{les-exp}
+\end{align}
+
+Mit Definition \ref{def-pmod} ist dieses Gleichungssystem äquivalent zu
+\begin{equation}
+	\mu_s = \sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot \left(R(s,t) + \mu_{t} \right) }\text{,}
+\end{equation}
+was sich in Matrixschreibweise mit $\mu = (\mu_s)_{s \in Q }$ ausdrücken lässt als:
+\begin{align}
+	& \mu = \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q} + P_{\rightarrow A} \cdot \mu \\
+	\Longleftrightarrow	\qquad & (P_{\rightarrow A} - \mathbb{1}) \mu = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q}\label{les-exp-mat}
+\end{align}
+
+Wir stellen fest, der Vektor $(\mathcal{E}_{s}(R))_{s \in Q}$ ist die einzige Lösung des Gleichungssystems (\ref{les-exp-mat}):
+Zum einen ist gemäß unserer Herleitung ist der Vektor $(\mathcal{E}_{s}(R))_{s \in Q}$ eine Lösung dieses Gleichungssystems. Zum anderen ist $P_{\rightarrow A} - \mathbb{1}$ nach Satz \ref{th-unique} invertierbar. Somit ist die Lösung eindeutig.
+
+Mit dem Gleichungssystem (\ref{les-exp}) und Standardalgorithmen zum Lösen linearer Gleichungssysteme erhalten wir unmittelbar einen Algorithmus zur Berechnung der Erwartungswerte $E_q(R)$ für $q \in Q$.
+
+\subsection{Berechnung von Varianzen}
+
+Seien \mcex{} eine \mc{}, $s \in Q$, $\emptyset \neq A \subseteq Q$ und $\forall s \in Q: \exists p \in \mathrm{Paths}_{s \rightarrow A}(M) : \mathrm{real}_{M}(p)$. Sei $R$ eine  \reward{} auf $M$. Wir betrachten im \probspace{} $(\mathrm{Paths}_{s \rightarrow A}(M), P)$ die Varianz $\mathcal{V}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)}(R)$:
+\begin{equation}
+	\mathcal{V}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)}(R) = \mathcal{E}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)}\left(\left(R - \mathcal{E}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)} (R)\right)^{2}\right) 
+\end{equation}
+Wir nutzen auch hier wieder die Kurzschreibweise $\mathcal{V}_{s}(R) := \mathcal{V}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)}(R)$ und erhalten:
+\begin{equation}
+\mathcal{V}_{s}(R) = \mathcal{E}_{s}\left(\left(R - \mathcal{E}_{s} (R)\right)^{2}\right)
+\end{equation}
+Falls $s \in A$, gilt $|\mathrm{Paths}_{s \rightarrow A}(M)| = 1$ mit dem einzigen enthaltenen Pfad $p = (s)$. Dann sind nach Definition $P(p) = 1$ und $R(p) = 0$ und der Erwartungswert beträgt $\mathcal{E}_{s}(R) = 0$, wie wir bereits im vorangegangenen Abschnitt gesehen haben. Damit erhalten wir:
+
+\begin{align}
+\mathcal{V}_{s}(R) = 0 && \text{(falls $s \in A$)}\label{var_trivial}
+\end{align}
+
+Falls $s \notin A$, besteht jeder Pfad $p \in \mathrm{Paths}_{s \rightarrow A}(M)$ aus mehr als einem Knoten, und wir erhalten:
+\begin{align}
+\mathcal{V}_{s}(R) & = & \sum_{p \in \mathrm{Paths}_{s \rightarrow A}(M)}{P(p) \cdot \left(R(p) - \mathcal{E}_{s}(R)\right)^2} \\
+& = & \sum_{t \in Q}{ P(s,t) \cdot \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot \left(R(s,t) + R(p') - \mathcal{E}_{s}(R)\right)^2 } } \\
+& = & \sum_{t \in Q}{ P(s,t) \cdot \mathcal{E}_{t}\left(\left(R + R(s,t) - \mathcal{E}_{s}(R)\right)^2\right) } \\
+& = & \sum_{t \in Q}{ P(s,t) \cdot \bigg(\mathcal{V}_{t}(R) + \Big(\mathcal{E}_{t}\big(R + R(s,t) - \mathcal{E}_{s}(R)\big)\Big)^2\bigg) } && \text{(Korollar (\ref{kor-var-exp}))}\\
+& = & \sum_{t \in Q}{ P(s,t) \cdot \Big(\mathcal{V}_{t}(R) + \big(\mathcal{E}_{t}(R) + R(s,t) - \mathcal{E}_{s}(R)\big)^2\Big) } && \text{(Linearität (\ref{eq-linearity}))} \label{var_recursive}
+\end{align}
+
+Die Gleichungen \ref{var_trivial} und \ref{var_recursive} geben uns ähnlich wie im Abschnitt über die \expect{}e ein System von $|Q|$ linearen Gleichungen in $|Q|$ Variablen:
+\begin{align}
+\begin{aligned}
+	\nu_s & = & 0 && \text{(falls $s \in A$)}\\
+	\nu_s & = & \sum_{t \in Q}{ P(s,t) \cdot \Big(\nu_t + \big(\mathcal{E}_{t}(R) + R(s,t) - \mathcal{E}_{s}(R)\big)^2\Big) } && \text{(falls $s \notin A$)}
+\end{aligned}\label{les-var}
+\end{align}
+
+Sei die \reward{} $S$ auf definiert durch $S: Q^2 \to \mathbb{R}_+ : (s,t) \mapsto \big(\mathcal{E}_{t}(R) + R(s,t) - \mathcal{E}_{s}(R)\big)^2$ und sei $\nu = (\nu_s)_{s\in Q}$. Analog zu Gleichung \ref{les-exp-mat} bekommen wir durch Anwendung von Definition \ref{def-pmod} das äquivalente Gleichungsystem
+\begin{equation}
+	(P_{\rightarrow A} - \mathbb{1}) \nu = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot S(s,t) }\right)_{s \in Q}\label{les-var-mat}
+\end{equation}
+Auch hier besitzt das Gleichungsystem eine eindeutige Lösung nach Satz \ref{th-unique}. Vergleicht man die Gleichungssysteme (\ref{les-exp-mat}) und (\ref{les-var-mat}), dann bekommen wir:
+\begin{equation}
+\forall q \in Q : \mathcal{V}_q(R) = \mathcal{E}_q(S)
+\end{equation}
+Damit haben wir die Berechnung der Varianzen gleichzeitig auf die Berechnung von Erwartungswerten zurückgeführt. Um die \var{}en $(\mathcal{V}_q(R))_{q\in Q}$ in einer \mc{} zu berechnen, genügt es die \expect{}e $(\mathcal{E}_q(R))_{q\in Q}$ im ersten Schritt und $(\mathcal{E}_q(S))_{q\in Q}$ im zweiten Schritt zu berechnen. Es ist sogar noch eine Optimierung möglich, indem zuerst die inverse Matrix $(P_{\rightarrow A} - \mathbb{1})^{-1}$ für sich berechnet wird. Dann müssen für das Lösen beider Gleichungssysteme jeweils nur eine Matrixmultiplikation ausgeführt werden.
+
+\subsection{Berechnung von Kovarianzen}
+Seien wieder \mcex{} eine \mc{}, $s \in Q$, $\emptyset \neq A \subseteq Q$ und $\forall s \in Q: \exists p \in \mathrm{Paths}_{s \rightarrow A}(M) : \mathrm{real}_{M}(p)$. Seien nun $X, Y$ \reward{}en auf $M$. Wir betrachten im \probspace{} $(\mathrm{Paths}_{s \rightarrow A}(M), P)$ die \cov{} $\mathcal{C}_s(X,Y) := \mathcal{C}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)}(X,Y)$:
+
+\begin{equation}
+\mathcal{C}_{s}(X,Y) = \mathcal{E}_{s}\big(\left(X - \mathcal{E}_{s} (X)\right)\left(Y - \mathcal{E}_{s} (Y)\right)\big)
+\end{equation}
+Falls $s \in A$, gilt $|\mathrm{Paths}_{s \rightarrow A}(M)| = 1$ mit dem einzigen enthaltenen Pfad $p = (s)$. Dann sind nach Definition $P(p) = 1$ und $R(p) = 0$ und die \expect{}e betragen $\mathcal{E}_{s}(X) = \mathcal{E}_{s}(Y) = 0$. Damit erhalten wir:
+
+\begin{align}
+\mathcal{C}_{s}(X,Y) = 0 && \text{(falls $s \in A$)}\label{cov_trivial}
+\end{align}
+
+Falls $s \notin A$, besteht jeder Pfad $p \in \mathrm{Paths}_{s \rightarrow A}(M)$ aus mehr als einem Knoten, und wir erhalten:
+
+\begin{align}
+\mathcal{V}_{s}(R) & = & \sum_{p \in \mathrm{Paths}_{s \rightarrow A}(M)}{P(p) \cdot \big(\left(X(p) - \mathcal{E}_{s} (X)\right)\left(Y(p) - \mathcal{E}_{s} (Y)\right)\big)} \\
+& = & \sum_{t \in Q}{ P(s,t) \cdot \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot \big((X(s,t) + X(p') - \mathcal{E}_{s}(X))(Y(s,t) + Y(p') - \mathcal{E}_{s}(Y))\big)} } \\
+& = & \sum_{t \in Q}{ P(s,t) \cdot \mathcal{E}_{t}\Big(\big(X + X(s,t) - \mathcal{E}_{s}(X)\big)\big(Y + Y(s,t) - \mathcal{E}_{s}(Y)\big)\Big) }\\
+& = & \sum_{t \in Q}P(s,t) \cdot \Bigg(\begin{aligned}
+&\mathcal{E}_{t}(XY)
+&+ \mathcal{E}_{t}(X)(Y(s,t) - \mathcal{E}_{s}(Y))\\
+&+ \mathcal{E}_{t}(Y)(X(s,t) - \mathcal{E}_{s}(X))
+&+ (X(s,t) - \mathcal{E}_{s}(X))(Y(s,t) - \mathcal{E}_{s}(Y))
+\end{aligned} \Bigg)\\
+& = & \sum_{t \in Q}P(s,t) \cdot \Bigg(\begin{aligned}
+&\mathcal{E}_{t}(XY)
+&\color{green}- \mathcal{E}_{t}(X)\mathcal{E}_{t}(Y)\\
+&\color{green}+ \mathcal{E}_{t}(X)\mathcal{E}_{t}(Y)
+&+ \mathcal{E}_{t}(X)(Y(s,t) - \mathcal{E}_{s}(Y))\\
+&+ \mathcal{E}_{t}(Y)(X(s,t) - \mathcal{E}_{s}(X))
+&+ (X(s,t) - \mathcal{E}_{s}(X))(Y(s,t) - \mathcal{E}_{s}(Y))
+\end{aligned} \Bigg)\\
+& = & \sum_{t \in Q}P(s,t) \cdot \Big( \mathcal{C}_{t}(X,Y) + \big(\mathcal{E}_{t}(X) + X(s,t) - \mathcal{E}_{s}(X)\big)\big(\mathcal{E}_{t}(Y) + Y(s,t) - \mathcal{E}_{s}(Y)\big)\Big)\label{cov_recursive}
+\end{align}
+
+Die Gleichungen \ref{cov_trivial} und \ref{cov_recursive} geben uns ähnlich wie im Abschnitt über die \expect{}e ein System von $|Q|$ linearen Gleichungen in $|Q|$ Variablen:
+\begin{align}
+\begin{aligned}
+c_s & = & 0 && \text{(falls $s \in A$)}\\
+c_s & = & \sum_{t \in Q}P(s,t) \cdot \Big( \big(\mathcal{E}_{t}(X) + X(s,t) - \mathcal{E}_{s}(X)\big)\big(\mathcal{E}_{t}(Y) + Y(s,t) - \mathcal{E}_{s}(Y)\big) + c_t\Big) && \text{(falls $s \notin A$)}
+\end{aligned}
+\end{align}
+
+Sei die \reward{} $S$ auf $M$ definiert durch $S: Q^2 \to \mathbb{R} : (s,t) \mapsto \big(\mathcal{E}_{t}(X) + X(s,t) - \mathcal{E}_{s}(X)\big)\big(\mathcal{E}_{t}(Y) + Y(s,t) - \mathcal{E}_{s}(Y)\big)$ und sei $c = (c_s)_{s\in Q}$. Analog zu Gleichung \ref{les-exp-mat} bekommen wir durch Anwendung von Definition \ref{def-pmod} das äquivalente Gleichungsystem
+\begin{equation}
+(P_{\rightarrow A} - \mathbb{1}) c = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot S(s,t) }\right)_{s \in Q}\label{les-cov-mat}
+\end{equation}
+Auch hier besitzt das Gleichungsystem eine eindeutige Lösung nach Satz \ref{th-unique}. Vergleicht man die Gleichungssysteme (\ref{les-exp-mat}) und (\ref{les-cov-mat}), dann bekommen wir:
+\begin{equation}
+\forall q \in Q : \mathcal{C}_q(X,Y) = \mathcal{E}_q(S)
+\end{equation}
+Damit haben wir die Berechnung der Kovarianzen gleichzeitig auf die Berechnung von Erwartungswerten zurückgeführt. Um die \cov{}en $(\mathcal{C}_q(X,Y))_{q\in Q}$ in einer \mc{} zu berechnen, genügt es die \expect{}e $(\mathcal{E}_q(X))_{q\in Q}$ sowie $(\mathcal{E}_q(Y))_{q\in Q}$ im ersten Schritt und $(\mathcal{E}_q(S))_{q\in Q}$ im zweiten Schritt zu berechnen. Es ist wie bei den Varianzen die Optimierung möglich, zuerst die inverse Matrix $(P_{\rightarrow A} - \mathbb{1})^{-1}$ zu berechnen, um danach nur noch Matrixmultiplikationen ausführen zu müssen.
+
+
+\section{Performancemessung am praktischen Beispiel}
+
+\subsection{Herman's Selbststabilisierungsalgorithmus}
+
+Hier verweis einfügen
+
+Um die beschriebene Berechnung von Erwartungswerten, Varianzen und Kovarianzen praktisch zu demonstrieren soll uns hier ein Beispiel dienen, welches auch in den \textit{PRISM Case Studies} zu finden ist.
+
+
+\begin{meta}
+Anmerkung: Die Berechnung der Varianz ist mittels \ref{kor-var-exp} kann zu unschönen Fehlern mit floatingpoint Standard führen...
+\end{meta}
+
+
+
+use https://github.com/ddemidov/amgcl
+
+Eigen library?
+
+\begin{thebibliography}{99}
+	\bibitem{CLR09} \textit{bla bla}
+		 https://de.wikipedia.org/wiki/BibTeX
+\end{thebibliography}
+
+\end{document}
