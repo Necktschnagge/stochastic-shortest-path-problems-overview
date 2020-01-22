@@ -1,4 +1,8 @@
 \documentclass[a4paper]{article}
+\usepackage[affil-it]{authblk}
+
+\usepackage[backend=biber]{biblatex}
+\addbibresource{bibliography.bib}
 
 %quasi-historischer Header:
 \usepackage{verbatim}
@@ -9,9 +13,13 @@
 %\usepackage{algorithmicx}[noend]
 \usepackage{bbold}
 \usepackage[noend]{algpseudocode}
+\usepackage{multicol}
 
-\title{\large Großer Beleg\\ \medskip \LARGE Effiziente und stabile Berechnung von Varianzen in Markov Ketten.}
-\author{Maximilian Starke \\ Student der TU Dresden \\ Fakultät Informatik}
+\usepackage[official]{eurosym}
+
+\title{Effiziente und stabile Berechnung von Varianzen in Markov Ketten.}
+\author{Maximilian Starke}
+\affil{Fakultät für Informatik, Technische Universität Dresden}
 \date{\today}
 
 %\usepackage{wasysym}
@@ -69,10 +77,10 @@
 	decorations.pathmorphing,% /pgf/decoration/random steps | erste Graphik
 	shadows%
 }
-
-\tikzstyle{vertex}=[circle,fill=lime!90,minimum size=20pt,inner sep=0pt]
-\tikzstyle{selected vertex} = [vertex, fill=red!24]
-\tikzstyle{edge} = [draw,line width=1.8pt,->]
+%#1
+\tikzstyle{vertex}=[circle, minimum size=20pt, line width = 1pt, draw = black]
+\tikzstyle{target} = [vertex, double, double distance = 1pt]
+\tikzstyle{edge} = [draw,shorten > = 1pt, shorten < = 1pt, line width=1pt,->]
 \tikzstyle{medge} = [draw, line width = 8pt, yellow!50]
 \tikzstyle{weight} = [font=\small]
 \tikzstyle{selected edge} = [draw,line width=5pt,-,red!50]
@@ -154,43 +162,32 @@ minimum height=2.5em]
 {\begin{center} \Large \color{red} META: \hspace{2ex} \large \color{blue}}
 {\end{center}}
 
-\section{Motivation}
+\section{Einführung}
 
-hier nur die Aufgabenstellung:
-\bigskip 
+Markov-Ketten mit Kantengewichten dienen der Modellierung und Analyse einer wichtigen Zielgröße in probabilistischen Systemen, z.B. der Dauer eines Verbindungsaufbaus in Computernetzwerken.
+Im Gegensatz zum Erwartungswert der akkumulierten Gewichte bis zum Erreichen eines Zielzustandes wurden die Schwankungen der Zielgröße in der wissenschaftlichen Literatur kaum untersucht.
+Dabei sind stark volatile Zielgrößen besonders in sicherheitskritischen Systemen zu vermeiden, was wiederum einen stabilen Algorithmus für ihre Berechnung erfordert.
 
-Markov-Ketten mit Kantengewichten dienen der Modellierung und Analyse einer wichtigen
-Zielgröße in probabilistischen Systemen, z.B. der Dauer eines
-Verbindungsaufbaus in Computernetzwerken. Im Gegensatz zum Erwartungswert der akkumulierten Gewichte bis zum Erreichen eines Zielzustandes wurden die
-Schwankungen der Zielgröße in der wissenschaftlichen Literatur kaum untersucht.
-Dabei sind stark volatile Zielgrößen besonders in sicherheitskritischen Systemen zu
-vermeiden, was wiederum einen stabilen Algorithmus für ihre Berechnung
-erfordert.
 
+Verhoeff \cite{Verh04} hat bereits weitere praktische Verwendungen zusammengetragen, von denen wir hier zwei erläutern wollen:
+Die niederländische Regierung hat in Bezug auf Probleme mit hohem Verkehrsaufkommen einst entschieden, anstatt auf möglichst geringe Erwartungswerte der Fahrtzeit hinzuwirken, eher die Minimierung der Varianz der Fahrtzeit in den Fokus zu nehmen. Auf diese Weise ist man im Durchschnitt zwar länger unterwegs, erreicht aber mehr Planungssicherheit, kann also Ankunftszeiten genauer vorhersagen.
+Wenn wir mit einer gewissen Wahrscheinlichkeit $\geq p$ rechtzeitig an einem Ort ankommen möchten, dann ist für die Planung des spätestmöglichsten Zeitpunkt für den Beginn der Fahrt neben dem Erwartungswert die Varianz von wesentlicher Bedeutung, da zum erwarteten Mittelwert ein von der Varianz abhängender Puffer addiert werden muss.
+In der Wirtschaft kommt es immer wieder vor, dass Budgeds für bestimmte Ausgaben geplant werden. Insofern größere Abweichungen der Kosten nach oben unbedingt zu vermeiden sind, kann es von Vorteil sein, anstatt eine Investition in Höhe von fiktiven 1000\euro{} zu planen, bei der mit 300\euro{} Abweichung der tatsächlichen Kosten gerechnet werden muss, eine zweckgleiche Investition in Höhe von erwarteten 1100\euro{} anzustreben, bei welcher eine Abweichung von nur 50\euro{} erwartet wird.
+
+
+Verhoeff hat dazu bereits lineare Gleichungssystem für die Berechnung von Varianzen und Kovarianzen präsentiert \cite{Verh04}. Wir wollen zunächst die erforderlichen Grundlagen zu Wahrscheinlichkeitstheorie sowie Markovketten für den Leser darlegen. Anschließend wollen wir einen Algorithmus zur Berechnung von Varianzen und Kovarianzen akkumulierter Kantengewichte formal herleiten. Wir wollen  die Betrachtungen von Verhoeff insbesondere um eine ausführliche Herleitung für die Berechnung von Kovarianzen erweitern und zeigen, dass alle ermittelten Gleichungssysteme tatsächlich eindeutig lösbar sind. Abschließend wollen wir eine Implementation des hergeleiteten Algorithmus' hinsichtlich Performance analysieren.
+
+\begin{meta}
+Aufgabenstellung:\\ 
 Nachdem die grundlegende Terminologie ausgearbeitet wurde, ist die Kernaufgabe
 der Arbeit die formale Erarbeitung und Analyse eines Algorithmus zur Berechnung
 der Varianz von akkumulierten Gewichten auf Basis von [1]. Der Algorithmus soll implementiert und zur experimentellen Analyse von anwendungsorientierten Beispielen herangezogen werden.
 Als weitergehende Forschungsfrage soll außerdem untersucht werden, ob das Verfahren auch zur Berechnung von Kovarianzen geeignet ist oder inwieweit der Algorithmus auf Markov-Entscheidungsprozesse mit Kantengewichten verallgemeinert werden kann.
-
-
-[1] T. Verhoeff, Reward Variance in Markov Chains: A Calculational Approach
-
-\bigskip
-
-\begin{meta}
-	to do...
-	
-	* was gibt es an bisheriger forschung
-	
-	* praktischer Nutzen
-	
-	* Thema und Ziel dieser arbeit
-	
-	* Vorabsummary, was den Leser erwartet
-	
 \end{meta}
 
-\section{Grundlagen der Wahrscheinlichkeitstheorie}
+\section{Grundlagen}
+
+\subsection{Wahrscheinlichkeitstheorie}
 
 \begin{meta}
 	/theoretische/ Grundlagen
@@ -214,11 +211,11 @@ Als weitergehende Forschungsfrage soll außerdem untersucht werden, ob das Verfa
 \end{definition}
 \newcommand{\expect}{Erwartungswert}
 \begin{definition}[\expect{}] \label{def-expect}
-	\hspace{1ex} Sei \probspaceex{} ein \probspace{} und $X$ eine \rvar{} auf \probspaceex{}.
+	\hspace{1ex} Sei \probspaceex{} ein \probspace{} und $X$ eine \rvar{} auf \probspaceex{}. Mit
 	\begin{equation}
 		\mathcal{E}_{\probspaceexraw{}}(X) := \sum_{\omega \in \Omega}{P(\omega) \cdot X(\omega)}
 	\end{equation}
-	ist der \expect{} von $X$ auf \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{E}(X)$.
+	bezeichnen wir den \expect{} von $X$ auf \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{E}(X)$.
 \end{definition}
 Es lässt sich leicht die folgende Linearität des \expect{}es beobachten. Seien $X$, $Y$ Zufallsvariablen, $c,d \in \mathbb{R}$. Dann gilt:
 \begin{align}
@@ -229,38 +226,39 @@ Es lässt sich leicht die folgende Linearität des \expect{}es beobachten. Seien
 Dabei ist  $X + cY + d$ die üblich Notation für die \rvar{} gegeben durch $Z : \Omega \to \mathbb{R} : \omega \mapsto X(\omega) + c \cdot Y(\omega)+ d$.
 \newcommand{\var}{Varianz}
 \begin{definition}[\var]\label{def-var}
-	Sei \probspaceex{} ein \probspace{} und $X$ eine \rvar{} auf \probspaceex{}.
+	Sei \probspaceex{} ein \probspace{} und $X$ eine \rvar{} auf \probspaceex{}. Mit
 	\begin{equation}
 		\mathcal{V}_{\probspaceexraw{}}(X) :=  \mathcal{E}_{\probspaceexraw{}}\left(\left(X - \mathcal{E}_{\probspaceexraw{}} (X)\right)^{2}\right)
 	\end{equation}
-	ist die \var{} von $X$ auf  \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{V}(X)$.
+	bezeichnen wir die \var{} von $X$ auf  \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir kurz $\mathcal{V}(X)$.
 \end{definition}
 \newcommand{\cov}{Kovarianz}
+\newcommand{\mcov}{\mathcal{C}\!ov}
 \begin{definition}[\cov]\label{def-cov}
-	Seien \probspaceex{} ein \probspace{} und $X, Y$ \rvar n auf \probspaceex{}. Die Kovarianz $\mathcal{C}_{\probspaceexraw}(X,Y)$ ist definiert durch:
+	Seien \probspaceex{} ein \probspace{} und $X, Y$ \rvar n auf \probspaceex{}. Die Kovarianz $\mcov{}_{\probspaceexraw}(X,Y)$ ist definiert durch:
 	\begin{equation}
-		\mathcal{C}_{\probspaceexraw}(X,Y) := \mathcal{E} \Big( \big(X - \mathcal{E}(X)\big)\big(Y - \mathcal{E}(Y) \big)\Big)
+		\mcov{}_{\probspaceexraw}(X,Y) := \mathcal{E} \Big( \big(X - \mathcal{E}(X)\big)\big(Y - \mathcal{E}(Y) \big)\Big)
 	\end{equation}
 \end{definition}
 
-Offenbar ist die \var{} ein Spezialfall der \cov{}, denn aus den Definitionen folgt unmittelbar $\mathcal{V}_{\probspaceexraw}(X) = \mathcal{C}_{\probspaceexraw}(X,X)$. Wir betrachten nun, wie sich Kovarianzen als Erwartungswerte beschreiben lassen.
+Offensichtlich ist die \var{} ein Spezialfall der \cov{}, denn aus den Definitionen folgt unmittelbar $\mathcal{V}_{\probspaceexraw}(X) = \mcov{}_{\probspaceexraw}(X,X)$. Wir betrachten im Folgenden, wie sich Kovarianzen als Erwartungswerte beschreiben lassen.
 
 \begin{lemma}\label{lemma-cov-exp}
 	Seien $X$ und $Y$ \rvar{}n. Dann gilt:
 \begin{equation}
-	\mathcal{C}(X,Y) = \mathcal{E}(XY) - \mathcal{E}(X)\mathcal{E}(Y)
+	\mcov{}(X,Y) = \mathcal{E}(XY) - \mathcal{E}(X)\mathcal{E}(Y)
 \end{equation}
 \end{lemma}
 \begin{beweis}
 \begin{align*}
-\mathcal{C}(X,Y) & = & \mathcal{E}\big( \left(X - \mathcal{E}(X)\right)\left(Y - \mathcal{E}(Y)\right)\big) && \text{(Definition \ref{def-cov})} \\
+\mcov{}(X,Y) & = & \mathcal{E}\big( \left(X - \mathcal{E}(X)\right)\left(Y - \mathcal{E}(Y)\right)\big) && \text{(Definition \ref{def-cov})} \\
 & = & \mathcal{E}\big(XY - X \mathcal{E}(Y) - Y \mathcal{E}(E) + \mathcal{E}(X)\mathcal{E}(Y)\big) \\
 & = & \mathcal{E}(XY) - 2 \mathcal{E}(X) \mathcal{E}(Y) + \mathcal{E}(X) \mathcal{E}(Y) && \text{(Linearität (\ref{eq-linearity}))}\\
 & = & \mathcal{E}(XY) - \mathcal{E}(X)\mathcal{E}(Y) \\
 \end{align*}
 \end{beweis}
 
-Der Spezialfall von Lemma \ref{lemma-cov-exp} für \var{}en lautet dann wiefolgt.
+Betrachten wir den Spezialfall $X = Y$  von Lemma \ref{lemma-cov-exp}, dann erhalten wir folgende Beziehung für \var{}en:
 
 \begin{korollar}\label{kor-var-exp}
 	Sei $X$ eine \rvar{}. Dann gilt:
@@ -276,7 +274,7 @@ Der Spezialfall von Lemma \ref{lemma-cov-exp} für \var{}en lautet dann wiefolgt
 %		& = & \mathcal{E}(X^{2}) - \mathcal{E}\left(X\right)^{2} \\
 % 	\end{align*}
 %\end{beweis}
-Analog zu (\ref{eq-linearity}) lässt sich für \var{}en folgende Beziehung feststellen:
+Dual zur Linearität von \expect{}en (\ref{eq-linearity}) lässt sich für \var{}en folgende Beziehung feststellen:
 \begin{lemma}\label{lemma-var-qlinear}
 	Sei $X$ eine \rvar{}, $c,d \in \mathbb{R}$. Dann gilt:
 	\begin{equation}
@@ -284,11 +282,18 @@ Analog zu (\ref{eq-linearity}) lässt sich für \var{}en folgende Beziehung fest
 	\end{equation}
 \end{lemma}
 \begin{beweis}
-	tbd (steht im Paper)
+\begin{align*}
+\mathcal{V}(cX + d) & = & \mathcal{E}\Big(\big(cX + d - \mathcal{E}(cX + d)\big)^2\Big) && \text{(Defintion \ref{def-var})} \\
+& = & \mathcal{E}\Big(\big(cX + d - c\mathcal{E}(X) - d\big)^2\Big) && \text{(Linearität von $\mathcal{E}$ (\ref{eq-linearity}))}\\
+& = & \mathcal{E}\Big(c^2 \cdot \big(X - \mathcal{E}(X) \big)^2\Big)\\
+& = & c^2 \cdot \mathcal{E}\Big( \big(X - \mathcal{E}(X) \big)^2\Big) && \text{(Linearität von $\mathcal{E}$ (\ref{eq-linearity}))}\\
+& = & c^2 \cdot \mathcal{V}(X) && \text{(Defintion \ref{def-var})}
+\end{align*}
 \end{beweis}
-\begin{meta}
-	das korollar wird nicht benutzt....
-\end{meta}
+Entsprechend der Intuition ist die Varianz, das Quadrat der Standardabweichung, invariant unter Addition einer Konstanten zur \rvar{}. Wird jedoch die \rvar{} mit einem Faktor skaliert, so ändert sich die Varianz um das Quadrat des Faktors. Nicht umsonst wird die Varianz auch mittlere quadratische Abweichung genannt.
+
+
+Durch das Wegfallen von $d$ lässt sich recht trivial auf Gleichungen schließen, welche dann nicht mehr als klar offensichtlich angesehen werden können. Das folgende Korollar soll dies verdeutlichen:
 \begin{korollar}
 	Sei $X$ eine Zufallsvariable und $c \in \mathbb{R}$. Dann gilt:
 	\begin{equation}
@@ -296,41 +301,66 @@ Analog zu (\ref{eq-linearity}) lässt sich für \var{}en folgende Beziehung fest
 	\end{equation}
 \end{korollar}
 \begin{beweis}
-Aus Korollar \ref{kor-var-exp} folgt unmittelbar $\mathcal{V}(X+c) = \mathcal{E}\left((X+c)^{2}\right) - \left(\mathcal{E}\left(X+c\right)\right)^{2}$. Dabei kann die linke Seite nach Lemma \ref{lemma-var-qlinear} vereifacht werden zu $\mathcal{V}(X+c) = \mathcal{V}(X)$. Der Subtrahend $\left(\mathcal{E}\left(X+c\right)\right)^{2}$ lässt sich aufgrund der Linearität (Gleichung \ref{eq-linearity}) auch als $\left( \mathcal{E}(X)+c\right)^{2}$ 
+Aus Korollar \ref{kor-var-exp} folgt unmittelbar \[\mathcal{V}(X+c) = \mathcal{E}\left((X+c)^{2}\right) - \left(\mathcal{E}\left(X+c\right)\right)^{2}\text{.}\] Die linke Seite kann nach Lemma \ref{lemma-var-qlinear} vereinfacht werden zu $\mathcal{V}(X+c) = \mathcal{V}(X)$. Der Subtrahend $\left(\mathcal{E}\left(X+c\right)\right)^{2}$ lässt sich aufgrund der Linearität (Gleichung \ref{eq-linearity}) auch als $\left( \mathcal{E}(X)+c\right)^{2}$ 
 schreiben.
 \end{beweis}
 
-\section{Markovketten}
+\begin{beispiel}
+	Ein manipulierter, gezinkter Spielwürfel habe 6 Seiten $\Omega = \{1,2,3,4,5,6\}$, wobei die $1$ im Vergleich zu einem herkömmlichen Würfel mit einer $2$ überklebt wurde. Dies drücken wir durch die Zufallsvariable $X : \Omega \to \mathbb{R} : s \mapsto \max(2,s)$ aus.	Außerdem wurde der Würfel mit ungleichmäßig verteilter Masse so gefertigt, dass nach einem Wurf nicht alle Seiten gleich wahrscheinlich oben liegen. Wir nehmen für dieses Beispiel eine Wahrscheinlichkeitsverteilung mit $P(1)=0,1$, $P(2)=0,15$, $P(3)=0,15$, $P(4)=0,15$, $P(5)=0,15$, $P(6)=0,3$ an.
+	Dann ist im Schnitt nach vielen Würfen eine Augenzahl pro Wurf von
+	\[
+		\mathcal{E}(X) = (0,1 + 0,15) \cdot 2 + 0,15 \cdot (3 + 4 + 5) + 0,3 \cdot 6 = 4,1
+	\]
+	zu erwarten und damit $0,6$ Augen mehr als bei einem ungezinkten Würfel mit \expect{} $3,5$. Wären wir noch so dreist, und würden alle beschrifteten Zahlen quadrieren, erhielten wir einen Würfel mit $Y : \Omega \to \mathbb{R} : s \mapsto \max(4, s^2)$ und würden im Schnitt $19,3$ Augen bei einem Wurf erwarten:
+	\[
+		\mathcal{E}(Y) = (0,25) \cdot 4 + 0,15 \cdot (9 + 16 + 25) + 0,3 \cdot 36 = 19,3
+	\]
+	Nach Korollar \ref{kor-var-exp} beträgt die \var{} beim ursprünglichen Würfel also $\mathcal{E}(X^2) - \mathcal{E}(X)^2 = \mathcal{E}(Y) - \mathcal{E}(X)^2 = 19,3 - 16,81 = 2,49$. Und tatsächlich ergibt die Berechnung nach Definition \ref{def-var} diesen Wert:
+	\begin{align*}
+	\mathcal{V}(X) & = & 0,15 \cdot \big((3- 4,1)^2 + (4-4,1)^2 + (5-4,1)^2\big) + && \\
+	& & + 0,25 \cdot (2 - 4,1)^2 + 0,3 \cdot (6-4,1)^2 && \\
+	& = & 0,25 \cdot 4,41 + 0,15 \cdot \big(1,21 + 0,01 + 0,81\big) + 0,3 \cdot 3,61 && \\
+	& = & 2,49 &&
+	\end{align*}
+\end{beispiel}
+
+\subsection{Markovketten}
 
 \newcommand{\mc}{Markovkette}
 \newcommand{\mcex}{$M = (Q, P, I)$}
 \begin{definition}[\mc]\label{def-mc}
-	Eine \mc{} ist ein Tupel \mcex{} mit den Eigenschaften
+	Eine \mc{} ist ein Tupel $(Q, P, I)$ mit den Eigenschaften
 	\begin{enumerate}[(a)]
 		\item $Q$ ist eine Menge.
 		\item $P : Q \times Q \to [0,1]$ mit der Eigenschaft $\forall q \in Q : \sum_{q' \in Q}{P(q,q') = 1}$
 		\item $I : Q \to [0,1]$ ist eine Wahrscheinlichkeitsverteilung auf $Q$.
 	\end{enumerate}	
-	Die Bilder von $P$ nennen wir auch Transitionswahrscheinlichkeiten.
+	Die Bilder von $P$ nennen wir auch Transitionswahrscheinlichkeiten und definieren mit welcher Wahrscheinlichkeit, nämlich $P(q,q')$ vom aktuellen Zustand $q$ in den Zustand $q'$ übergegangen wird. $I$ ist die initiale Verteilung, welche definiert, mit welcher Wahrscheinlichkeit ein Zustand als Startzustand gewählt wird.
 \end{definition}
-\newcommand{\path}{Pfad}
-\begin{definition}[\path]\label{def-path}
-	Sei \mcex{} eine \mc{}. Die Menge aller (endlichen) \path e in $M$ ist definiert durch
+
+Für theoretische Betrachtungen ist es durchaus sinnvoll unendliche \mc{}n zu betrachten. Wir werden uns jedoch auf endliche beschränken, d.h. $|Q| < \infty$, sobald wir zur Berechnung von u.a. Varianzen entsprechende Gleichungssysteme herleiten. Andernfalls bestünde das lineare Gleichungssystem aus unendlich vielen Gleichungen in unendlich vielen Variablen.
+
+\newcommand{\gpath}{Pfad}
+\begin{definition}[\gpath]\label{def-path}
+	Sei \mcex{} eine \mc{}. Die Menge aller (endlichen) \gpath e in $M$ ist definiert durch
 	\begin{equation}
 		\mathrm{Paths}(M) := \{p \in Q^{k} \mid k \in \mathbb{N}_{+}\}
 	\end{equation}
-	Wir nennen einen \path{} $p \in \mathrm{Paths}(M)$ echt, wenn zusätzlich $\mathrm{real}_{M}(p)$ gilt mit:
+	Wir nennen einen \gpath{} $p \in \mathrm{Paths}(M)$ echt, wenn zusätzlich $\mathrm{real}_{M}(p)$ gilt mit:
 	\begin{equation}
 		\mathrm{real}_{M}(p) := \forall 0 \leq i < |p| - 1 : P(p_i,p_{i+1}) > 0
 	\end{equation}
-	Die Wahrscheinlichkeit $\mathrm{P}(p)$ eines Pfades ist gegeben durch
+	Die Wahrscheinlichkeit $\mathrm{\tilde{P}}(p)$ eines Pfades ist gegeben durch
 	\begin{equation}
-		\mathrm{P}(p) := \prod_{i = 0}^{|p| - 2}{P(p_i,p_{i+1})}
+		\mathrm{\tilde{P}}(p) := \prod_{i = 0}^{|p| - 2}{P(p_i,p_{i+1})}
 	\end{equation}
-	Insbesondere ist $\mathrm{P}(p) = 1$ für alle Pfade $p$ mit $|p| = 1$ und ein Pfad $p$ ist genau dann echt, wenn $\mathrm{P}(p) > 0$, d.h. wenn $p$ tatsächlich ein Streckenzug im zugrundeliegenden gerichteten Graph von $M$ ist.
+	Insbesondere ist $\mathrm{\tilde{P}}(p) = 1$ für alle Pfade $p$ mit $|p| = 1$ und ein Pfad $p$ ist genau dann echt, wenn $\mathrm{\tilde{P}}(p) > 0$, d.h. wenn $p$ tatsächlich ein Streckenzug im zugrundeliegenden gerichteten Graph von $M$ ist.
 	
-	Für $|p| = 2$ entspricht die Wahrscheinlichkeit $\mathrm{P}(p)$ genau der Wahrscheinlichkeit gegeben durch die Funktion $P$ der Transitionswahrscheinlichkeiten aus der Markovkette. Daher gilt $P \subseteq \mathrm{P}$, $\mathrm{P}$ ergibt sich als eindeutige Fortsetzung von $P$ und wir schreiben im Folgenden einfach $P$.
+	Für $|p| = 2$ entspricht die Wahrscheinlichkeit $\mathrm{\tilde{P}}(p)$ genau der Wahrscheinlichkeit gegeben durch die Funktion $P$ der Transitionswahrscheinlichkeiten aus der Markovkette. Daher gilt $P \subseteq \mathrm{\tilde{P}}$, $\mathrm{\tilde{P}}$ ergibt sich als eindeutige Fortsetzung von $P$ und wir schreiben im Folgenden einfach nur $P$.
+	
+	Wohlgemerkt schließt unser Pfadbegriff auch entartete Pfade ein, also Tupel von Zuständen, die im zugrundeliegenden Graphen nie durch Entlanggehen an Transitionen reproduziert werden können. Solche Pfade haben die Wahrscheinlichkeit $\mathrm{\tilde{P}}(p) = 0$.
 \end{definition}
+
 \newcommand{\reward}{Gewichtsfunktion}
 \begin{definition}[\reward]
 	Sei \mcex{} eine \mc{}. Eine \reward{} auf $M$ ist eine Abbildung
@@ -338,24 +368,130 @@ schreiben.
 	R : Q \times Q \to \mathbb{R}\text{.}
 	\end{equation} 
 \end{definition}
-Offenbar gibt es analog zur Wahrscheinlichkeit $P$ eine eindeutige Fortsetzung für eine \reward{} $R$, gegeben durch Aufsummierung aller Kantengewichte entlang von Pfaden:
+Wir bezeichnen Gewichtsfunktionen typischerweise mit $R$ in Anlehnung an das englische Wort \textit{reward}.
+Offenbar gibt es analog zur Wahrscheinlichkeit $P$ eine eindeutige Fortsetzung für eine \reward{} $R$ auf Pfade, gegeben durch Aufsummierung aller Kantengewichte entlang eines solchen:
 \begin{equation}
-	\mathrm{R} : \bigcup_{k \in \mathbb{N}_+}{Q^k} \to \mathbb{R} : p \mapsto \sum_{i = 0}^{|p| - 2}{R(p_i,p_{i+1})}
+	\mathrm{\tilde{R}} : \bigcup_{k \in \mathbb{N}_+}{Q^k} \to \mathbb{R} : p \mapsto \sum_{i = 0}^{|p| - 2}{R(p_i,p_{i+1})}
 \end{equation}
 Wir schreiben im Folgenden einfach $R$.
 \begin{definition}\label{def-path-to}
-	Sei \mcex{} eine \mc{}, $s \in Q$ ein Startzustand und $A \subseteq Q$ eine Menge von Zielzuständen. Wir bezeichnen die Menge der Pfade, welche in $s$ starten und in $A$ enden, jedoch $A$ nicht zwischenzeitlich schon erreichen mit:
+	Sei \mcex{} eine \mc{}, $s \in Q$ ein (frei gewählter) Startzustand und $A \subseteq Q$ eine Menge von Zielzuständen. Wir bezeichnen die Menge der Pfade, welche in $s$ starten und in $A$ enden, jedoch $A$ nicht zwischenzeitlich schon erreichen mit:
 	\begin{equation}
-		\mathrm{Paths}_{s \rightarrow A}(M) = \{ p \in \mathrm{Paths}(M) \mid p_0 = s \land p_{|p|-1} \in A \land \forall i < |p| - 1 : p_i \notin A \}
+		\mathrm{Paths}_{s \rightarrow A}(M) := \{ p \in \mathrm{Paths}(M) \mid p_0 = s \land p_{|p|-1} \in A \land \forall i < |p| - 1 : p_i \notin A \}
 	\end{equation}
 	
 \end{definition}
 
-\begin{meta}
-	[Literaturverweis einfügen:] Wenn A von allen $q \in Q$ erreichbar, dann ...
-\end{meta}
-
-Wir beobachten, dass unter dieser Voraussetzung $(\mathrm{Paths}_{s \rightarrow A}(M), P)$ ein \probspace{} ist und $R$ eine \rvar{} auf $M$.
+Wir ziehen nun Erkenntnisse heran, die Baier und Katoen in Kapitel 10.1 ihres Buches \textit{Principles of Modelchecking} \cite{Bai08} beschreiben, speziell im Abschnitt \textit{Reachability Probabilities}.
+Setzen wir einmal voraus, dass von jedem Zustand $q\in Q$, welcher von $s$ erreichbar ist, ein \textit{echter} Pfad in die Zielzustandsmenge $A$ existiert, das heißt
+\[
+\exists p \in \mathrm{Paths}_{s \rightarrow \{q\}}(M) : \mathrm{real}_M(p) \quad \Rightarrow \quad \exists p \in \mathrm{Paths}_{q \rightarrow A}(M) : \mathrm{real}_M(p)\text{.}
+\]
+ Unter dieser Voraussetzung beobachteten Baier und Katoen, dass es ein fast sicheres Ereignis ist, nach endlich vielen Übergängen in einem Zustand aus $A$ vorbeizukommen.
+Offenbar ergibt die Menge der unendlichen Pfade $Paths_{\infty}(s) := \{p \in Q^\omega \mid p(0) = s\}$, die in einem Knoten $s$ starten zusammen mit $P$ einen \probspace{} $(Paths_{\infty}(s), P)$, sofern wir $P$ mit dessen eindeutiger Fortsetzung auf $Q^\omega$ identifizieren.
+Nach der Beobachtung ist dann auch
+\[
+(\mathrm{Paths}_{s \rightarrow A}(M), P)
+\] ein \probspace{}, da die Menge aller Pfade, welche $A$ nie besuchen ein fast unmögliches Ereignis darstellt. Die Fortsetzung von $R$ eine \rvar{} auf $\mathrm{Paths}_{s \rightarrow A}(M)$. 
+\begin{beispiel}
+	Gegeben sei eine \mc{} \mcex{} mit
+	\begin{align*}
+	Q &= &\{1,2,3,4,5,6\} \\
+	P &= &\begin{pmatrix}
+	0 & 0,5 & 0,5 & 0 & 0 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 1 \\
+	0 & 0,25 & 0 & 0,5 & 0,25 & 0 \\
+	0 & 0 & 0 & 0,8 & 0,2 & 0 \\
+	0 & 0 & 0 & 0 & 0 & 1 \\
+	0 & 0 & 0 & 0 & 1 & 0 \\
+	\end{pmatrix} \\
+	I &= &\begin{pmatrix} 1 & 0 & 0 & 0 & 0 & 0\end{pmatrix}^\intercal
+	\end{align*}
+	Wir betrachten also eine \mc{} mit dem einzigen initialen Zustand $1$. Weiterhin sei $\{5,6\}$ die betrachtete Menge an Zielzuständen, welche wir auf Pfaden erreichen wollen.	
+	Eine \mc{} lässt sich immer auch als Graph auffassen, wir beschriften alle Kanten $(i,j)$ mit Übergangswahrscheinlichkeit und Wert der Gewichtsfunktion $R$ in der Schreibweise $P(i,j) : R(i,j)$. Sei die Gewichtsfunktion $R$ implizit definiert durch folgenden Graphen:
+	\begin{center}%#2
+		\begin{tikzpicture}[auto,swap,scale=3]
+		
+		% First we draw the vertices
+		\foreach \pos/\name in {{(0,0)/1}, {(1,0)/3}, {(2,0)/4}, {(0,1)/2}}
+		\node[vertex] (\name) at \pos {$\name$};
+		
+		% First we draw the vertices
+		\foreach \pos/\name in {{(1,1)/6}, {(2,1)/5}}
+		\node[target] (\name) at \pos {$\name$};
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest /\weight in {
+			1/2/{\frac{1}{2}:1},
+			2/6/{1:10},
+			5/6/{1:3},
+			6/5/{1:7}
+		}
+		\path[edge] (\source) to[bend left] node[weight]{$\weight$} (\dest);
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest /\weight in {
+			1/3/{\frac{1}{2}:4},
+			3/4/{\frac{1}{2}:3},
+			4/5/{\frac{1}{5}:3}
+		}
+		\path[edge] (\source) to[bend right] node{$\weight$} (\dest);
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest /\weight in {
+			3/2/{\frac{1}{4}:4},	3/5/{\frac{1}{4}:10}
+		}
+		\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+		
+		\foreach \source/ \dest /\weight in {
+			4/4/{\frac{4}{5}:2}
+		}
+		\path[edge] (\source) to[loop right] node[weight]{$\weight$} (\dest);
+		
+		% Draw initial state
+		\path[edge] (-0.5,0) to (1);
+		
+		\end{tikzpicture}
+	\end{center}
+	Wir wollen nun zur Veranschaulichung den Erwartungswert und die Varianz von $R$ im Wahrscheinlichkeitsraum $(\mathrm{Paths}_{1 \rightarrow \{5,6\}}(M), P)$ betrachten. Die von $5$ beziehungsweise $6$ ausgehenden Kanten samt Beschriftung werden für diesen Fall irrelevant. Alle Pfade mit Wahrscheinlichkeit $0$ können wir direkt entfernen und die Tupel aus $Q^n$ mit Wörtern über dem Alphabet $Q$ identifizieren. Wir erhalten so:
+	\begin{equation*}
+	\mathrm{rPaths}_{1 \rightarrow \{5,6\}}(M) = \big\{126,1326,135\big\} \; \cup \big\{134^n5 \in Q^{n+3} \mid n\geq 1\big\} 
+	\end{equation*}
+	Sei $\Omega := \mathrm{rPaths}_{1 \rightarrow \{5,6\}}$. Für den Erwartungswert $\mathcal{E}(R)$ ergibt sich:
+	\newcommand{\exres}{10}
+	\begin{align*}
+	\mathcal{E}(R) & = & \sum_{p \in \Omega}{P(p) \cdot R(p)}\\
+	& = & \frac{1}{2}\cdot 11_{\scriptscriptstyle [126]} + \frac{1}{8}\cdot 18_{\scriptscriptstyle [1326]} + \frac{1}{8}\cdot 14_{\scriptscriptstyle [135]} + \sum_{n = 0}^{\infty}{\frac{1}{20}\cdot\left(\frac{4}{5}\right)^n \cdot (10 + 2n)}_{\scriptscriptstyle [134^n5]} \\
+	& = & \exres{}
+\end{align*}
+	Für das Berechnen der unendlichen Summe möchten wir an dieser Stelle auf die Appendix verweisen. Mit Lemma \ref{lem-geosum} und \ref{lem-infsum} und der Zerlegung 
+	\begin{equation*}
+		\sum_{n = 0}^{\infty}{\frac{1}{20}\cdot\left(\frac{4}{5}\right)^n \cdot (10 + 2n)}
+		= \frac{1}{2}\sum_{n = 0}^{\infty}{\left(\frac{4}{5}\right)^n} + \frac{1}{10} \sum_{n = 0}^{\infty}{\left(\frac{4}{5}\right)^n \cdot n}
+	\end{equation*}
+	lässt sich der Wert dieser Summe, nämlich $4,5$ leicht ausrechnen.
+	Als Varianz $\mathcal{V}(R)$ erhalten wir, diesmal unter Verwendung von Lemma \ref{lem-infqsum}:
+	\begin{align*}
+		\mathcal{V}(R) & = & & \mathcal{E}((R - \exres{})^2) \\
+		& = & & \frac{1}{2}\cdot (12 - \exres)^2+ \frac{1}{8}\cdot (18-\exres)^2 + \frac{1}{8}\cdot (14-\exres)^2 + \\
+		& & & + \sum_{n = 0}^{\infty}{\frac{1}{20}\cdot\left(\frac{4}{5}\right)^n \cdot (10 + 2n - \exres)^2} \\
+		& = & & 12 + \frac{1}{5}\sum_{n = 0}^{\infty}{\left(\frac{4}{5}\right)^n \cdot n^2} \\
+		& = & & 12 + 36 \\
+		& = & & 48
+	\end{align*}
+	Bemerkt sei, dass die Zufallsvariable $X := (R-\exres)^2$, per Definition
+	\[
+	(R-\exres)^2 : \mathrm{rPaths}_{1 \rightarrow \{5,6\}}(M) \to  \mathbb{R} : p \mapsto (R(p) - \exres)^2
+	\]
+	im Allgemeinen nicht die Eigenschaft der eindeutigen Fortsetzung von Kanten zu Pfaden erfüllt:
+	\[
+	\forall n \in \mathbb{N}_{>0}, p \in Q^n : n>1 \Rightarrow X(p) = \sum_{i=0}^{n-2}{X(p(i),p(i+1))}
+	\]
+	Beispielsweise verletzt $X(1,3) + X(3,2) = 36 + 36 \neq 4 = X(132)$ diese Eigenschaft. Während im Graphen eingezeichnete Kantengewichte immer zu einer \rvar{}n auf der Menge der Pfade fortgesetzt werden kann, können wir nicht alle \rvar{}n auf Kantengewichte zurückführen, insbesondere X also nicht durch Kantengewichte im Graphen einzeichnen.
+	
+	
+	An diesem Beispiel sehen wir, dass die explizite Berechnung von Varianzen bereits kompliziert werden kann, wenn nur ein Kreis trivialer Länge im Graphen der \mc{} enthalten ist. Stellen wir einen Graphen vor, in dem Knoten $a$ und $b$ existieren sowie Kanten mit positiver Wahrscheinlichkeit für $(a,a), (a,b), (b,a), (b,b)$. Dann gibt es nicht mehr nur eine Möglichkeit, einen Kreis zu finden, sondern unendlich viele, z.B. $b^\omega, (ab)^\omega, (aab)^\omega, (aaab)^\omega, \dots$\;.
+\end{beispiel}
 
 \begin{definition}\label{def-pmod}
 	Sei \mcex{} eine endliche \mc, $A\subseteq Q$ eine Zielmenge. Dann bezeichnen wir mit $P_{\rightarrow A}$ die folgende Matrix:
@@ -371,14 +507,14 @@ Diese Modifikation entspricht dem Entfernen von allen ausgehenden Kanten von Zus
 
 \begin{satz}\label{th-unique}
 	Sei \mcex{} eine endliche \mc, $A\subseteq Q$ eine Zielmenge, die von jedem Knoten aus erreichbar ist ($\forall s\in Q: \exists p \in \mathrm{Paths}_{s\rightarrow A}(M) : \mathrm{real}_M(p)$). 
-	Dann ist die Matrix $M := P_{\rightarrow A} - \mathbb{1}$ invertierbar.
+	Dann ist die Matrix $D := P_{\rightarrow A} - \mathbb{1}$ invertierbar.
 \end{satz}
 \begin{beweis}
 	%Sei $R: Q^2 \to \mathbb{R} : (s,t) \mapsto 0$ die triviale \reward{} auf $M$. 
-	Aus der linearen Algebra ist bekannt, dass $M$ genau dann invertierbar ist, wenn $Mx = 0$ nur die Lösung $x=0$ hat.
-	Nehmen wir also an, $x \in R^Q$ mit $x\neq 0$ erfüllt $Mx = 0$. Dann gilt auch $\forall k \in \mathbb{R}: M (kx) = 0$. Wählen wir ein geeignetes $k$, so erhalten wir eine Lösung $z$ mit einem positiven Eintrag, d.h. $Mz = 0$ und $\exists q \in Q : z_q > 0$. Sei $E \subseteq Q$ die Indexmenge aller maximalen Einträge von $z$, also $e \in E :\Leftrightarrow \forall q \in Q z_q \leq z_e$. Sei $s\in A$. Dann folgt aus $Mx_s = 0_s$, dass $\sum_{q\in Q}{(\widehat{P}- \mathbb{1})_{(s,q)} \cdot z_q} = \sum_{q\in Q}{-\mathbb{1}_{(s,q)} \cdot z_q} = 0$  und damit $z_s = 0$.
+	Aus der linearen Algebra ist bekannt, dass $D$ genau dann invertierbar ist, wenn $Dx = 0$ nur die Lösung $x=0$ hat.
+	Nehmen wir also an, $x \in R^Q$ mit $x\neq 0$ erfüllt $Dx = 0$. Dann gilt auch $\forall k \in \mathbb{R}: D (kx) = 0$. Wählen wir ein geeignetes $k$, so erhalten wir eine Lösung $z$ mit einem positiven Eintrag, d.h. $Dz = 0$ und $\exists q \in Q : z_q > 0$. Sei $E \subseteq Q$ die Indexmenge aller maximalen Einträge von $z$, also $e \in E :\Leftrightarrow \forall q \in Q : z_q \leq z_e$. Sei $s\in A$. Dann folgt aus $Dz_s = 0_s$, dass $\sum_{q\in Q}{(P_{\rightarrow A}- \mathbb{1})_{(s,q)} \cdot z_q} = -\sum_{q\in Q}{\mathbb{1}_{(s,q)} \cdot z_q} = 0$  und damit $z_s = 0$.
 	
-	Sei $s \in E$. Dann ist $z_s > 0$ und daher $s\notin A$. Aus $Mx_s = 0_s$ folgt dann $\sum_{q\in Q}{(\widehat{P}- \mathbb{1})_{(s,q)} \cdot z_q} = 0$. Damit bekommen wir $\sum_{q\in Q}{P_{(s,q)} \cdot z_q} = z_s$. Da nach Definition \ref{def-mc} $q \mapsto P(s,q)$ eine Wahrscheinlichkeitsverteilung auf $Q$ ist, folgt schließlich $\forall q\in Q: P(s,q) > 0 \Rightarrow z_q = z_s$. D.h. für jeder Nachfolgerknoten $t\in Q$ von $s\in E$ in der \mc{} $M$ liegt selbst wieder in $E$. Da ein Knoten $a\in A$ von $s$ aus erreichbar ist, gilt auch $a\in E$. Wir erhalten einen Widerspruch.
+	Sei $s \in E$. Dann ist $z_s > 0$ und daher $s\notin A$. Aus $Dz_s = 0_s$ folgt dann $\sum_{q\in Q}{(P_{\rightarrow A}- \mathbb{1})_{(s,q)} \cdot z_q} = 0$. Damit bekommen wir $\sum_{q\in Q}{P_{(s,q)} \cdot z_q} = z_s$. Da nach Definition \ref{def-mc} $q \mapsto P(s,q)$ eine Wahrscheinlichkeitsverteilung auf $Q$ ist, folgt schließlich $\forall q\in Q: P(s,q) > 0 \Rightarrow z_q = z_s$. Schließlich kann die gewichtete Summe nur genau dann den maximalen Wert $z_s$ annehmen, wenn alle zu gewichtenden Summanden bereits maximal sind. D.h. für jeden Nachfolgeknoten $t\in Q$ von $s\in E$ in der \mc{} $M$ liegt selbst wieder in $E$. Da ein Knoten $a\in A$ von $s$ aus erreichbar ist, gilt auch $a\in E$. Aber dann wäre $a\notin A$. Wir erhalten einen Widerspruch.
 \end{beweis}
 
 
@@ -386,9 +522,16 @@ Diese Modifikation entspricht dem Entfernen von allen ausgehenden Kanten von Zus
 
 Ziel ist es nun, Algorithmen zu beschreiben und zu analysieren, welche bei gegebener \mc{} $M$, gegebenem Startzustand $s$ und gegebener Zielzustandsmenge $A$ die Varianz bzw. Kovarianz berechnen. Wir beschränken uns dabei auf den Fall, dass $A$ von jedem Zustand in $M$ aus erreichbar ist.
 
+\begin{definition}
+	Sei $Q$ eine Menge, $n\in \mathbb{N}, n>2$ und $p \in Q^n$, in folgenden Betrachtungen als Pfad aufgefasst. Dann bezeichnen wir mit $p_{\leftarrow 1}$ den Teilpfad von $p = (p_0, \dots p_{n-1})$ ohne den ersten Knoten $p_0$:
+	\begin{equation}
+		p_{\leftarrow 1} := (p_1,p_2, \dots p_{n-1})
+	\end{equation}
+\end{definition}
+
 \subsection{Berechnung von Erwartungswerten}
 
-Seien \mcex{} eine \mc{}, $s \in Q$, $\emptyset \neq A \subseteq Q$ und $\forall s \in Q: \exists p \in \mathrm{Paths}_{s \rightarrow A}(M) : \mathrm{real}_{M}(p)$. Sei $R$ eine  \reward{} auf $M$. Wir betrachten im \probspace{} $(\mathrm{Paths}_{s \rightarrow A}(M), P)$ den Erwartungswert $\mathcal{E}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)}(R)$, im Folgenden kurz $\mathcal{E}_{s}(R)$:
+Seien \mcex{} eine \mc{}, $s \in Q$, $\emptyset \neq A \subseteq Q$ und $\forall q \in Q: \exists p \in \mathrm{Paths}_{q \rightarrow A}(M) : \mathrm{real}_{M}(p)$. Sei $R$ eine  \reward{} auf $M$. Wir betrachten im \probspace{} $(\mathrm{Paths}_{s \rightarrow A}(M), P)$ den Erwartungswert $\mathcal{E}_{(\mathrm{Paths}_{s \rightarrow A}(M), P)}(R)$, im Folgenden kurz $\mathcal{E}_{s}(R)$:
 
 \begin{equation}
 	\mathcal{E}_{s}(R) = \sum_{p \in \mathrm{Paths}_{s \rightarrow A}(M)}{P(p) \cdot R(p)} 
@@ -403,12 +546,9 @@ Falls $s \notin A$, besteht jeder Pfad $p \in \mathrm{Paths}_{s \rightarrow A}(M
 \begin{align}
 	\mathcal{E}_{s}(R) & = & \sum_{p \in \mathrm{Paths}_{s \rightarrow A}(M)}{P(s,p_1) \cdot P(p_{\leftarrow 1}) \cdot (R(s,p_1) + R(p_{\leftarrow 1}))} \\
 	& = & \sum_{t \in Q}{ P(s,t) \cdot \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot (R(s,t) + R(p')) } } \\
-	& = & \sum_{t \in Q}{ P(s,t) \cdot \left((R(s,t) + \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot R(p') } \right) } \\
+	& = & \sum_{t \in Q}{ P(s,t) \cdot \left(R(s,t) + \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot R(p') } \right) } \\
 	& = & \sum_{t \in Q}{ P(s,t) \cdot \left(R(s,t) + \mathcal{E}_{t}(R) \right) } \label{expect_recursive}
 \end{align}
-\begin{meta}
-	TODO: notation erklären $p_{\leftarrow 1}$
-\end{meta}
 Die Gleichungen \ref{expect_trivial} und \ref{expect_recursive} geben uns ein System von $|Q|$ linearen Gleichungen in $|Q|$ Variablen:
 \begin{align}
 \begin{aligned}
@@ -422,15 +562,21 @@ Mit Definition \ref{def-pmod} ist dieses Gleichungssystem äquivalent zu
 	\mu_s = \sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot \left(R(s,t) + \mu_{t} \right) }\text{,}
 \end{equation}
 was sich in Matrixschreibweise mit $\mu = (\mu_s)_{s \in Q }$ ausdrücken lässt als:
-\begin{align}
-	& \mu = \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q} + P_{\rightarrow A} \cdot \mu \\
-	\Longleftrightarrow	\qquad & (P_{\rightarrow A} - \mathbb{1}) \mu = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q}\label{les-exp-mat}
-\end{align}
-
+\begin{equation}
+\mu = \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q} + P_{\rightarrow A} \cdot \mu 
+\end{equation}
+\begin{satz}(\expect{}e in \mc{}n)
+	Sei \mcex{} eine \mc{}, $A\subseteq Q$. Dann ist der Vektor $\mu = (\mu_s)_{s \in Q }$ der Erwartungswerte akkumulierter Kantengewichte auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems	
+	 \begin{equation}
+	 (P_{\rightarrow A} - \mathbb{1}) \mu = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q}\text{.}\label{les-exp-mat}
+	 \end{equation}
+\end{satz}
+\begin{beweis}
 Wir stellen fest, der Vektor $(\mathcal{E}_{s}(R))_{s \in Q}$ ist die einzige Lösung des Gleichungssystems (\ref{les-exp-mat}):
 Zum einen ist gemäß unserer Herleitung ist der Vektor $(\mathcal{E}_{s}(R))_{s \in Q}$ eine Lösung dieses Gleichungssystems. Zum anderen ist $P_{\rightarrow A} - \mathbb{1}$ nach Satz \ref{th-unique} invertierbar. Somit ist die Lösung eindeutig.
+\end{beweis}
 
-Mit dem Gleichungssystem (\ref{les-exp}) und Standardalgorithmen zum Lösen linearer Gleichungssysteme erhalten wir unmittelbar einen Algorithmus zur Berechnung der Erwartungswerte $E_q(R)$ für $q \in Q$.
+Mit dem Gleichungssystem (\ref{les-exp-mat}) und Standardalgorithmen zum Lösen linearer Gleichungssysteme erhalten wir unmittelbar einen Algorithmus zur Berechnung der Erwartungswerte $E_q(R)$ für $q \in Q$.
 
 \subsection{Berechnung von Varianzen}
 
@@ -528,29 +674,147 @@ Auch hier besitzt das Gleichungsystem eine eindeutige Lösung nach Satz \ref{th-
 \end{equation}
 Damit haben wir die Berechnung der Kovarianzen gleichzeitig auf die Berechnung von Erwartungswerten zurückgeführt. Um die \cov{}en $(\mathcal{C}_q(X,Y))_{q\in Q}$ in einer \mc{} zu berechnen, genügt es die \expect{}e $(\mathcal{E}_q(X))_{q\in Q}$ sowie $(\mathcal{E}_q(Y))_{q\in Q}$ im ersten Schritt und $(\mathcal{E}_q(S))_{q\in Q}$ im zweiten Schritt zu berechnen. Es ist wie bei den Varianzen die Optimierung möglich, zuerst die inverse Matrix $(P_{\rightarrow A} - \mathbb{1})^{-1}$ zu berechnen, um danach nur noch Matrixmultiplikationen ausführen zu müssen.
 
+\subsection{Die initiale Verteilung und die gesamte Markovkette}
+
+Wir haben bisher nur über die Erwartungswerte und (Ko-) Varianzen für den Start in einem speziellen Zustand gesprochen. Wenn es darum geht, den Erwartungswert einer \mc{} \mcex{} insgesamt zu berechnen, muss aber auch die initiale Zufallsverteilung $I : Q \to [0,1]$ in Betracht gezogen werden. Der Erwartungswert der \mc{} ist als die gewichtete Summe $\mu = \sum_{q\in Q}{I(q) \cdot \mu_q}$ definiert. Um nicht Erwartungswert und (Ko-) Varianz der \mc{} als ganzes auf diese Weise gesondert betrachten zu müssen, können wir uns dem Trick bedienen, mit $Q' := Q \cup \{q_{start}\}$ einen neuen Zustand $q_{start} \notin Q$ hinzuzufügen. Mit $I'$ und $P'$ definiert als
+\begin{multicols}{2}
+\noindent
+\begin{equation*}
+	I'(q) := \begin{cases}
+		1 & q = q_{start}\\
+		0 & q \neq q_{start}
+		
+	\end{cases}
+\end{equation*}
+\begin{equation*}
+	P'(s, t)  := \begin{cases}
+	I(t) & s = q_{start} \land t \in Q \\
+	0 & s \neq q_{start} \lor t \notin Q
+	\end{cases}
+\end{equation*}
+\end{multicols}
+erhalten wir eine neue \mc{} $M'=(Q',P',I')$, wobei \expect{} und (Ko-) Varianz von $M$ und $M'$ mit den entsprechenden Werten von $q_{start}$ übereinstimmen.
+
+Wir wollen uns deshalb mit der zustandsweisen Betrachtung der Größen begnügen. Ferner können wir die genannten Größen neben alternativen Mög\-lich\-keit\-en mithilfe genau dieser Betrachtung definieren. Seien dazu $R, S$ Gewichtsfunktionen und A eine Zielzustandsmenge. Wir definieren:
+	\[\mathcal{E}_{M,A}(R) := \mathcal{E}_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R)\]
+	\[\mathcal{V}_{M,A}(R) := \mathcal{V}_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R)\]
+	\[\mathcal{C}\mathit{ov}_{M,A}(R,S) := \mathcal{C}\mathit{ov}_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R,S)\]
+	
+\subsection{Komplexität}
+
+Zum Berechnen von Erwartungswerten, Varianzen bzw. Kovarianzen unter Zuhilfenahme der gezeigten linearen Gleichungssysteme, sind mehrere Schritte notwendig:
+
+\begin{itemize}
+	\item Zunächst berechnen wir die Matrix $M_{(P,A)} := (P_{\rightarrow A} - \mathbb{1})$.
+	\item Danach berechnen wir $b_{(P,A,R)} := - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q}$
+	\item Im dritten Schritt lösen wir das lineare Gleichungssystem $M_{(P,A)}x_{(P,A,R)} = b_{(P,A,R)}$, wobei gilt $x_{(P,A,R)} = M_{(P,A)}^{-1}b_{(P,A,R)}$.
+\end{itemize}
+
+Für das Berechnen von Erwartungswerten müssen wir nichts weiter tun, denn es gilt $\forall s\in Q : x_{(P,A,R)}(s) = \mathcal{E}_s(R)$.
+Für die Berechnung von Varianzen und Kovarianzen müssen wir die Schritte lediglich mehrfach ausführen müssen, um zunächst die Erwartungswerte zu berechnen und danach aus diesen einen neuen Reward zu definieren. Das Berechnen des neuen Rewards ist in $\mathcal{O}(\#edges)$ möglich, wobei $\#edges$ die Zahl der Kanten in der Markovkette bezeichnen soll. Die Ermittlung von $M_{(P,A)}$ ist auf jeden Fall in $\mathcal{O}(|Q^2|)$ möglich. Geht man von dünn besetzten Matrizen aus, so ist bei entsprechender Speicherverwaltung die Berechnung sogar in $\mathcal{O}(\#edges)$ möglich, da nur über echte Kanten iteriert werden muss, nicht aber über entartete Kanten $(s,t)$ im Sinne von $P(s,t) = 0$. Den Vektor $b_{(P,A,R)}$ können wir in $\mathcal{O}(|Q^2|)$ Schritten berechnen, bzw. analog in $\mathcal{O}(\#edges)$ bei einer dünn besetzten Matrix und entsprechender Speicherung.
+
+
+Das Lösen linearer Gleichungssysteme ist ein Standardproblem und wurde dementsprechend schon ausführlich untersucht. Ohne ins Detail zu gehen, können wir festhalten, dass sich das lineares Gleichungssystem $Mx = b$ mit $M \in \mathbb{R}^{|Q|\times|Q|}$  in $\mathcal{O}(|Q^3|)$ lösen lässt unter der Annahme, dass jede einzelne Additions- und Multiplikationsoperation in einem Zeitschritt erfolgt. Will man ein solches Gleichungssystem unter Verwendung von durch BigInteger dargestellten rationalen Zahlen explizit und ohne Verlust von Genauigkeit lösen, dann benötigen einzelne Additions- bzw. Multiplikationsschritte mit herkömmlicher Rechentechnik im Allgemeinen mehr als nur einen Taktzyklus des Prozessors. Ein Algorithmus arbeitet in $\mathcal{O}(n^3(\log n)^2)$ unter Nutzung von p-adischen Körper\-er\-wei\-ter\-ung\-en von $\mathbb{Q}$ \cite{Dixon1982}.
+Zusammenfassend können wir festhalten, dass der Zeitaufwand für die Berechnung von \expect{}en bzw (Ko-) \var{}en im wesentlichen vom Algorithmus zum Lösen des linearen Gleichungssystems abhängt, da der Aufwand zur Berechnung von $M$ und $b$ wesentlich geringer ist.
+
 
 \section{Performancemessung am praktischen Beispiel}
 
-\subsection{Herman's Selbststabilisierungsalgorithmus}
+Um die beschriebene Berechnung von Erwartungswerten, Varianzen und Kovarianzen praktisch zu demonstrieren soll uns hier ein Beispiel dienen, welches unter anderem in den \textit{PRISM Case Studies} \cite{PRISMCS} zu finden ist. Die Rede ist von \textit{Herman's self-stabilising algorithm} \cite{Her90}.
 
-Hier verweis einfügen
+\subsection{Herman's selbst-stabilisierender Algorithmus}
 
-Um die beschriebene Berechnung von Erwartungswerten, Varianzen und Kovarianzen praktisch zu demonstrieren soll uns hier ein Beispiel dienen, welches auch in den \textit{PRISM Case Studies} zu finden ist.
+Das zu lösende Problem besteht allgemein gesagt darin, dass ein Netzwerk von $n$ identischen Prozessen, welche allesamt mit einer möglicherweise instabilen Startkonfiguration starten, mit Wahrscheinlichkeit $1$ nach endlich vielen Schritten des Algorithmus' einen stabilen Zustand erreicht.
 
+\begin{beispiel}[Stabilisierung im unidirektionalen Ring]
+	Sei $n \in 2\mathbb{N}+1$ eine ungerade natürliche Zahl. Dann betrachten wir einen Ring von $n$ Prozessen $P_0, P_1, \dots, P_{n-1}$ , in welchem unidirektionale Kommunikation stattfindet. Ein Zustand $z$ ist eine Funktion, die jedem Prozess einen booleschen Wert zuordnet, d.h. $z : n \to 2$.
+	Gesucht ist ein Algorithmus, sodass mit sicherer Wahrscheinlichkeit nach endlich vielen Schritten nur noch Zustände folgen, in welchem genau ein Prozess als privilegierter Prozess ausgewählt ist, dass heißt $\exists i \in n : z(i) \land \forall j \in n: i\neq j \Rightarrow \neg z(i)$.
+\end{beispiel}
+
+Herman hat dazu die folgende Lösung präsentiert:
+
+\begin{algorithmus}
+	Sei $y$ eine Funktion vom gleichen Typ wie $z$, d.h. $y : n \to 2$ und sei $i \in n$ eine Prozess-ID. Dann fassen wir $y(i)$ als den internen Zustand des Prozesses $i$ auf sowie $y(i - 1 \mod n)$ als den internen Zustand von seinem Vorgänger, welcher ihm über die Ringinfrastruktur bekannt wird. Jeder einzelne Prozess führt nun in einem Schritt Folgendes aus:
+	\begin{itemize}
+		\item Falls $y(i-1 \mod n) \neq y(i)$, setze für den Folgezustand $y'(i) := \neg y(i)$.
+		\item Falls $y(i-1 \mod n) =    y(i)$, gehe mit Wahrscheinlichkeit $0,5$ in den Folgezustand mit $y'(i) := 0$ und sonst in den Folgezustand mit $y'(i) := 1$.
+	\end{itemize}
+	Sei weiterhin $f$ die Funktion
+	\[
+	f : 2^n \to 2^n : y \mapsto \{i \mapsto y(i) \Leftrightarrow y(i-1 \mod n) \}
+	\]
+	Mit $z := f(y)$ erhalten wir einen prozessbezogenen booleschen Wert, der die gewünschte Bedingung erfüllt, also der mit sicherer Wahrscheinlichkeit nach endlichen Schritten nur für genau einen Prozess $1$ ergibt. Wohlgemerkt kann jeder Prozess $P_i$ seinen Wert $z(i)$ berechnen, da er dafür nur bereits bekannte Stellen von $y$ kennen muss.
+\end{algorithmus}
+
+Dass dieser Algorithmus die geforderte Eigenschaft erfüllt, wollen wir hier nicht zeigen und verweisen auf Hermans Betrachtungen dazu \cite{Her90}. Jedoch sei angemerkt, dass es sich relativ leicht sehen lässt, wie von jedem Zustand aus ein stabiler Zustand erreicht werden kann sowie dass die Menge der stabilen Zustände abgeschossen ist unter der Zustandsübergangsfunktion, welche aus Hermans Algorithmus hervorgeht.
+
+
+Ein ringförmiges Netzwerk, welches sich nach Hermans Algorithmus verhält, lässt sich als \mc{} \mcex{} auffassen. Die Zustände $Q := \{ y \in 2^n\}$ sind die Konfigurationen der einzelnen Prozesse. Wir sehen leicht, dass für jeden Zustand $y$ alle ausgehenden Kanten mit dergleichen Wahrscheinlichkeit beschriftet sind, nämlich $p_y := 2^{-|\mathrm{supp}\>f(y)|}$. Die Menge der Folgezustände für ein $y \in Q$, bezeichnet durch $\mathrm{Succ}(y)$, können wir schreiben als
+\[
+	\mathrm{Succ}(y) := \{ y' \in Q \mid \neg f(y)(i) \Rightarrow y'(i) \neq y(i) \}
+\]
+Wir erhalten für $P$:
+\begin{equation}
+	P(y,y') := \begin{cases}
+		p_y & \text{falls } s\in \mathrm{Succ}(y)\\
+		0 & \text{falls } s\notin \mathrm{Succ}(y)
+	\end{cases}
+\end{equation}
+
+\subsection{Implementation}
+
+Zu dieser schriftlichen Abhandlung wurde eine Implementation zur Berechnung von \expect{}en, \var{}en und \cov{}en angefertigt und ist öffentlich bei GitHub einsehbar \cite{MCA}. 
+
+% mess daten diagram
+
+%? vergleich naiver ansatz
+
+% numerische Stabilität
+
+% MDPs
 
 \begin{meta}
 Anmerkung: Die Berechnung der Varianz ist mittels \ref{kor-var-exp} kann zu unschönen Fehlern mit floatingpoint Standard führen...
 \end{meta}
 
 
+\section{Appendix}
+\begin{lemma} \label{lem-geosum}
+	Seien $n \in \mathbb{N}$ eine natürliche Zahl und $a \in \mathbb{R}_{>0}$. Dann gilt
+\begin{equation}
+\sum_{i=0}^{n}{a^i} = \frac{a^{n+1}-1}{a-1}
+\end{equation}
+\end{lemma}
 
-use https://github.com/ddemidov/amgcl
+Betrachten wir den Grenzwert der Summe aus Lemma \ref{lem-geosum} für $n \to \infty$, so ergibt sich für $0<a<1$:
+\begin{equation}
+\sum_{i=0}^{\infty}{a^i}
+= \lim\limits_{n \to \infty} \sum_{i=0}^{n}{a^i}
+= \frac{1}{1-a}
+\end{equation}
 
-Eigen library?
+\begin{lemma} \label{lem-infsum}
+	Seien $n \in \mathbb{N}$ eine natürliche Zahl und $a \in \mathbb{R}_{>0}$. Dann gilt
+	\begin{equation}
+		\sum_{i=0}^{n}{i\cdot a^i} = \frac{(an-n-1)a^{n+1}+a}{(a-1)^2}
+	\end{equation}
+\end{lemma}
 
-\begin{thebibliography}{99}
-	\bibitem{CLR09} \textit{bla bla}
-		 https://de.wikipedia.org/wiki/BibTeX
-\end{thebibliography}
+Betrachten wir den Grenzwert der Summe aus Lemma \ref{lem-infsum} für $n \to \infty$, so ergibt sich für $0<a<1$:
+\begin{equation}
+\sum_{i=0}^{\infty}{i\cdot a^i}
+= \lim\limits_{n \to \infty} \sum_{i=0}^{n}{i\cdot a^i}
+= \frac{a}{(a-1)^2}
+\end{equation}
+
+\begin{lemma} \label{lem-infqsum}
+	Seien $n \in \mathbb{N}$ eine natürliche Zahl und $a \in \mathbb{R}_{>0}$. Dann gilt
+	\begin{equation}
+	\sum_{i=0}^{n}{i^2\cdot a^i} = \frac{\big(-a^2n^2 + a(2n^2 + 2n + 1) - (n+1)^2\big)a^{n+1}+a(a+1)}{(a-1)^3}
+	\end{equation}
+\end{lemma}
+
+
+\printbibliography
 
 \end{document}
