@@ -1,0 +1,184 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.1 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{Bai08}{book}{}
+      \name{author}{2}{}{%
+        {{hash=7725f3db070a985fe46a5feb0bcee960}{%
+           family={Baier},
+           familyi={B\bibinitperiod},
+           given={Christel},
+           giveni={C\bibinitperiod}}}%
+        {{hash=392d5825b15ef7f81f68632c7a49fdef}{%
+           family={Katoen},
+           familyi={K\bibinitperiod},
+           given={Joost-Pieter},
+           giveni={J\bibinithyphendelim P\bibinitperiod}}}%
+      }
+      \list{publisher}{1}{%
+        {The MIT Press}%
+      }
+      \strng{namehash}{89a25b516e2b4c8733def01ee561abfe}
+      \strng{fullhash}{89a25b516e2b4c8733def01ee561abfe}
+      \strng{bibnamehash}{89a25b516e2b4c8733def01ee561abfe}
+      \strng{authorbibnamehash}{89a25b516e2b4c8733def01ee561abfe}
+      \strng{authornamehash}{89a25b516e2b4c8733def01ee561abfe}
+      \strng{authorfullhash}{89a25b516e2b4c8733def01ee561abfe}
+      \field{sortinit}{B}
+      \field{sortinithash}{8de16967003c7207dae369d874f1456e}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{026202649X}
+      \field{title}{Principles of Model Checking (Representation and Mind Series)}
+      \field{year}{2008}
+    \endentry
+    \entry{Dixon1982}{article}{}
+      \name{author}{1}{}{%
+        {{hash=05ac84c11dfc0cbfc782caf6a9fb1df6}{%
+           family={Dixon},
+           familyi={D\bibinitperiod},
+           given={J.D.},
+           giveni={J\bibinitperiod}}}%
+      }
+      \strng{namehash}{05ac84c11dfc0cbfc782caf6a9fb1df6}
+      \strng{fullhash}{05ac84c11dfc0cbfc782caf6a9fb1df6}
+      \strng{bibnamehash}{05ac84c11dfc0cbfc782caf6a9fb1df6}
+      \strng{authorbibnamehash}{05ac84c11dfc0cbfc782caf6a9fb1df6}
+      \strng{authornamehash}{05ac84c11dfc0cbfc782caf6a9fb1df6}
+      \strng{authorfullhash}{05ac84c11dfc0cbfc782caf6a9fb1df6}
+      \field{sortinit}{D}
+      \field{sortinithash}{c438b3d5d027251ba63f5ed538d98af5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Numerische Mathematik}
+      \field{title}{Exact Solution of Linear Equations Using P-Adic Expansions}
+      \field{volume}{40}
+      \field{year}{1982}
+      \field{pages}{137\bibrangedash 142}
+      \range{pages}{6}
+      \verb{urlraw}
+      \verb http://eudml.org/doc/132821
+      \endverb
+      \verb{url}
+      \verb http://eudml.org/doc/132821
+      \endverb
+      \keyw{exact arithmetic; p-adic approximation; rational approximation; integer matrix; successive refinements; Euclidean algorithm}
+    \endentry
+    \entry{Her90}{article}{}
+      \name{author}{1}{}{%
+        {{hash=4a49dc800d4f29e54780ee6f1c4df298}{%
+           family={Herman},
+           familyi={H\bibinitperiod},
+           given={T.},
+           giveni={T\bibinitperiod}}}%
+      }
+      \strng{namehash}{4a49dc800d4f29e54780ee6f1c4df298}
+      \strng{fullhash}{4a49dc800d4f29e54780ee6f1c4df298}
+      \strng{bibnamehash}{4a49dc800d4f29e54780ee6f1c4df298}
+      \strng{authorbibnamehash}{4a49dc800d4f29e54780ee6f1c4df298}
+      \strng{authornamehash}{4a49dc800d4f29e54780ee6f1c4df298}
+      \strng{authorfullhash}{4a49dc800d4f29e54780ee6f1c4df298}
+      \field{sortinit}{H}
+      \field{sortinithash}{6db6145dae8dc9e1271a8d556090b50a}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Information Processing Letters}
+      \field{number}{2}
+      \field{title}{Probabilistic Self-stabilization}
+      \field{volume}{35}
+      \field{year}{1990}
+      \field{pages}{63\bibrangedash 67}
+      \range{pages}{5}
+    \endentry
+    \entry{MCA}{online}{}
+      \field{sortinit}{M}
+      \field{sortinithash}{2e5c2f51f7fa2d957f3206819bf86dc3}
+      \field{labeltitlesource}{title}
+      \field{title}{MC Analyzer - a tool to calculate edge-reward expects, variances and covariances in discrete time markov chains}
+      \verb{urlraw}
+      \verb https://github.com/Necktschnagge/markov_chain_analyzer
+      \endverb
+      \verb{url}
+      \verb https://github.com/Necktschnagge/markov_chain_analyzer
+      \endverb
+    \endentry
+    \entry{PRISMCS}{online}{}
+      \field{sortinit}{P}
+      \field{sortinithash}{bb5b15f2db90f7aef79bb9e83defefcb}
+      \field{labeltitlesource}{title}
+      \field{month}{1}
+      \field{title}{PRISM - Case Studies}
+      \field{year}{2019}
+      \field{dateera}{ce}
+      \verb{urlraw}
+      \verb https://www.prismmodelchecker.org/casestudies/index.php
+      \endverb
+      \verb{url}
+      \verb https://www.prismmodelchecker.org/casestudies/index.php
+      \endverb
+    \endentry
+    \entry{Verh04}{inproceedings}{}
+      \name{author}{1}{}{%
+        {{hash=1d93a30020e9cad737a743e960c9fa84}{%
+           family={Verhoeff},
+           familyi={V\bibinitperiod},
+           given={T.},
+           giveni={T\bibinitperiod}}}%
+      }
+      \name{editor}{2}{}{%
+        {{hash=362f864f86df2905b852c24b406aafd6}{%
+           family={Cleophas},
+           familyi={C\bibinitperiod},
+           given={L.G.W.A.},
+           giveni={L\bibinitperiod}}}%
+        {{hash=fc34392fab4fdf9d8238bea0488e5ae9}{%
+           family={Watson},
+           familyi={W\bibinitperiod},
+           given={B.W.},
+           giveni={B\bibinitperiod}}}%
+      }
+      \list{language}{1}{%
+        {English}%
+      }
+      \list{publisher}{1}{%
+        {Technische Universiteit Eindhoven}%
+      }
+      \strng{namehash}{1d93a30020e9cad737a743e960c9fa84}
+      \strng{fullhash}{1d93a30020e9cad737a743e960c9fa84}
+      \strng{bibnamehash}{1d93a30020e9cad737a743e960c9fa84}
+      \strng{authorbibnamehash}{1d93a30020e9cad737a743e960c9fa84}
+      \strng{authornamehash}{1d93a30020e9cad737a743e960c9fa84}
+      \strng{authorfullhash}{1d93a30020e9cad737a743e960c9fa84}
+      \strng{editorbibnamehash}{e9a9056fd6488d168dc036dd08f6ffe2}
+      \strng{editornamehash}{e9a9056fd6488d168dc036dd08f6ffe2}
+      \strng{editorfullhash}{e9a9056fd6488d168dc036dd08f6ffe2}
+      \field{sortinit}{V}
+      \field{sortinithash}{02432525618c08e2b03cac47c19764af}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{booktitle}{Proceedings of the Eindhoven FASTAR Days 2004 (Eindhoven, The Netherlands, September 3-4, 2004)}
+      \field{series}{Computer Science Reports}
+      \field{title}{Reward variance in Markov chains : a calculational approach}
+      \field{year}{2004}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
