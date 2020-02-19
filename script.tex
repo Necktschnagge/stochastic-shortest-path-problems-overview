@@ -922,17 +922,158 @@ Das Tool \textit{MC Analyzer} \cite{MCA} liefert Algorithmen zur Berechnung von 
 	
 \item amgcl beschreiben
 	
-\item skalierbarkeit des algorithmus'
-	
-\item mess daten diagram
-
-\item vergleich naiver ansatz?
+\item skalierbarkeit des algorithmus' -> wann Speicherüberlauf
 
 \item numerische Stabilität
-
-\item MDPs
 	
 \end{meta}
+
+\begin{tikzpicture}
+\begin{axis}[
+title={leader\_sync},
+xlabel={\#edges},
+ylabel={},
+xmin=10,
+xmax=100000000,
+xmode=log,
+ymode=log,
+ymin= 0.1,
+ymax=1000000,
+legend pos=north west,
+ymajorgrids=true,
+grid style=dashed,
+]
+\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+
+\addplot[ only marks,color=green,mark=square,name path=f]
+coordinates {
+	(33,0.1127)(95,0.3268)(210,1.572)(397,10.6355)(674,56.5212)(1570,816.4017)(76,0.2376)(354,5.1225000000000005)(1067,150.9849)(2557,2292.6318)(5257,1614.7134)(16495,129.2181)(172,0.6708000000000001)(1292,187.4179)(5267,1102.4958000000001)(15833,134.2616)(39158,344.1537)(164288,1665.7068)(398,5.3942)(4487,578.5895)(24979,218.5131)(94408,881.9840999999999)(280865,2990.3109000000004)
+};
+
+
+\addplot[ only marks,color=blue,mark=square,name path=f]
+coordinates {
+(33,0.14)(95,0.4475)(210,1.737)(397,10.9188)(674,57.0437)(1570,817.7085)(76,0.3348)(354,5.39)(1067,152.2213)(2557,2294.7803)(5257,1619.5376)(16495,146.5989)(172,0.8428)(1292,188.5498)(5267,1107.7286)(15833,151.8085)(39158,388.8695)(164288,1889.3968)(398,5.7291)(4487,583.2662)(24979,247.0121)(94408,1009.7594)(280865,3417.4312)
+};
+
+\addplot[only marks,color=red,mark=square,name path=f]
+coordinates {
+(28,2.0300000000000002)(244,2.0029)(2188,4.882899999999999)(19684,78.4442)(177148,4874.6008)(1594324,1465.1883)(14348908,15274.0869)
+};
+
+\addlegendentry{time for solving linear system (ms)}
+\addlegendentry{total time (ms)}
+\addlegendentry{time for solving linear system herman (ms)}
+\end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\begin{axis}[
+title={leader\_sync},
+xlabel={\#nodes},
+ylabel={},
+xmin=10,
+xmax=1000000,
+xmode=log,
+ymode=log,
+ymin= 0.1,
+ymax=100000,
+legend pos=north west,
+ymajorgrids=true,
+grid style=dashed,
+]
+\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+
+\addplot[ only marks,color=green,mark=square,name path=f]
+coordinates {
+	(26,0.1127)(69,0.3268)(147,1.572)(273,10.6355)(459,56.5212)(1059,816.4017)(61,0.2376)(274,5.1225000000000005)(812,150.9849)(1933,2292.6318)(3962,1614.7134)(12400,129.2181)(141,0.6708000000000001)(1050,187.4179)(4244,1102.4958000000001)(12709,134.2616)(31383,344.1537)(131521,1665.7068)(335,5.3942)(3759,578.5895)(20884,218.5131)(78784,881.9840999999999)(234210,2990.3109000000004)
+};
+
+
+\addplot[ only marks,color=blue,mark=square,name path=f]
+coordinates {
+	(26,0.14)(69,0.4475)(147,1.737)(273,10.9188)(459,57.0437)(1059,817.7085)(61,0.3348)(274,5.39)(812,152.2213)(1933,2294.7803)(3962,1619.5376)(12400,146.5989)(141,0.8428)(1050,188.5498)(4244,1107.7286)(12709,151.8085)(31383,388.8695)(131521,1889.3968)(335,5.7291)(3759,583.2662)(20884,247.0121)(78784,1009.7594)(234210,3417.4312)
+};
+
+\addlegendentry{time for solving linear system (ms)}
+\addlegendentry{total time (ms)}
+\end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\begin{axis}[
+title={leader\_sync},
+xlabel={\#nodes},
+ylabel={\#edges},
+xmin=0.001,
+xmax=300000,
+ymin= 0.001,
+ymax=300000,
+legend pos=north west,
+ymajorgrids=true,
+grid style=dashed,
+]
+\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+
+\addplot[only marks,color=blue,mark=square,name path=f]
+coordinates {
+	(26,33)(69,95)(147,210)(273,397)(459,674)(1059,1570)(61,76)(274,354)(812,1067)(1933,2557)(3962,5257)(12400,16495)(141,172)(1050,1292)(4244,5267)(12709,15833)(31383,39158)(131521,164288)(335,398)(3759,4487)(20884,24979)(78784,94408)(234210,280865)
+};
+\end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\begin{axis}[
+title={leader\_sync},
+xlabel={\#nodes},
+ylabel={\#edges},
+xmin=10,
+xmax=300000,
+xmode=log,
+ymin= 10,
+ymax=600000,
+ymode=log,
+legend pos=north west,
+ymajorgrids=true,
+grid style=dashed,
+]
+\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+
+\addplot[only marks,color=blue,mark=square,name path=f]
+coordinates {
+	(26,33)(69,95)(147,210)(273,397)(459,674)(1059,1570)(61,76)(274,354)(812,1067)(1933,2557)(3962,5257)(12400,16495)(141,172)(1050,1292)(4244,5267)(12709,15833)(31383,39158)(131521,164288)(335,398)(3759,4487)(20884,24979)(78784,94408)(234210,280865)
+};
+\end{axis}
+\end{tikzpicture}
+
+\begin{tikzpicture}
+\begin{axis}[
+title={f},
+xlabel={fff},
+ylabel={},
+xmin=1,
+xmax=300000,
+xmode=log,
+ymin= 40,
+ymax=119,
+legend pos=north west,
+ymajorgrids=true,
+grid style=dashed,
+]
+\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+
+\addplot[only marks,color=blue,mark=square,name path=f]
+coordinates {
+(26,80.5)(69,73.0279)(147,90.5009)(273,97.4054)(459,99.084)(1059,99.8402)(61,70.9677)(274,95.0371)(812,99.1878)(1933,99.9064)(3962,99.7021)(12400,88.144)(141,79.5918)(1050,99.3997)(4244,99.5276)(12709,88.4414)(31383,88.5011)(131521,88.1608)(335,94.1544)(3759,99.1982)(20884,88.4625)(78784,87.346)(234210,87.5017)
+};
+
+
+\addlegendentry{ les solving time / total time (ms) in\%}
+
+
+\end{axis}
+\end{tikzpicture}
+
 
 \begin{tikzpicture}
 \begin{axis}[
@@ -953,12 +1094,12 @@ grid style=dashed,
 
 \addplot[color=blue,mark=square,name path=f]
 coordinates {
-(3,2.0556)(5,2.1663)(7,5.9642)(9,89.3927)(11,4986.23)(13,2503.55)(15,26033.9)
+	(3,2.0556)(5,2.1663)(7,5.9642)(9,89.3927)(11,4986.23)(13,2503.55)(15,26033.9)
 };
 
 \addplot[color=yellow,mark=square,name path=f]
 coordinates {
-(3,2.03)(5,2.0029)(7,4.8829)(9,78.4442)(11,4874.6)(13,1465.19)(15,15274.1)
+	(3,2.03)(5,2.0029)(7,4.8829)(9,78.4442)(11,4874.6)(13,1465.19)(15,15274.1)
 };
 
 \addplot[color=red!50,mark=square,]
@@ -1036,20 +1177,20 @@ coordinates {
 	(3,98.7546)(5,92.4572)(7,81.8702)(9,87.7524)(11,97.7613)(13,58.5245)(15,58.6699)
 };
 
-\addplot[color=green,mark=square,name path=f]
-coordinates {
-(3,98.7798)(5,97.0794)(7,84.8991)(9,87.1188)(11,97.7595)(13,57.3912)(15,58.338)
-};
+%\addplot[color=green,mark=square,name path=f]
+%coordinates {
+%(3,98.7798)(5,97.0794)(7,84.8991)(9,87.1188)(11,97.7595)(13,57.3912)(15,58.338)
+%};
 
-\addplot[color=red,mark=square,name path=f]
-coordinates {
-(3,98.3979)(5,92.7316)(7,99.0205)(9,87.1824)(11,97.7466)(13,57.7921)(15,58.6214)
-};
+%\addplot[color=red,mark=square,name path=f]
+%coordinates {
+%(3,98.3979)(5,92.7316)(7,99.0205)(9,87.1824)(11,97.7466)(13,57.7921)(15,58.6214)
+%};
 
-\addplot[color=yellow,mark=square,name path=f]
-coordinates {
-(3,99.0998)(5,92.5558)(7,92.7248)(9,87.3214)(11,97.7103)(13,57.6795)(15,59.0479)
-};
+%\addplot[color=yellow,mark=square,name path=f]
+%coordinates {
+%(3,99.0998)(5,92.5558)(7,92.7248)(9,87.3214)(11,97.7103)(13,57.6795)(15,59.0479)
+%};
 
 \addlegendentry{ les solving time / total time (ms) in\%}
 
@@ -1139,6 +1280,8 @@ Anmerkung: Die Berechnung der Varianz ist mittels \ref{kor-var-exp} kann zu unsc
 
 \section{Ein Blick auf MDPs}
 
+\section{Weiterführende Fragestellungen}
+
 \section{Appendix}
 
 Die folgenden Lemmata sollen mathematische Aussagen bereitstellen, welche nicht zentrales Thema dieser Abhandlung sind, jedoch an bestimmten Stellen zur Argumentation herangezogen werden.
@@ -1211,13 +1354,9 @@ Betrachten wir den Grenzwert der Summe aus Lemma \ref{lem-infqsum} für $n \to \
 
 \begin{meta}
 	\begin{itemize}
-\item  \mc Beispiel kontrollieren mittels implementation.
 \item AMGCL beschreiben: Stabilität, Laufzeit nach Messung, 
 \item Diagramme zeichnen und analysieren
 \item anderes Beispiel finden.
-\item wie soll das mit verallgemeinerung auf MDPs gehen?
-\item sanity checks für das Tool -> wohldefinierte MCs erkennen
-\item abschluss subsection: offene bzw. aufgetretene weitere Fragestellungen
 	\end{itemize}
 	
 \end{meta}
