@@ -21,51 +21,28 @@
 \usepackage[noend]{algpseudocode}
 \usepackage{multicol}
 
-\usepackage[official]{eurosym}
+\usepackage[official]{eurosym} % € - Symbol
 
-\title{Effiziente Berechnung von Varianzen in Markov Ketten}%und stabile
+\title{Effiziente Berechnung von Varianzen in Markovketten}%und stabile
 \author{Maximilian Starke}
 \affil{Fakultät für Informatik, Technische Universität Dresden}
 \date{\today}
 
-%\usepackage{wasysym}
 \usepackage{mathtools}
 \usepackage{ragged2e}
 
-%\usepackage[pdftex]{hyperref}
 \usepackage{framed}
-%\usepackage{mdframed}
-
-%\usepackage[inline, shortlabels]{enumitem}
 \usepackage{amsmath, amssymb}
 \usepackage{enumerate}
-%\usepackage{multicol} % multiple collums in enumerate
-%\usepackage{graphicx}
 \usepackage{tabularx}
 
 \usepackage{pgfplots}
 \pgfplotsset{width=10cm,compat=1.10}
-%\usepgfplotslibrary{external}
-%\tikzexternalize
 \usepgfplotslibrary{fillbetween}
-
-%\usepackage[thmmarks,amsmath,hyperref,noconfig]{ntheorem}
-%\usepackage{listings}
-%\usepackage{fancybox}
-%\usepackage{tikz}
-%\usepackage{struktex}
-
-%\usepackage{array}
 \newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
 
-%\usepackage{caption}
-%\DeclareCaptionFont{white}{\color{white}}
-
 \usepackage{listings}
-%\usepackage{tcolorbox<}
-%\tcbuselibrary{listings}
-%\usepackage{minted}
-%\tcbuselibrary{minted}
+
 \newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
 \newcolumntype{L}[1]{>{\flushleft\arraybackslash}m{#1}}
 
@@ -157,46 +134,31 @@ minimum height=2.5em]
 % tell TikZ how to stack them (back to front)
 \pgfsetlayers{bg,background,main,foreground}
 
-
-\def\ftup{$F= (V,E,c,s,t)$ }
-\def\tab{\hspace{5ex}}
+\newenvironment{meta}
+{\begin{center} \Large \color{red} META: \hspace{2ex} \large \color{blue}}
+	{\end{center}}
 
 \begin{document}
 
+% title page:
 \maketitle
-
-\vspace{2cm}
-
+\vspace{6em}
 \tableofcontents
-
 \pagebreak
-
-\newenvironment{meta}
-{\begin{center} \Large \color{red} META: \hspace{2ex} \large \color{blue}}
-{\end{center}}
 
 \section{Einführung}
 
-Markov-Ketten mit Kantengewichten dienen der Modellierung und Analyse einer wichtigen Zielgröße in probabilistischen Systemen, z.B. der Dauer eines Verbindungsaufbaus in Computernetzwerken.
-Im Gegensatz zum Erwartungswert der akkumulierten Gewichte bis zum Erreichen eines Zielzustandes wurden die Schwankungen der Zielgröße in der wissenschaftlichen Literatur kaum untersucht.
-Dabei sind stark volatile Zielgrößen besonders in sicherheitskritischen Systemen zu vermeiden, was wiederum einen stabilen Algorithmus für ihre Berechnung erfordert.
+Zur Analyse relevanter Zielgrößen in probabilistischen Systemen sind Markovketten mit Kantengewichten ein wesentliches, häufig genutztes Modell. Mit dessen Hilfe kann beispielsweise die Dauer eines Verbindungsaufbaus in Netzwerken modelliert werden. Wir wollen hier Varianzen akkumulierter Kantengewichte auf endlichen Pfaden in Markovketten bis zum Erreichen einer Menge von Zielzuständen und deren effiziente Berechnung betrachten.
+Während Erwartungswerte der akkumulierten Kantengewichte in der wissenschaftlichen Literatur bereits ausführlich untersucht worden sind, trifft dies nicht für die Varianzen zu, obgleich diese besonders in sicherheitskritischen Systemen oder zur Beurteilung von Risiken durch Abweichung von der Erwartung besondere Relevanz erhalten.
+Verhoeff \cite{Verh04} hat praktische Anwendungen zusammengetragen, von denen wir hier zwei erläutern wollen:
 
-
-Verhoeff \cite{Verh04} hat bereits weitere praktische Verwendungen zusammengetragen, von denen wir hier zwei erläutern wollen:
 Die niederländische Regierung hat in Bezug auf Probleme mit hohem Verkehrsaufkommen einst entschieden, anstatt auf möglichst geringe Erwartungswerte der Fahrtzeit hinzuwirken, eher die Minimierung der Varianz der Fahrtzeit in den Fokus zu nehmen. Auf diese Weise ist man im Durchschnitt zwar länger unterwegs, erreicht aber mehr Planungssicherheit, kann also Ankunftszeiten genauer vorhersagen.
-Wenn wir mit einer gewissen Wahrscheinlichkeit $\geq p$ rechtzeitig an einem Ort ankommen möchten, dann ist für die Planung des spätestmöglichsten Zeitpunkt für den Beginn der Fahrt neben dem Erwartungswert die Varianz von wesentlicher Bedeutung, da zum erwarteten Mittelwert ein von der Varianz abhängender Puffer addiert werden muss.
+Wenn wir mit einer gewissen Wahrscheinlichkeit $\geq p$ rechtzeitig an einem Ort ankommen möchten, dann ist für die Planung des Startzeitpunktes der Fahrt neben dem Erwartungswert die Varianz von wesentlicher Bedeutung, da zum erwarteten Mittelwert ein von der Varianz abhängender Zeitpuffer addiert werden muss.
+
 In der Wirtschaft kommt es immer wieder vor, dass Budgeds für bestimmte Ausgaben geplant werden. Insofern größere Abweichungen der Kosten nach oben unbedingt zu vermeiden sind, kann es von Vorteil sein, anstatt eine Investition in Höhe von fiktiven 1000\euro{} zu planen, bei der mit 300\euro{} Abweichung der tatsächlichen Kosten gerechnet werden muss, eine zweckgleiche Investition in Höhe von erwarteten 1100\euro{} anzustreben, bei welcher eine Abweichung von nur 50\euro{} erwartet wird.
 
 
-Verhoeff hat dazu bereits lineare Gleichungssystem für die Berechnung von Varianzen und Kovarianzen präsentiert \cite{Verh04}. Wir wollen zunächst die erforderlichen Grundlagen zu Wahrscheinlichkeitstheorie sowie Markovketten für den Leser darlegen. Anschließend wollen wir einen Algorithmus zur Berechnung von Varianzen und Kovarianzen akkumulierter Kantengewichte formal herleiten. Wir wollen  die Betrachtungen von Verhoeff insbesondere um eine ausführliche Herleitung für die Berechnung von Kovarianzen erweitern und zeigen, dass alle ermittelten Gleichungssysteme tatsächlich eindeutig lösbar sind. Abschließend wollen wir eine Implementation des hergeleiteten Algorithmus' hinsichtlich Performance analysieren.
-
-\begin{meta}
-Aufgabenstellung:\\ 
-Nachdem die grundlegende Terminologie ausgearbeitet wurde, ist die Kernaufgabe
-der Arbeit die formale Erarbeitung und Analyse eines Algorithmus zur Berechnung
-der Varianz von akkumulierten Gewichten auf Basis von [1]. Der Algorithmus soll implementiert und zur experimentellen Analyse von anwendungsorientierten Beispielen herangezogen werden.
-Als weitergehende Forschungsfrage soll außerdem untersucht werden, ob das Verfahren auch zur Berechnung von Kovarianzen geeignet ist oder inwieweit der Algorithmus auf Markov-Entscheidungsprozesse mit Kantengewichten verallgemeinert werden kann.
-\end{meta}
+Verhoeff hat lineare Gleichungssysteme für die Berechnung von Varianzen und Kovarianzen präsentiert \cite{Verh04}. Wir wollen zunächst die erforderlichen Grundlagen zu Wahrscheinlichkeitstheorie sowie Markovketten für den Leser darlegen. Anschließend wollen wir einen Algorithmus zur Berechnung von Varianzen und Kovarianzen akkumulierter Kantengewichte formal herleiten. Wir wollen  die Betrachtungen von Verhoeff insbesondere um eine ausführliche Herleitung für die Berechnung von Kovarianzen erweitern und zeigen, dass alle ermittelten Gleichungssysteme tatsächlich eindeutig lösbar sind. Abschließend wollen wir eine Implementation des hergeleiteten Algorithmus' hinsichtlich Performance analysieren.
 
 \section{Grundlagen}
 
@@ -223,8 +185,12 @@ Als weitergehende Forschungsfrage soll außerdem untersucht werden, ob das Verfa
 	\begin{equation}
 		\mathcal{E}_{\probspaceexraw{}}(X) \coloneqq \sum_{\omega \in \Omega}{P(\omega) \cdot X(\omega)}
 	\end{equation}
-	bezeichnen wir den \expect{} von $X$ auf \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{E}(X)$.
+	bezeichnen wir den \expect{} von $X$ auf \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{E}(X)$. Es sei angemerkt, dass es bei $|\Omega|=\infty$ Fälle gibt, bei denen die Summe nicht beschränkt ist. Wir schreiben dafür $\mathcal{E}(X) = \infty$ bzw. $\mathcal{E}(X) = -\infty$ und sagen, dass der Erwartungswert nicht existiert.
 \end{definition}
+\begin{beispiel}
+	Seien $\Omega = \mathbb{N}_{>0}$, $P : \Omega \to [0,1] : n \mapsto 2^{-n}$ und $R : \Omega \to \mathbb{R} : n \mapsto 2^{n}$. Dann gibt es offensichtlich für jede Zahl $a \in \mathbb{R}$ eine endliche Teilmenge von $T \subseteq \Omega$ mit $\sum_{n \in T}{P(n) \cdot R(n)} \geq a$. Dazu wählen wir einfach $T \coloneqq \{n \in \mathbb{N}_{>0}\mid n \leq \lceil a \rceil \}$ und erhalten $\sum_{n \in T}{P(n) \cdot R(n)} = |T| = \lceil a \rceil \leq \mathcal{E}(R)$. Damit erhalten wir $\mathcal{E}(R) = \infty$.
+\end{beispiel}
+Wir wollen uns im Folgenden nur auf \rvar n beziehen, für welche ein Erwartungswert existiert.
 \begin{beispiel}\label{example-expect}
 	Ein manipulierter Spielwürfel habe 6 Seiten $\Omega = \{1,2,3,4,5,6\}$, wobei die $1$ im Vergleich zu einem herkömmlichen Würfel mit einer $2$ überklebt wurde. Dies drücken wir durch die Zufallsvariable $X : \Omega \to \mathbb{R} : s \mapsto \max(2,s)$ aus. Außerdem wurde der Würfel mit ungleichmäßig verteilter Masse so gefertigt, dass nach einem Wurf nicht alle Seiten gleich wahrscheinlich oben liegen. Wir nehmen für dieses Beispiel eine Wahrscheinlichkeitsverteilung mit $P(1)=0,1$, $P(2)=0,15$, $P(3)=0,15$, $P(4)=0,15$, $P(5)=0,15$, $P(6)=0,3$ an.
 	Dann ist im Schnitt nach vielen Würfen eine Augenzahl pro Wurf von
@@ -237,6 +203,7 @@ Als weitergehende Forschungsfrage soll außerdem untersucht werden, ob das Verfa
 	\]
 \end{beispiel}
 
+\begin{lemma}
 Es lässt sich leicht die folgende Linearität des \expect{}es beobachten. Seien $X$, $Y$ Zufallsvariablen, $c,d \in \mathbb{R}$. Dann gilt:
 \begin{align}
 	\mathcal{E}(X + cY + d) & = \sum_{\omega \in \Omega}{P(\omega) \cdot (X + cY + d)(\omega) } \nonumber \\
@@ -244,6 +211,7 @@ Es lässt sich leicht die folgende Linearität des \expect{}es beobachten. Seien
 	& = \mathcal{E}(X) + c \mathcal{E}(Y) + d \label{eq-linearity}
 \end{align}
 Dabei ist  $X + cY + d$ die üblich Notation für die \rvar{} gegeben durch $Z : \Omega \to \mathbb{R} : \omega \mapsto X(\omega) + c \cdot Y(\omega)+ d$.
+\end{lemma}
 \newcommand{\var}{Varianz}
 \newcommand{\mvar}{\mathcal{V}\!ar}
 \begin{definition}[\var]\label{def-var}
@@ -861,21 +829,21 @@ Zusammenfassend können wir festhalten, dass der Zeitaufwand für die Berechnung
 
 \section{Performancemessung am praktischen Beispiel}
 
-Um die beschriebene Berechnung von Erwartungswerten, Varianzen und Kovarianzen praktisch zu demonstrieren soll uns hier ein Beispiel dienen, welches unter anderem in den \textit{PRISM Case Studies} \cite{PRISMCS} zu finden ist. Die Rede ist von \textit{Herman's self-stabilising algorithm} \cite{Her90}.
+Wir wollen die beschriebene Berechnung von Erwartungswerten, Varianzen und Kovarianzen praktisch an zwei Beispielen demonstrieren. Als Beispiele dienen uns Markovketten, welches unter anderem in den \textit{PRISM Case Studies} \cite{PRISMCS} zu finden ist. Zum einen wollen wir \textit{Herman's self-stabilising algorithm} \cite{Her90}, kurz \textit{herman}, zum anderen das \textit{Synchronous Leader Election Protocol} von Itai und Rodeh \cite{IR90}, kurz \textit{leader\_sync}. Ersteres Beispiel wollen wir zur Veranschaulichung hier einmal ausführlich beschreiben.
 
 \subsection{Herman's selbst-stabilisierender Algorithmus}
 
-Das zu lösende Problem besteht allgemein formuliert darin, dass ein Netzwerk von $n$ identischen Prozessen, welche allesamt mit einer möglicherweise instabilen Startkonfiguration starten, mit Wahrscheinlichkeit $1$ nach endlich vielen Schritten des Algorithmus' einen stabilen Zustand erreicht.
+Das zu lösende Problem besteht allgemein formuliert darin, dass ein Netzwerk von $n$ identischen Prozessen, welche allesamt mit einer möglicherweise instabilen Konfiguration starten, mit Wahrscheinlichkeit $1$ nach endlich vielen Schritten des Algorithmus' einen stabilen Zustand erreicht.
 
 \begin{beispiel}[Stabilisierung im unidirektionalen Ring]
-	\hspace{0.5em} Wir nutzen im Folgenden zur Vereinfachung die Abkürzung $n = \{0,\dots,n-1\}$.
+	\hspace{0.5em} Wir nutzen im Folgenden zur Vereinfachung die Abkürzung $n = \{0,\dots,n-1\}$ und insbesondere $2$ für die Menge der booleschen Werte, wobei wir $true$ mit $1$ und $false$ mit $0$ identifizieren.
 	Sei $n \in 2\mathbb{N}+1$ eine ungerade natürliche Zahl. Dann betrachten wir einen Ring von $n$ Prozessen $P_0, P_1, \dots, P_{n-1}$ , in welchem unidirektionale Kommunikation stattfindet. Ein Zustand $z$ ist eine Funktion, die jedem Prozess einen booleschen Wert zuordnet, d.h. $z : n \to 2$.
 	Gesucht ist ein Algorithmus, sodass nach endlich vielen Schritten fast sicher nur noch Zustände folgen, in welchen genau ein Prozess als privilegierter Prozess ausgewählt ist, oder anders ausgedrückt $\exists i \in n : z(i) \land \forall j \in n: i\neq j \Rightarrow \neg z(i)$.
 \end{beispiel}
 
 Herman hat dazu die folgende Lösung präsentiert:
 
-\begin{algorithmus}
+\begin{algorithmus}\label{alg-herman}
 	Sei $y$ eine Funktion vom gleichen Typ wie $z$, also $y : n \to 2$ und sei $i \in n$ eine Prozess-ID. Wir fassen $y(i)$ als den internen Zustand des Prozesses $i$ auf sowie $y(i - 1 \mod n)$ als den Zustand von dessen Vorgänger, welcher dem Prozess $i$ über die Ringinfrastruktur bekannt wird. Jeder einzelne Prozess führt nun in einem Schritt Folgendes aus:
 	\begin{itemize}
 		\item Falls $y(i-1 \mod n) \neq y(i)$, setze für den Folgezustand $y'(i) \coloneqq \neg y(i)$.
@@ -883,7 +851,7 @@ Herman hat dazu die folgende Lösung präsentiert:
 	\end{itemize}
 	Sei weiterhin $f$ die Funktion
 	\[
-	f : 2^n \to 2^n : y \mapsto \{i \mapsto y(i) \Leftrightarrow y(i-1 \mod n) \}
+	f : 2^n \to 2^n : f(y)(i) :=  y(i) \Leftrightarrow y(i-1 \mod n)
 	\]
 	Mit $z \coloneqq f(y)$ erhalten wir einen prozessbezogenen booleschen Wert, der die gewünschte Bedingung erfüllt, also der bei Grenzwertbetrachtung mit Wahrscheinlichkeit 1 nach endlichen Schritten nur für genau einen Prozess $1$ ergibt. Wohlgemerkt kann jeder Prozess $P_i$ seinen Wert $z(i)$ berechnen, da er dafür nur bereits bekannte Stellen von $y$ kennen muss. Als Intuition kann man formulieren, $f(y)(i)$ ist genau dann 1, wenn Prozess $i$ seinen Nachfolgezustand nicht-deterministisch bzw. probabilistisch aussucht.
 \end{algorithmus}
@@ -914,377 +882,250 @@ Als Menge der Zielzustände  $A = \{ y \in Q \mid 1 = |\mathrm{supp}\>f(y)|\}$ b
 
 Zu dieser schriftlichen Abhandlung wurde eine Implementation zur Berechnung von \expect{}en, \var{}en und \cov{}en angefertigt und ist öffentlich auf \textit{github.com} einsehbar \cite{MCA}. Wir wollen diese Implementation nutzen, um die Performance der vorgestellten Verfahren an anwendungsorientierten Beispielen zu testen. Zunächst sollen aber hier der wesentliche Aufbau und die wesentlichen Features der Softwarelösung kurz beschrieben werden.
 
-\subsubsection{Beschreibung der Softwarelösung}
 
 Das Tool \textit{MC Analyzer} \cite{MCA} liefert Algorithmen zur Berechnung von Erwartungswerten, Varianzen und Kovarianzen von akkumulierten Kantengewichten in \mc n.
-
-\begin{meta}
-	
-\item amgcl beschreiben
-	
-\item skalierbarkeit des algorithmus' -> wann Speicherüberlauf
-
-\item numerische Stabilität
-	
-\end{meta}
-
-\begin{tikzpicture}
-\begin{axis}[
-title={leader\_sync},
-xlabel={\#edges},
-ylabel={},
-xmin=10,
-xmax=100000000,
-xmode=log,
-ymode=log,
-ymin= 0.1,
-ymax=1000000,
-legend pos=north west,
-ymajorgrids=true,
-grid style=dashed,
-]
-\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
-
-\addplot[ only marks,color=green,mark=square,name path=f]
-coordinates {
-	(33,0.1127)(95,0.3268)(210,1.572)(397,10.6355)(674,56.5212)(1570,816.4017)(76,0.2376)(354,5.1225000000000005)(1067,150.9849)(2557,2292.6318)(5257,1614.7134)(16495,129.2181)(172,0.6708000000000001)(1292,187.4179)(5267,1102.4958000000001)(15833,134.2616)(39158,344.1537)(164288,1665.7068)(398,5.3942)(4487,578.5895)(24979,218.5131)(94408,881.9840999999999)(280865,2990.3109000000004)
-};
+Dazu muss zunächst eine \mc{} geladen werden. Hierfür ist es möglich Dateien, wie \textit{PRISM} \cite{PRISMCS} sie verwendet, einzulesen oder vom Tool eine \mc{} für den Algorithmus von Herman (\ref{alg-herman}) erzeugen zu lassen. Weiterhin wird ein eigens mitgebrachtes Dateiformat akzeptiert. Beispiele finden sich auf GitHub. Nachdem eine \mc{} und eine Menge an Zielzuständen eingelesen wurden, lassen sich Operationen zur Berechnung von Erwartungswert, Varianz bzw. \cov{} in einzelnen Schritten ausführen. Dabei schreibt das Tool Messwerte in die Standardausgabe, aus denen unter anderem die Dauer einzelner Berechnungsschritte hervorgeht. Details zur Verwendung sind online beschrieben \cite{MCA}.
 
 
-\addplot[ only marks,color=blue,mark=square,name path=f]
-coordinates {
-(33,0.14)(95,0.4475)(210,1.737)(397,10.9188)(674,57.0437)(1570,817.7085)(76,0.3348)(354,5.39)(1067,152.2213)(2557,2294.7803)(5257,1619.5376)(16495,146.5989)(172,0.8428)(1292,188.5498)(5267,1107.7286)(15833,151.8085)(39158,388.8695)(164288,1889.3968)(398,5.7291)(4487,583.2662)(24979,247.0121)(94408,1009.7594)(280865,3417.4312)
-};
+Zum Lösen linearer Gleichungssysteme wurde die \textit{header-only C++ library AMGCL} von Demidov \cite{Demidov2019} verwendet. Diese verwendet algebraische Mehrgitterverfahren zum näherungsweisen Lösen großer linearer Gleichungsysteme mit dünnbesetzter Koeffizientenmatrix $A_1$. 
+%Im Prinzip löst diese Implementation Gleichungssysteme mit vergleichsweise kleinen Matrizen direkt. Sobald die Koeffizientenmatrix eine gewisse Größe überschreitet, so wird eine Matrix von kleinerer Dimension 
+Ist eine Koeffizientenmatrix $A_i$ zum direkten Lösen in angemessener Zeit zu groß, wird so lange eine gröbere Matrix $A_{i+1}$ geringerer Dimension gebildet zusammen mit einem sogenannten Prolongationsoperator $P_i$ und einem sogenannten Restriktionsoperator $R_i$ mit $A_{i+1} = R_iA_iP_i$, bis wir eine direkt lösbare Matrix $A_n$ erhalten. Nachdem solch eine Hierarchie aufgestellt worden ist, werden zunächst von der feinsten bis zur gröbsten Hierarchieebene jeweils iterativ Näherungslösungen berechnet. Die Fehler werden in die jeweils gröbere Hierarchiestufe propagiert durch Anwenden der Restriktionsoperation. Das lineare Gleichungssystem aus der gröbsten Stufe wird direkt gelöst. Danach werden die Hierarchieebenen in umgekehrter Reihenfolge betrachtet, jeweils die Lösung der gröberen Ebene wird in die feinere propagiert unter Anwendung des Prolongationsoperators. In jeder Ebene werden dabei verbliebene Fehler iterativ minimiert. Nähere Details bietet der Artikel von Demidov \cite{Demidov2019}.
 
-\addplot[only marks,color=red,mark=square,name path=f]
-coordinates {
-(28,2.0300000000000002)(244,2.0029)(2188,4.882899999999999)(19684,78.4442)(177148,4874.6008)(1594324,1465.1883)(14348908,15274.0869)
-};
+Da in diesem Verfahren einzelne Schritte stets Restfehler verkleinern, tritt im Gegensatz zur klassischen Methode von Gauß-Jordan zum direkten Lösen linearer Gleichungssysteme nicht das typische Problem der numerischen Instabilität in Verbindung mit der floating-point Arithmetik auf. Dieses provozieren wir zum Beispiel, wenn wir zwei positive Zahlen mit sehr geringen Beträgen am Rande des Darstellbaren multiplizieren und in der floating-point Arithmetik als Resultat eine $0$ erhalten, da die die Genauigkeit nicht mehr ausreicht.
 
-\addlegendentry{time for solving linear system (ms)}
-\addlegendentry{total time (ms)}
-\addlegendentry{time for solving linear system herman (ms)}
-\end{axis}
-\end{tikzpicture}
-
-\begin{tikzpicture}
-\begin{axis}[
-title={leader\_sync},
-xlabel={\#nodes},
-ylabel={},
-xmin=10,
-xmax=1000000,
-xmode=log,
-ymode=log,
-ymin= 0.1,
-ymax=100000,
-legend pos=north west,
-ymajorgrids=true,
-grid style=dashed,
-]
-\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
-
-\addplot[ only marks,color=green,mark=square,name path=f]
-coordinates {
-	(26,0.1127)(69,0.3268)(147,1.572)(273,10.6355)(459,56.5212)(1059,816.4017)(61,0.2376)(274,5.1225000000000005)(812,150.9849)(1933,2292.6318)(3962,1614.7134)(12400,129.2181)(141,0.6708000000000001)(1050,187.4179)(4244,1102.4958000000001)(12709,134.2616)(31383,344.1537)(131521,1665.7068)(335,5.3942)(3759,578.5895)(20884,218.5131)(78784,881.9840999999999)(234210,2990.3109000000004)
-};
+\subsection{Analyse der Messwerte}
 
 
-\addplot[ only marks,color=blue,mark=square,name path=f]
-coordinates {
-	(26,0.14)(69,0.4475)(147,1.737)(273,10.9188)(459,57.0437)(1059,817.7085)(61,0.3348)(274,5.39)(812,152.2213)(1933,2294.7803)(3962,1619.5376)(12400,146.5989)(141,0.8428)(1050,188.5498)(4244,1107.7286)(12709,151.8085)(31383,388.8695)(131521,1889.3968)(335,5.7291)(3759,583.2662)(20884,247.0121)(78784,1009.7594)(234210,3417.4312)
-};
 
-\addlegendentry{time for solving linear system (ms)}
-\addlegendentry{total time (ms)}
-\end{axis}
-\end{tikzpicture}
+%=====================================================
+% percentage les_time/total_time @ size_nodes
 
-\begin{tikzpicture}
-\begin{axis}[
-title={leader\_sync},
-xlabel={\#nodes},
-ylabel={\#edges},
-xmin=0.001,
-xmax=300000,
-ymin= 0.001,
-ymax=300000,
-legend pos=north west,
-ymajorgrids=true,
-grid style=dashed,
-]
-\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
-
-\addplot[only marks,color=blue,mark=square,name path=f]
-coordinates {
-	(26,33)(69,95)(147,210)(273,397)(459,674)(1059,1570)(61,76)(274,354)(812,1067)(1933,2557)(3962,5257)(12400,16495)(141,172)(1050,1292)(4244,5267)(12709,15833)(31383,39158)(131521,164288)(335,398)(3759,4487)(20884,24979)(78784,94408)(234210,280865)
-};
-\end{axis}
-\end{tikzpicture}
-
-\begin{tikzpicture}
-\begin{axis}[
-title={leader\_sync},
-xlabel={\#nodes},
-ylabel={\#edges},
-xmin=10,
-xmax=300000,
-xmode=log,
-ymin= 10,
-ymax=600000,
-ymode=log,
-legend pos=north west,
-ymajorgrids=true,
-grid style=dashed,
-]
-\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
-
-\addplot[only marks,color=blue,mark=square,name path=f]
-coordinates {
-	(26,33)(69,95)(147,210)(273,397)(459,674)(1059,1570)(61,76)(274,354)(812,1067)(1933,2557)(3962,5257)(12400,16495)(141,172)(1050,1292)(4244,5267)(12709,15833)(31383,39158)(131521,164288)(335,398)(3759,4487)(20884,24979)(78784,94408)(234210,280865)
-};
-\end{axis}
-\end{tikzpicture}
-
-\begin{tikzpicture}
-\begin{axis}[
-title={f},
-xlabel={fff},
-ylabel={},
-xmin=1,
-xmax=300000,
-xmode=log,
-ymin= 40,
-ymax=119,
-legend pos=north west,
-ymajorgrids=true,
-grid style=dashed,
-]
-\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
-
-\addplot[only marks,color=blue,mark=square,name path=f]
-coordinates {
-(26,80.5)(69,73.0279)(147,90.5009)(273,97.4054)(459,99.084)(1059,99.8402)(61,70.9677)(274,95.0371)(812,99.1878)(1933,99.9064)(3962,99.7021)(12400,88.144)(141,79.5918)(1050,99.3997)(4244,99.5276)(12709,88.4414)(31383,88.5011)(131521,88.1608)(335,94.1544)(3759,99.1982)(20884,88.4625)(78784,87.346)(234210,87.5017)
-};
-
-
-\addlegendentry{ les solving time / total time (ms) in\%}
-
-
-\end{axis}
-\end{tikzpicture}
-
-
-\begin{tikzpicture}
-\begin{axis}[
-title={Performancemessung},
-xlabel={Herman Size},
-ylabel={},
-xmin=1,
-xmax=18,
-ymode=log,
-ymin= 0.1,
-ymax=10000000000,
-xtick={3,5,7,9,11,13,15,17},
-legend pos=north west,
-ymajorgrids=true,
-grid style=dashed,
-]
-\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
-
-\addplot[color=blue,mark=square,name path=f]
-coordinates {
-	(3,2.0556)(5,2.1663)(7,5.9642)(9,89.3927)(11,4986.23)(13,2503.55)(15,26033.9)
-};
-
-\addplot[color=yellow,mark=square,name path=f]
-coordinates {
-	(3,2.03)(5,2.0029)(7,4.8829)(9,78.4442)(11,4874.6)(13,1465.19)(15,15274.1)
-};
-
-\addplot[color=red!50,mark=square,]
-coordinates {
-	(3,28)(5,244)(7,2188)(9,19684)(11,177148)(13,1594324)(15,14348908)
-};
-
-\addplot[color=green!50,mark=square,]
-coordinates {
-	(3,8)(5,32)(7,128)(9,512)(11,2048)(13,8192)(15,32768)
-};
-
-\addlegendentry{total time (ms)}
-\addlegendentry{linear system solving time (ms)}
-\addlegendentry{number of edges}
-\addlegendentry{number of nodes}
-
-\end{axis}
-\end{tikzpicture}
-
-
-\begin{tikzpicture}
-\begin{axis}[
-title={Performancemessung},
-xlabel={\#edges},
-ylabel={},
-xmin=20,
-xmax=100000000,
-xmode=log,
-ymode=log,
-ymin=1,
-ymax=100000,
-legend pos=north west,
-ymajorgrids=true,
-grid style=dashed,
-]
-\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
-
-\addplot[color=blue,mark=square,name path=f]
-coordinates {
-(28,2.0556)(244,2.1663)(2188,5.9642)(19684,89.3927)(177148,4986.23)(1594324,2503.55)(14348908,26033.9)
-};
-
-\addplot[color=yellow,mark=square,name path=f]
-coordinates {
-(28,2.0300000000000002)(244,2.0029)(2188,4.882899999999999)(19684,78.4442)(177148,4874.6008)(1594324,1465.1883)(14348908,15274.0869)
-};
-
-
-\addlegendentry{total time (ms)}
-\addlegendentry{linear system solving time (ms)}
-
-
-\end{axis}
-\end{tikzpicture}
-
-\begin{tikzpicture}
-\begin{axis}[
-title={Performancemessung},
-xlabel={Herman Size},
-ylabel={},
-xmin=1,
-xmax=18,
-ymin= -10,
-ymax=119,
-xtick={3,5,7,9,11,13,15,17},
-legend pos=north west,
-ymajorgrids=true,
-grid style=dashed,
-]
-\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
-
-\addplot[color=blue,mark=square,name path=f]
-coordinates {
-	(3,98.7546)(5,92.4572)(7,81.8702)(9,87.7524)(11,97.7613)(13,58.5245)(15,58.6699)
-};
-
-%\addplot[color=green,mark=square,name path=f]
-%coordinates {
-%(3,98.7798)(5,97.0794)(7,84.8991)(9,87.1188)(11,97.7595)(13,57.3912)(15,58.338)
-%};
-
-%\addplot[color=red,mark=square,name path=f]
-%coordinates {
-%(3,98.3979)(5,92.7316)(7,99.0205)(9,87.1824)(11,97.7466)(13,57.7921)(15,58.6214)
-%};
-
-%\addplot[color=yellow,mark=square,name path=f]
-%coordinates {
-%(3,99.0998)(5,92.5558)(7,92.7248)(9,87.3214)(11,97.7103)(13,57.6795)(15,59.0479)
-%};
-
-\addlegendentry{ les solving time / total time (ms) in\%}
-
-
-\end{axis}
-\end{tikzpicture}
-
-\newcommand\LM{\ensuremath{\mathit{LM}}}
-\newcommand\IS{\ensuremath{\mathit{IS}}}
-\begin{comment}
-	
-	\begin{tikzpicture}[
-	scale=2,
-	IS/.style={blue, thick},
-	LM/.style={red, thick},
-	axis/.style={very thick, ->, >=stealth', line join=miter},
-	important line/.style={thick}, dashed line/.style={dashed, thin},
-	every node/.style={color=black},
-	dot/.style={circle,fill=black,minimum size=4pt,inner sep=0pt,
-		outer sep=-1pt},
+\begin{figure}
+	\caption{Anteil Lösung des Gleichungssystem an Gesamtzeitaufwand}
+	\label{fig-percentage}
+	\centering
+	\begin{tikzpicture}
+	\begin{axis}[
+	xlabel={\#nodes},
+	ylabel={},
+	xmin=1,
+	xmax=300000,
+	xmode=log,
+	ymin= 40,
+	ymax=119,
+	legend pos=north west,
+	ymajorgrids=true,
+	grid style=dashed,
 	]
-	% axis
-	\draw[axis,<->] (2.5,0) node(xline)[right] {$Y$} -|
-	(0,2.5) node(yline)[above] {$i$};
-	% IS-LM diagram
-	\draw[LM] (0.2,0.3) coordinate (LM_1) parabola (1.8,1.8)
-	coordinate (LM_2) node[above] {\LM};
-	\draw[IS] (0.2,1.8) coordinate (IS_1) parabola[bend at end]
-	(1.8,.3) coordinate (IS_2) node[right] {\IS};
-	%Intersection is calculated "manually" since Tikz does not offer
-	%intersection calculation for parabolas
-	\node[dot,label=above:$A$] at (1,.68) (int1) {};
-	%shifted IS-LM diagram
-	\draw[xshift=.7cm, LM, red!52] (0.2,0.2) parabola (1.8,1.7)
-	node[above] {\LM'};
-	\draw[xshift=.4cm, yshift=.3cm, IS, blue!60] (0.2,1.8)
-	parabola[bend at end] (1.8,.3)
-	node[right] {\IS'};
-	%Intersection of shifted IS-LM
-	\path[xshift=.36cm, yshift=.35cm] (.98,.7)
-	node[dot,label=above:{$B$}] (int2) {};
-	\path[xshift=.805cm] (1,.68) node[dot,label=above:$C$] (int3) {};
-	%arrows between intersections
-	\draw[->, very thick, black, >=stealth']
-	($(int1)+1/2*(-.80,1)$) -- ($(int2)+1/2*(-.8,1)$)
-	node[sloped, above, midway] {$\mathsmaller{\Delta G > 0}$};
-	\draw[->, very thick, black, >=stealth']
-	($(int2)+2*(.14,.2)$) -- ($(int2)!.2cm!270:(int2)+(.9,0)$)
-	node[sloped,above, midway] {$\mathsmaller{\Delta M>0}$};
+	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
 	
-	\begin{scope}[xshift=4cm]
-	%E-diagram
-	\draw[axis,<->] (0,2.5) node(eyline)[above] {$i$} |-
-	(2.5,0) node(exline)[right] {$E$};
+	\addplot[only marks,color=blue,mark=square,name path=f]
+	coordinates {
+		(26,78.1297)(69,73.8502)(147,91.2907)(273,97.4164)(459,99.0921)(1059,99.8594)(61,74.1098)(274,94.8631)(812,99.4065)(1933,99.9064)(3962,99.7138)(12400,89.104)(141,81.3459)(1050,99.4114)(4244,99.5664)(12709,89.5479)(31383,89.1185)(131521,88.3985)(335,94.2451)(3759,99.2669)(20884,88.8311)(78784,87.5181)(234210,88.0346)
+	};
 	
-	\draw[important line, green, xshift=.5cm]
-	(.2,.2) coordinate (es) -- (1.5,1.5) coordinate (ee)
-	node [above right] {Interest rate parity};
-	\end{scope}
-	%Lines connecting IS LM coordinates and E coordinates
-	\draw[dashed] 
-	let
-	% Store the intersection point in \p1 for later retrieval. 
-	% A convenient feature of the let operation is that we can
-	% access the x and y component of the coordinate directly 
-	% using the \x1 and \y1 syntax. 
-	\p1=(intersection of int2--[xshift=1]int2 and es--ee)
-	in
-	(0,\y1) node[left]{$i'$} -|  (\x1,0)
-	node[pos=0.5,dot,label=above:$B'$] {} node[below] {$E'$};
+	\addplot[only marks,color=red,mark=square,name path=f]
+	coordinates {
+		(8,88.0933)(32,67.5738)(128,73.1332)(512,94.3184)(2048,99.1223)(8192,77.3382)(32768,79.3499)
+	};
 	
-	\draw[dashed line] let
-	\p1=(intersection of int3--[xshift=1]int3 and es--ee)
-	in
-	(0,\y1) node[left]{$i\phantom{'}$} -| (\x1,0)
-	node[dot,label=above:$C'$,pos=0.5] {} node[below] {$E$};
-	
+	\addlegendentry{leader\_sync: les solving time / total time in\%}
+	\addlegendentry{herman: les solving time / total time in\%}
+	\end{axis}
 	\end{tikzpicture}
+\end{figure}
 
-\begin{meta}
-Anmerkung: Die Berechnung der Varianz ist mittels \ref{kor-var-exp} kann zu unschönen Fehlern mit floatingpoint Standard führen...
-\end{meta}
+% leader_sync: size_edges @ size_nodes
 
+\begin{figure}
+	\caption{leader\_sync}
+	\label{fig-leader-sync}
+	\centering
+	\begin{tikzpicture}
+	\begin{axis}[
+	xlabel={\#nodes},
+	ylabel={\#edges},
+	xmin=10,
+	xmax=300000,
+	xmode=log,
+	ymin= 10,
+	ymax=600000,
+	ymode=log,
+	legend pos=north west,
+	ymajorgrids=true,
+	grid style=dashed,
+	]
+	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+	
+	\addplot[only marks,color=blue,mark=square,name path=f]
+	coordinates {
+		(26,33)(69,95)(147,210)(273,397)(459,674)(1059,1570)(61,76)(274,354)(812,1067)(1933,2557)(3962,5257)(12400,16495)(141,172)(1050,1292)(4244,5267)(12709,15833)(31383,39158)(131521,164288)(335,398)(3759,4487)(20884,24979)(78784,94408)(234210,280865)};
+	\end{axis}
+	\end{tikzpicture}
+\end{figure}
 
-\end{comment}
+% herman: stuff @ size
+
+\begin{figure}
+	\caption{hermanN}
+	\label{fig-herman}
+	\centering
+	\begin{tikzpicture}
+	\begin{axis}[
+	xlabel={N},
+	ylabel={},
+	xmin=1,
+	xmax=18,
+	ymode=log,
+	ymin= 0.1,
+	ymax=10000000000,
+	xtick={3,5,7,9,11,13,15,17},
+	legend pos=north west,
+	ymajorgrids=true,
+	grid style=dashed,
+	]
+	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+	
+	\addplot[color=blue,mark=square,name path=f]
+	coordinates {
+		(3,0.10579999999999999)(5,0.2036)(7,1.903)(9,119.3446)(11,8153.997799999999)(13,2304.9141)(15,24438.8768)
+	};
+	
+	\addplot[color=red!50,mark=square,]
+	coordinates {
+		(3,28)(5,244)(7,2188)(9,19684)(11,177148)(13,1594324)(15,14348908)
+	};
+	
+	\addplot[color=green!50,mark=square,]
+	coordinates {
+		(3,8)(5,32)(7,128)(9,512)(11,2048)(13,8192)(15,32768)
+	};
+	
+	\addlegendentry{linear system solving time (ms)}
+	\addlegendentry{number of edges}
+	\addlegendentry{number of nodes}
+	
+	\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+% time_solve_linear_system @ size_edges
+
+\begin{figure}
+	\caption{Zeitaufwand in Abhängigkeit der Kanten in der Markovkette}
+	\label{fig-in-edges}
+	\centering
+	\begin{tikzpicture}
+	\begin{axis}[
+	xlabel={\#edges},
+	ylabel={},
+	xmin=10,
+	xmax=100000000,
+	xmode=log,
+	ymode=log,
+	ymin= 0.04,
+	ymax=1000000,
+	legend pos=north west,
+	ymajorgrids=true,
+	grid style=dashed,
+	]
+	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+	
+	\addplot[ only marks,color=blue,mark=square,name path=f]
+	coordinates {
+		(33,0.1036)(95,0.3115)(210,1.5398)(397,10.599)(674,56.123999999999995)(1570,814.5362)(76,0.1769)(354,5.1043)(1067,145.92079999999999)(2557,2213.3460999999998)(5257,1594.7379999999998)(16495,128.0005)(172,0.6467)(1292,184.9602)(5267,1067.2242999999999)(15833,133.8994)(39158,340.5342)(164288,1620.4404)(398,5.152)(4487,545.3649)(24979,213.96460000000002)(94408,862.373)(280865,2954.3986)
+	};
+	
+	\addplot[only marks,color=red,mark=square,name path=f]
+	coordinates {
+		(28,0.10579999999999999)(244,0.2036)(2188,1.903)(19684,119.3446)(177148,8153.997799999999)(1594324,2304.9141)(14348908,24438.8768)
+	};
+	
+	\addlegendentry{leader\_sync: time for solving linear system (ms)}
+	\addlegendentry{herman: time for solving linear system (ms)}
+	\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+% time_solve_linear_system @ size_nodes
+
+\begin{figure}
+	\caption{Zeitaufwand in Abhängigkeit der Knoten in der Markovkette}
+	\label{fig-in-nodes}
+	\centering
+	\begin{tikzpicture}
+	\begin{axis}[
+	xlabel={\#nodes},
+	ylabel={},
+	xmin=10,
+	xmax=1000000,
+	xmode=log,
+	ymode=log,
+	ymin= 0.04,
+	ymax=1000000,
+	legend pos=north west,
+	ymajorgrids=true,
+	grid style=dashed,
+	]
+	\path[name path=axis] (axis cs:0,0) -- (axis cs:1,0);
+	
+	\addplot[ only marks,color=blue,mark=square,name path=f]
+	coordinates {
+		(26,0.1036)(69,0.3115)(147,1.5398)(273,10.599)(459,56.123999999999995)(1059,814.5362)(61,0.1769)(274,5.1043)(812,145.92079999999999)(1933,2213.3460999999998)(3962,1594.7379999999998)(12400,128.0005)(141,0.6467)(1050,184.9602)(4244,1067.2242999999999)(12709,133.8994)(31383,340.5342)(131521,1620.4404)(335,5.152)(3759,545.3649)(20884,213.96460000000002)(78784,862.373)(234210,2954.3986)
+	};
+	
+	\addplot[ only marks,color=red,mark=square,name path=f]
+	coordinates {
+		(8,0.10579999999999999)(32,0.2036)(128,1.903)(512,119.3446)(2048,8153.997799999999)(8192,2304.9141)(32768,24438.8768)
+	};
+	
+	\addlegendentry{leader\_sync: time for solving linear system (ms)}
+	\addlegendentry{herman: time for solving linear system (ms)}
+	\end{axis}
+	\end{tikzpicture}
+\end{figure}
+
+Wir sehen im Folgenden Messwerte für die Beispiele \textit{herman} und \textit{leader\_sync}. Gemessen wurde auf einem Windows 10 Pro 1909 mit einem Intel Core i9-9900K mit einer nominalen Taktrate von 3.60GHz.
+Bei \textit{leader\_sync} handelt es sich um ein anderes Verfahren, um in einer Ringstruktur einen privilegierten Prozess ("\textit{leader}") auszuwählen. Abbildung \ref{fig-percentage} zeigt zunächst einmal welchen Anteil das Lösen des linearen Gleichungssystems an der Gesamtzeit hat. Wir sehen, dass sich für beide Beispiel unsere Erkenntnis aus den theoretischen Betrachtungen bestätigt, nämlich dass die Berechnungszeit im wesentlichen vom Aufwand zum Lösen des linearen Gleichungssystems abhängt. Wäre dies nicht der Fall, wäre zu überprüfen, ob die Implementierung hinsichtlich Effizienz im Speicherzugriff gröbere Fehler beinhaltet. Genau diese Fehler können wir mit den Messdaten an dieser Stelle ausschließen.
+
+% hinzufügen: Speicherbedarf im wesentlichen von Matrix abhängig, A;GCl braucht nichjt nennenswert ,ehr Speicher,.
+Sowohl \textit{herman} als auch \textit{leader\_sync} geben uns für verschieden große Parameter entsprechend Markovketten in abhängiger Größe. Für \textit{leader\_sync} wurden alle Modelle in Betracht gezogen, welche in den \textit{PRISM Case Studies} \cite{PRISMCS} zu finden waren. Bei \textit{herman} lässt sich beobachten, dass mit $N=17$ bereits ein Speicherbedarf in der Größenordnung von 60GB besteht. Deswegen konnte nur bis $N=15$ gemessen werden. Abbildung \ref{fig-leader-sync} zeigt die Anzahl der Kanten in der Markovkette in Abhängigkeit der Zahl der Knoten für das Beispiel \textit{leader\_sync}. Wir erkennen eine lineare Korrelation zwischen Anzahl der Kanten und Anzahl der Knoten: Im Diagramm mit logarithmischer Achsenskalierung sehen wir einen linearen Graphen mit Anstieg eins, bezogen auf jene Exponenten. Aus $\lg (\#edges) \approx a \lg (\#nodes) + b$ mit $a \approx 1$ folgt $\#edges = k \cdot \#nodes$. Abbildung \ref{fig-herman} zeigt uns ähnliche Kenngrößen für \textit{herman}. Wir sehen, dass sich Anzahl der Knoten sowie Anzahl der Kanten exponentiell in der Anzahl der Prozesse $N$ verhalten. Dabei steigt die Anzahl der Kanten schneller als die der Knoten und lässt sich mit dem Quadrat der Anzahl der Knoten nach oben abschätzen.
+Im selben Diagramm sehen wir noch die Zeit, welche es zum Lösen des linearen Gleichungssystems braucht. Auffällig ist hier der Rückgang der Zeit bei $N=13$ im Vergleich zu $N=11$. Schaut man in die Logs von AMGCL bei der Berechnung, so stellt man fest, dass erst bei $N=13$ das erste Mal im Rahmen des Mehrgitterverfahrens eine zweite, gröbere Matrix aufgestellt wird. Dies erklärt, warum der Zeitaufwand nicht streng monoton in Abhängigkeit von $N$ steigt. Bei allen vorigen Instanzen, d.h. $N\leq 11$ rechnet das Verfahren nur auf der ursprünglichen Matrix. Der Vorteil, welchen die Mehrgittermethode bringen soll, kommt bis dahin gar nicht zum Einsatz. Weiterhin sind die Lücken zwischen den Messpunkten ziemlich groß, sodass man sagen kann, dass die Messwerte aus dem Beispiel \textit{herman} allein recht wenig aussagekräftig sind. Weiterhin fällt auf, dass die Matrizen bei \textit{herman} schon ziemlich viele Einträge verschieden von null aufweisen, bei gleicher Zahl an Knoten deutlich mehr im Vergleich zu \textit{leader\_sync}.
+
+Nach dieser Art Vorbetrachtung wollen wir nun den Zeitaufwand zur Lösung des linearen Gleichungssystems einmal in Abhängigkeit von den Kanten (Abbildung \ref{fig-in-edges}) und einmal in Abhängigkeit von den Knoten (Abbildung \ref{fig-in-nodes}) betrachten. Schauen wir zunächst auf erstere Darstellung, so erkennen wir, dass auch \textit{leader\_sync} keinen monotonen Graphen aufweist, da AMGCL bei Gewissen Größen beginnt, mehr Matrizen in der Hierarchie des Mehrgitterverfahrens aufzustellen. Wir sehen drei maximale Intervalle mit monoton steigenden Messwerten für den Zeitaufwand, entsprechend wurden keine, genau eine, beziehungsweise genau zwei zusätzliche Matrizen aufgestellt. Betrachten wir die Messwerte für größere Kantenanzahlen, so lässt sich Ablesen, dass der Zeitaufwand sich in etwa linear zur Zahl der Kanten verhält. Schlüsse auf den Verlauf des Graphen für noch größere Eingaben scheinen hier sehr gewagt und möchten wir hier nicht vornehmen.
+
+Betrachten wir in Abbildung \ref{fig-in-nodes} die Berechnungszeit abhängig von der Zahl der Knoten, so lässt sich für \textit{leader\_sync} logischerweise qualitativ kein Unterschied zur Abhängigkeit von der Zahl der Kanten feststellen, da Knoten und Kanten bereits linear oder zumindest annähernd linear korreliert sind. Interessant ist es an dieser Stelle, die Werte von \textit{herman} zu betrachten. Hier ist die erforderliche Zeit in etwa quadratisch in der Anzahl der Knoten und die Messwerte von \textit{herman} und \textit{leader\_sync} liegen für größere \mc{}n deutlich auseinander. Dies ist jedoch ebenfalls nur ein logische Konsequenz von der Tatsache, dass bei \textit{herman} sich die Zahl der Kanten in etwa quadratisch zur Zahl der Knoten verhält.
+Zumindest im Rahmen der Aussagekraft unserer Messdaten lässt sich also darauf schließen, dass die Zahl der Kanten kennzeichnend für die benötigte Rechenzeit ist und dass diese Rechenzeit sich linear zur Zahl der Kanten verhält, bis auf Abweichungen im Bereich kleinerer Markovketten, wo sich die Rechenschritte der Mehrgittermethode letztlich auf das Rechnen auf einer einzigen Matrix reduzieren.
+
+\subsection{Grenzen der Aussagekraft}
+
+Wie bereits kurz zur Erläuterung der Abbildungen erwähnt, steigt der Speicherbedarf natürlich recht schnell an, wenn \mc{}n eines bestimmten Modells betrachtet werden und die Zahl der Kanten in Abhängigkeit der Parameter des Modells exponentiell wachsen. Bei Speicherung der Matrizen mittels HashMaps ist davon auszugehen, dass sich der Speicherbedarf linear zur Zahl der Kanten verhält.
+Bei Rechenzeiten unter $100\mathrm{s}$ ist hier nicht die Zeit und damit die Taktfrequenz des Prozessors die limitierende Ressource, sondern vielmehr der zur Verfügung stehende Speicherplatz. Ausgaben des Debuggers und Logs von AMGCL zu Folge ist der für das Lösen des linearen Gleichungssystems benötigte Speicherplatz nach Aufstellen der Eingabematrix im Vergleich zu dieser Matrix bei den gemessenen Beispielen verschwindend gering. Es genügt im Wesentlichen also zu schauen, wie viel Platz zur Darstellung der \mc{} im Speicher benötigt wird.
+
+Wir haben in den besten Fällen gesehen, dass AMGCL drei Matrizen im Mehrgitterverfahren verwendet. Ob sich die lineare Abhängigkeit der Rechenzeit von der Zahl der Kanten auch bei noch größeren Markovketten und den mit diesen verbundenen Matrizen fortsetzt, lässt sich an dieser Stelle schwer einschätzen. Auch wäre es interessant zu analysieren, wie es sich bei derart größeren \mc{} verhält, bei welchen dann entsprechend mehr Matrizen in der Mehrgitterhierarchie berechnet werden.
+
 
 
 \section{Ein Blick auf MDPs}
 
 \section{Weiterführende Fragestellungen}
 
+In diesem Abschnitt wollen wir kurz offen gebliebene oder erst aufgekommene weiterführende Fragestellungen erwähnen.
+
+
+Im Zusammenhang mit dem Speicherbedarf beim Berechnen von Varianzen wäre es zum Einen interessant, noch für größere Beispiele Messwerte zu ermitteln auf einem System, welches den entsprechend benötigten Speicher zur Verfügung stellt. Zum Anderen könnte man sich Mittel und Methoden überlegen und implementieren, den tatsächlichen Speicherbedarf zu ermitteln und wie die benötigte Rechenzeit in Abhängigkeit von der Zahl der Kanten darzustellen, um zu untersuchen, ob sich daraus neue Erkenntnisse schließen lassen.
+
+
+\begin{meta}
+	
+	\item AMGCL: zugrundeliegende verfahren austauschen und neu messen.
+	\item zugrundeliegende Verfahren im Text noch erwähnen.
+	
+\end{meta}
+
 \section{Appendix}
 
-Die folgenden Lemmata sollen mathematische Aussagen bereitstellen, welche nicht zentrales Thema dieser Abhandlung sind, jedoch an bestimmten Stellen zur Argumentation herangezogen werden.
+Mit folgenden Lemmata wollen wir mathematische Aussagen kurz begründen, welche nicht zentrales Thema sind, jedoch an bestimmten Stellen zur Argumentation herangezogen werden.
 
 \begin{lemma} \label{lem-geosum}
 	Seien $n \in \mathbb{N}$ eine natürliche Zahl und $a \in \mathbb{R}_{>0}\setminus\{1\}$. Dann gilt
@@ -1351,15 +1192,6 @@ Betrachten wir den Grenzwert der Summe aus Lemma \ref{lem-infqsum} für $n \to \
 = \frac{a\;(a+1)}{(a-1)^3}
 \end{equation}	
 \end{korollar}
-
-\begin{meta}
-	\begin{itemize}
-\item AMGCL beschreiben: Stabilität, Laufzeit nach Messung, 
-\item Diagramme zeichnen und analysieren
-\item anderes Beispiel finden.
-	\end{itemize}
-	
-\end{meta}
 
 \printbibliography
 
