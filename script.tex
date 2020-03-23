@@ -23,7 +23,8 @@
 
 \usepackage[official]{eurosym} % € - Symbol
 
-\title{Effiziente Berechnung von Varianzen in Markovketten}%und stabile
+\newcommand{\mc}{Markow-Kette}
+\title{Effiziente Berechnung von Varianzen in \mc{}n}%und stabile
 \author{Maximilian Starke}
 \affil{Fakultät für Informatik, Technische Universität Dresden}
 \date{\today}
@@ -148,7 +149,7 @@ minimum height=2.5em]
 
 \section{Einführung}
 
-Zur Analyse relevanter Zielgrößen in probabilistischen Systemen sind Markovketten mit Kantengewichten ein wesentliches, häufig genutztes Modell. Mit dessen Hilfe kann beispielsweise die Dauer eines Verbindungsaufbaus in Netzwerken modelliert werden. Wir wollen hier Varianzen akkumulierter Kantengewichte auf endlichen Pfaden in Markovketten bis zum Erreichen einer Menge von Zielzuständen und deren effiziente Berechnung betrachten.
+Zur Analyse relevanter Zielgrößen in probabilistischen Systemen sind \mc{}n mit Kantengewichten ein wesentliches, häufig genutztes Modell. Mit dessen Hilfe kann beispielsweise die Dauer eines Verbindungsaufbaus in Netzwerken modelliert werden. Wir wollen hier Varianzen akkumulierter Kantengewichte auf endlichen Pfaden in \mc{}n bis zum Erreichen einer Menge von Zielzuständen und deren effiziente Berechnung betrachten.
 Während Erwartungswerte der akkumulierten Kantengewichte in der wissenschaftlichen Literatur bereits ausführlich untersucht worden sind, trifft dies nicht für die Varianzen zu, obgleich diese besonders in sicherheitskritischen Systemen oder zur Beurteilung von Risiken durch Abweichung von der Erwartung besondere Relevanz erhalten.
 Verhoeff \cite{Verh04} hat praktische Anwendungen zusammengetragen, von denen wir hier zwei erläutern wollen:
 
@@ -158,7 +159,7 @@ Wenn wir mit einer gewissen Wahrscheinlichkeit $\geq p$ rechtzeitig an einem Ort
 In der Wirtschaft kommt es immer wieder vor, dass Budgeds für bestimmte Ausgaben geplant werden. Insofern größere Abweichungen der Kosten nach oben unbedingt zu vermeiden sind, kann es von Vorteil sein, anstatt eine Investition in Höhe von fiktiven 1000\euro{} zu planen, bei der mit 300\euro{} Abweichung der tatsächlichen Kosten gerechnet werden muss, eine zweckgleiche Investition in Höhe von erwarteten 1100\euro{} anzustreben, bei welcher eine Abweichung von nur 50\euro{} erwartet wird.
 
 
-Verhoeff hat lineare Gleichungssysteme für die Berechnung von Varianzen und Kovarianzen präsentiert \cite{Verh04}. Wir wollen zunächst die erforderlichen Grundlagen zu Wahrscheinlichkeitstheorie sowie Markovketten für den Leser darlegen. Anschließend wollen wir einen Algorithmus zur Berechnung von Varianzen und Kovarianzen akkumulierter Kantengewichte formal herleiten. Wir wollen  die Betrachtungen von Verhoeff insbesondere um eine ausführliche Herleitung für die Berechnung von Kovarianzen erweitern und zeigen, dass alle ermittelten Gleichungssysteme tatsächlich eindeutig lösbar sind. Abschließend wollen wir eine Implementation des hergeleiteten Algorithmus' hinsichtlich Performance analysieren.
+Verhoeff hat lineare Gleichungssysteme für die Berechnung von Varianzen und Kovarianzen präsentiert \cite{Verh04}. Wir wollen zunächst die erforderlichen Grundlagen zu Wahrscheinlichkeitstheorie sowie \mc{}n für den Leser darlegen. Anschließend wollen wir einen Algorithmus zur Berechnung von Varianzen und Kovarianzen akkumulierter Kantengewichte formal herleiten. Wir wollen  die Betrachtungen von Verhoeff insbesondere um eine ausführliche Herleitung für die Berechnung von Kovarianzen erweitern und zeigen, dass alle ermittelten Gleichungssysteme tatsächlich eindeutig lösbar sind. Abschließend wollen wir eine Implementation des hergeleiteten Algorithmus' hinsichtlich Performance analysieren.
 
 \section{Grundlagen}
 
@@ -185,7 +186,7 @@ Verhoeff hat lineare Gleichungssysteme für die Berechnung von Varianzen und Kov
 	\begin{equation}
 		\mathcal{E}_{\probspaceexraw{}}(X) \coloneqq \sum_{\omega \in \Omega}{P(\omega) \cdot X(\omega)}
 	\end{equation}
-	bezeichnen wir den \expect{} von $X$ auf \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{E}(X)$. Es sei angemerkt, dass es bei $|\Omega|=\infty$ Fälle gibt, bei denen die Summe nicht beschränkt ist. Wir schreiben dafür $\mathcal{E}(X) = \infty$ bzw. $\mathcal{E}(X) = -\infty$ und sagen, dass der Erwartungswert nicht existiert.
+	bezeichnen wir den \expect{} von $X$ auf \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{E}(X)$. Es sei angemerkt, dass es für $|\Omega|=\infty$ Fälle gibt, bei denen die Summe nicht beschränkt ist. Wir schreiben dafür $\mathcal{E}(X) = \infty$ bzw. $\mathcal{E}(X) = -\infty$ und sagen, dass der Erwartungswert nicht existiert.
 \end{definition}
 \begin{beispiel}
 	Seien $\Omega = \mathbb{N}_{>0}$, $P : \Omega \to [0,1] : n \mapsto 2^{-n}$ und $R : \Omega \to \mathbb{R} : n \mapsto 2^{n}$. Dann gibt es offensichtlich für jede Zahl $a \in \mathbb{R}$ eine endliche Teilmenge von $T \subseteq \Omega$ mit $\sum_{n \in T}{P(n) \cdot R(n)} \geq a$. Dazu wählen wir einfach $T \coloneqq \{n \in \mathbb{N}_{>0}\mid n \leq \lceil a \rceil \}$ und erhalten $\sum_{n \in T}{P(n) \cdot R(n)} = |T| = \lceil a \rceil \leq \mathcal{E}(R)$. Damit erhalten wir $\mathcal{E}(R) = \infty$.
@@ -267,7 +268,7 @@ Dual zur Linearität von \expect{}en (\ref{eq-linearity}) lässt sich für \var{
 \begin{lemma}\label{lemma-var-qlinear}
 	Sei $X$ eine \rvar{}, $c,d \in \mathbb{R}$. Dann gilt:
 	\begin{equation}
-		\mvar(cX + d) = c^2\mvar(X)
+		\mvar(cX + d) = c^2\cdot\mvar(X)
 	\end{equation}
 \end{lemma}
 \begin{beweis}
@@ -318,37 +319,36 @@ schreiben.
 	\end{align*}
 \end{beispiel}
 
-\subsection{Markovketten}
+\subsection{\mc{}n}
 
-\newcommand{\mc}{Markovkette}
 \newcommand{\mcex}{$M = (Q, P, I)$}
 \begin{definition}[\mc]\label{def-mc}
 	Eine \mc{} ist ein Tupel $(Q, P, I)$ mit den Eigenschaften
 	\begin{enumerate}[(a)]
 		\item $Q$ ist eine Menge.
-		\item $P : Q \times Q \to [0,1]$ mit der Eigenschaft $\forall q \in Q : \sum_{q' \in Q}{P(q,q') = 1}$
+		\item $P : Q \times Q \to [0,1]$ mit der Eigenschaft $\forall q \in Q : \sum_{q' \in Q}{P(q,q') = 1}$.
 		\item $I : Q \to [0,1]$ ist eine Wahrscheinlichkeitsverteilung auf $Q$.
 	\end{enumerate}	
 	Die Bilder von $P$ nennen wir auch Transitionswahrscheinlichkeiten und definieren mit welcher Wahrscheinlichkeit, nämlich $P(q,q')$ vom aktuellen Zustand $q$ in den Zustand $q'$ übergegangen wird. $I$ ist die initiale Verteilung, welche definiert, mit welcher Wahrscheinlichkeit ein Zustand als Startzustand gewählt wird.
 \end{definition}
 
-Für theoretische Betrachtungen ist es durchaus sinnvoll unendliche \mc{}n zu betrachten. Wir werden uns jedoch auf endliche beschränken, d.h. $|Q| < \infty$, sobald wir zur Berechnung von u.a. Varianzen entsprechende Gleichungssysteme herleiten. Andernfalls bestünde das lineare Gleichungssystem aus unendlich vielen Gleichungen in unendlich vielen Variablen.
+Für theoretische Betrachtungen ist es durchaus sinnvoll unendliche \mc{}n zu betrachten. Wir werden uns jedoch auf endliche beschränken, d.h. $|Q| < \infty$, sobald wir zur Berechnung von u.a. Varianzen entsprechende Gleichungssysteme herleiten. Andernfalls bestünde das Gleichungssystem aus unendlich vielen Gleichungen in unendlich vielen Variablen.
 
 \newcommand{\gpath}{Pfad}
 \newcommand{\pfin}{\mathrm{Paths}}%_{fin}
 \begin{definition}[\gpath]\label{def-path}
 	Sei \mcex{} eine \mc{}. Die Menge aller endlichen \gpath e in $M$ ist definiert durch
 	\begin{equation}
-		\pfin(M) \coloneqq \{p \in Q^{k} \mid k \in \mathbb{N}_{+} \land \forall 0 \leq i < k : P(p_i,p_{i+1}) > 0\}
+		\pfin(M) \coloneqq \{p \in Q^{k} \mid k \in \mathbb{N}_{>0} \land \forall 0 \leq i < k : P(p_i,p_{i+1}) > 0\}
 	\end{equation}
-	Wir bezeichnen mit $|p|$ die Länge eine Pfades, d.h. $|p| \coloneqq k$ für $p \in Q^k$ und beginnen Indizes bei $0$.
+	Wir bezeichnen mit $|p|$ die Länge eine Pfades, d.h. $|p| = k$ für $p \in Q^k$ und beginnen Indizes bei $0$.
 	Die Wahrscheinlichkeit $\mathrm{\tilde{P}}(p)$ eines Pfades ist gegeben durch
 	\begin{equation}
 		\mathrm{\tilde{P}}(p) \coloneqq \prod_{i = 0}^{|p| - 2}{P(p_i,p_{i+1})}
 	\end{equation}
-	Insbesondere ist $\mathrm{\tilde{P}}(p) = 1$ für alle Pfade $p$ mit $|p| = 1$. Für Tupel $p \in Q^k$, $k \in \mathbb{N}^+$, die keine Pfade sind, wäre $\mathrm{\tilde{P}}(p) = 0$.
+	Insbesondere ist $\mathrm{\tilde{P}}(p) = 1$ für alle Pfade $p$ mit $|p| = 1$. Für Tupel $p \in Q^k$, $k \in \mathbb{N}_{>0}$, die keine Pfade sind, wäre $\mathrm{\tilde{P}}(p) = 0$.
 	
-	Für $|p| = 2$ entspricht die Wahrscheinlichkeit $\mathrm{\tilde{P}}(p)$ genau der Wahrscheinlichkeit gegeben durch die Funktion $P$, nämlich der Transitionswahrscheinlichkeit aus der Markovkette. $\mathrm{\tilde{P}}$ ergibt sich als eindeutige Fortsetzung von $P$, also $P = \mathrm{\tilde{P}}\vert_{Q\times Q}$, und wir schreiben im Folgenden einfach nur $P$.
+	Für $|p| = 2$ entspricht die Wahrscheinlichkeit $\mathrm{\tilde{P}}(p)$ genau der Wahrscheinlichkeit gegeben durch die Funktion $P$, nämlich der Transitionswahrscheinlichkeit aus der \mc{}. $\mathrm{\tilde{P}}$ ergibt sich als eindeutige Fortsetzung von $P$, es gilt $P = \mathrm{\tilde{P}}\vert_{Q\times Q}$, und wir schreiben im Folgenden einfach nur $P$.
 \end{definition}
 
 \newcommand{\reward}{Gewichtsfunktion}
@@ -361,11 +361,11 @@ Für theoretische Betrachtungen ist es durchaus sinnvoll unendliche \mc{}n zu be
 Wir bezeichnen Gewichtsfunktionen typischerweise mit $R$ in Anlehnung an das englische Wort \textit{reward}.
 Offenbar gibt es analog zur Wahrscheinlichkeit $P$ eine eindeutige Fortsetzung für eine \reward{} $R$ auf Pfade, gegeben durch Aufsummierung aller Kantengewichte entlang eines solchen:
 \begin{equation}
-	\mathrm{\tilde{R}} : \bigcup_{k \in \mathbb{N}_+}{Q^k} \to \mathbb{R} : p \mapsto \sum_{i = 0}^{|p| - 2}{R(p_i,p_{i+1})}
+	\mathrm{\tilde{R}} : \bigcup_{k \in \mathbb{N}_{>0}}{Q^k} \to \mathbb{R} : p \mapsto \sum_{i = 0}^{|p| - 2}{R(p_i,p_{i+1})}
 \end{equation}
 Wir schreiben im Folgenden einfach $R$.
 \begin{definition}\label{def-path-to}
-	Sei \mcex{} eine \mc{}, $s \in Q$ ein (frei gewählter) Startzustand und $A \subseteq Q$ eine Menge von Zielzuständen. Wir bezeichnen die Menge der Pfade, welche in $s$ starten und in $A$ enden, jedoch $A$ nicht zwischenzeitlich schon erreichen mit:
+	Sei \mcex{} eine \mc{}, $s \in Q$ ein beliebiger Zustand, genannt Startzustand und $A \subseteq Q$ eine Menge von Zielzuständen. Wir bezeichnen die Menge der Pfade, welche in $s$ starten und in $A$ enden, jedoch $A$ nicht zwischenzeitlich schon erreichen mit:
 	\begin{equation}
 		\mathrm{Paths}_{s \rightarrow A}(M) \coloneqq \{ p \in \pfin(M) \mid p_0 = s \land p_{|p|-1} \in A \land \forall i < |p| - 1 : p_i \notin A \}
 	\end{equation}
@@ -378,7 +378,7 @@ Setzen wir einmal voraus, dass von jedem Zustand $q\in Q$, welcher von $s$ errei
 \exists p \in \pfin_{s \rightarrow \{q\}}(M)  \quad \Rightarrow \quad \exists p \in \pfin_{q \rightarrow A}(M) \text{.}
 \]
  Unter dieser Voraussetzung beobachteten Baier und Katoen, dass es ein fast sicheres Ereignis ist, nach endlich vielen Übergängen in einem Zustand aus $A$ vorbeizukommen.
-Die endlichen Pfade, welche wir ausschließlich betrachten wollen, lassen sich als Präfixe der unendlichen Pfade $\mathrm{Paths}_{inf}(s) \coloneqq \{p \in Q^\omega \mid p(0) = s\}$ der Markovkette auffassen.
+Die endlichen Pfade, welche wir ausschließlich betrachten wollen, lassen sich als Präfixe der unendlichen Pfade $\mathrm{Paths}_{inf}(s) \coloneqq \{p \in Q^\omega \mid p(0) = s\}$ der \mc{} auffassen.
 Man sieht leicht, dass sich ein endlicher Pfad mit der Menge an jenen unendlichen Pfaden identifizieren lässt, welche diesen als  Präfix haben.
 Eine Menge endlicher Pfade ist abzählbar, da wir die Pfade als endliche Wörter über dem Alphabet bestehend aus den Zuständen auffassen können.
 Nach der Beobachtung ist dann
@@ -446,11 +446,11 @@ Nach der Beobachtung ist dann
 		
 		\end{tikzpicture}
 	\end{center}
-	Wir wollen nun zur Veranschaulichung den Erwartungswert und die Varianz von $R$ im Wahrscheinlichkeitsraum $(\mathrm{Paths}_{1 \rightarrow \{5,6\}}(M), P)$ betrachten. Die von $5$ beziehungsweise $6$ ausgehenden Kanten samt Beschriftung werden für diesen Fall irrelevant. Alle Pfade mit Wahrscheinlichkeit $0$ können wir direkt entfernen und die Tupel aus $Q^n$ mit Wörtern über dem Alphabet $Q$ identifizieren. Wir erhalten so:
+	Wir wollen nun zur Veranschaulichung den Erwartungswert und die Varianz von $R$ im Wahrscheinlichkeitsraum $(\mathrm{Paths}_{1 \rightarrow \{5,6\}}(M), P)$ betrachten. Die von $5$ beziehungsweise $6$ ausgehenden Kanten samt Beschriftung werden für diesen Fall irrelevant. Die Tupel aus $Q^n$ können wir mit Wörtern über dem Alphabet $Q$ identifizieren. Wir erhalten so:
 	\begin{equation*}
-	\mathrm{rPaths}_{1 \rightarrow \{5,6\}}(M) = \big\{126,1326,135\big\} \; \cup \big\{134^n5 \in Q^{n+3} \mid n\geq 1\big\} 
+	\Omega \coloneqq \mathrm{Paths}_{1 \rightarrow \{5,6\}}(M) = \big\{126,1326,135\big\} \; \cup \big\{134^n5 \in Q^{n+3} \mid n\geq 1\big\} 
 	\end{equation*}
-	Sei $\Omega \coloneqq \mathrm{rPaths}_{1 \rightarrow \{5,6\}}$. Für den Erwartungswert $\mathcal{E}(R)$ ergibt sich:
+	Für den Erwartungswert $\mathcal{E}(R)$ ergibt sich:
 	\newcommand{\exres}{10}
 	\begin{align*}
 	\mathcal{E}(R) & = \sum_{p \in \Omega}{P(p) \cdot R(p)}\\
@@ -472,9 +472,9 @@ Nach der Beobachtung ist dann
 		& = 9 + 36 \\
 		& = 45
 	\end{align*}
-	Bemerkt sei, dass die Zufallsvariable $X \coloneqq (R-\exres)^2$, per Definition
+	Es sei angemerkt, dass die Zufallsvariable $X \coloneqq (R-\exres)^2$, per Definition
 	\[
-	(R-\exres)^2 : \mathrm{rPaths}_{1 \rightarrow \{5,6\}}(M) \to  \mathbb{R} : p \mapsto (R(p) - \exres)^2
+	(R-\exres)^2 : \mathrm{Paths}_{1 \rightarrow \{5,6\}}(M) \to  \mathbb{R} : p \mapsto (R(p) - \exres)^2
 	\]
 	im Allgemeinen nicht die Eigenschaft der eindeutigen Fortsetzung von Kanten zu Pfaden erfüllt:
 	\[
@@ -483,7 +483,7 @@ Nach der Beobachtung ist dann
 	Beispielsweise verletzt $X(1,3) + X(3,2) = 25 + 25 \neq 0 = X(132)$ diese Eigenschaft. Während im Graphen eingezeichnete Kantengewichte immer zu einer \rvar{}n auf der Menge der Pfade fortgesetzt werden kann, können wir nicht alle \rvar{}n auf Kantengewichte zurückführen, insbesondere X also nicht durch Kantengewichte im Graphen einzeichnen.
 	
 	
-	An diesem Beispiel sehen wir, dass die explizite Berechnung von Varianzen bereits kompliziert werden kann, wenn nur ein Kreis trivialer Länge im Graphen der \mc{} enthalten ist. Stellen wir uns einen Graphen vor, in dem Knoten $a$ und $b$ existieren sowie Kanten mit positiver Wahrscheinlichkeit für $(a,a), (a,b), (b,a)$. Dann gibt es nicht mehr nur eine Möglichkeit, einen Kreis zu finden, sondern unendlich viele, z.B. $b^\omega, (ab)^\omega, (aab)^\omega, (aaab)^\omega, \dots$\;.
+	An diesem Beispiel sehen wir, dass die explizite Berechnung von Varianzen bereits kompliziert werden kann, wenn nur ein Kreis trivialer Länge im Graphen der \mc{} enthalten ist. Stellen wir uns einen Graphen vor, in dem Knoten $a$ und $b$ existieren sowie Kanten $(a,a), (a,b), (b,a)$. Dann gibt es nicht mehr nur eine Möglichkeit, einen Kreis zu finden, sondern unendlich viele mit beispielsweise $(a)^\omega, (ab)^\omega, (aab)^\omega, (aaab)^\omega, (aaaab)^\omega,\dots$\;.
 \end{beispiel}
 
 \begin{definition}\label{def-pmod}
@@ -496,7 +496,7 @@ Nach der Beobachtung ist dann
 	\end{equation}
 \end{definition}
 
-Diese Modifikation entspricht dem Entfernen von allen ausgehenden Kanten von Zuständen $a\in A$.
+Diese Modifikation entspricht dem Entfernen von allen ausgehenden Kanten von Zielzuständen $a\in A$.
 
 \begin{satz}\label{th-unique}
 	Sei \mcex{} eine endliche \mc, $A\subseteq Q$ eine Zielmenge, die von jedem Knoten aus erreichbar ist ($\forall s\in Q: \exists p \in \mathrm{Paths}_{s\rightarrow A}(M)$). 
@@ -505,9 +505,12 @@ Diese Modifikation entspricht dem Entfernen von allen ausgehenden Kanten von Zus
 \begin{beweis}
 	%Sei $R: Q^2 \to \mathbb{R} : (s,t) \mapsto 0$ die triviale \reward{} auf $M$. 
 	Aus der linearen Algebra ist bekannt, dass $D$ genau dann invertierbar ist, wenn $Dx = 0$ nur die Lösung $x=0$ hat.
-	Nehmen wir also an, $x \in R^Q$ mit $x\neq 0$ erfüllt $Dx = 0$. Dann gilt auch $\forall k \in \mathbb{R}: D (kx) = 0$. Wählen wir ein geeignetes $k$, so erhalten wir eine Lösung $z$ mit einem positiven Eintrag, d.h. $Dz = 0$ und $\exists q \in Q : z_q > 0$. Sei $E \subseteq Q$ die Indexmenge aller maximalen Einträge von $z$, also $e \in E :\Leftrightarrow \forall q \in Q : z_q \leq z_e$. Sei $s\in A$. Dann folgt aus $(Dz)_s = 0$, dass $\sum_{q\in Q}{(P_{\rightarrow A}- \mathbb{1})_{(s,q)} \cdot z_q} = -\sum_{q\in Q}{\mathbb{1}_{(s,q)} \cdot z_q} = 0$  und damit $z_s = 0$.
+	Nehmen wir also an, $x \in R^Q$ mit $x\neq 0$ erfüllt $Dx = 0$. O.B.d.A. habe $x$ einen positiven Eintrag. (Hat $x$ keinen positiven Eintrag, so hat es einen negativen Eintrag. Dann finden wir mit $-x$ eine Lösung mit einem positivem Eintrag, da $D(-x) = - Dx = 0$.)
+	%Dann gilt auch $\forall k \in \mathbb{R}: D (kx) = 0$. Wählen wir ein geeignetes $k$, so erhalten wir eine Lösung $z$ mit einem positiven Eintrag, d.h. $Dz = 0$ und $\exists q \in Q : z_q > 0$.
+	Sei $E \subseteq Q$ die Indexmenge aller maximalen Einträge von $x$, also $e \in E :\Leftrightarrow \forall q \in Q : x_q \leq x_e$.
+	Sei $s\in A$. Dann folgt aus $(Dx)_s = 0$, dass $\sum_{q\in Q}{(P_{\rightarrow A}- \mathbb{1})_{(s,q)} \cdot x_q} = -\sum_{q\in Q}{\mathbb{1}_{(s,q)} \cdot x_q} = 0$  und damit $x_s = 0$.
 	
-	Sei $s \in E$. Dann ist $z_s > 0$ und daher $s\notin A$. Aus $(Dz)_s = 0$ folgt dann $\sum_{q\in Q}{(P_{\rightarrow A}- \mathbb{1})_{(s,q)} \cdot z_q} = 0$. Damit bekommen wir $\sum_{q\in Q}{P_{(s,q)} \cdot z_q} = z_s$. Da nach Definition \ref{def-mc} $q \mapsto P(s,q)$ eine Wahrscheinlichkeitsverteilung auf $Q$ ist, folgt schließlich $\forall q\in Q: P(s,q) > 0 \Rightarrow z_q = z_s$. Schließlich kann die gewichtete Summe nur genau dann den maximalen Wert $z_s$ annehmen, wenn alle zu gewichtenden Summanden bereits maximal sind. D.h. für jeden Nachfolgeknoten $t\in Q$ von $s\in E$ in der \mc{} $M$ liegt selbst wieder in $E$. Da ein Knoten $a\in A$ von $s$ aus erreichbar ist, gilt auch $a\in E$. Aber dann wäre $a\notin A$. Wir erhalten einen Widerspruch.
+	Sei nun $s \in E$ frei gewählt. Dann ist $x_s > 0$ und daher $s\notin A$. Aus $(Dx)_s = 0$ folgt dann $\sum_{q\in Q}{(P_{\rightarrow A}- \mathbb{1})_{(s,q)} \cdot x_q} = 0$. Damit bekommen wir $\sum_{q\in Q}{P_{(s,q)} \cdot x_q} = x_s$. Da nach Definition \ref{def-mc} $q \mapsto P(s,q)$ eine Wahrscheinlichkeitsverteilung auf $Q$ ist, folgt schließlich $\forall q\in Q: P(s,q) > 0 \Rightarrow x_q = x_s$. Schließlich kann die gewichtete Summe nur genau dann den maximalen Wert $x_s$ annehmen, wenn alle zu gewichtenden Summanden bereits maximal sind. D.h. für jeden Nachfolgeknoten $t\in Q$ von $s\in E$ in der \mc{} $M$ liegt $t$ selbst wieder in $E$. Da ein Knoten $a\in A$ von $s$ aus erreichbar ist, gilt auch $a\in E$. Aber dann wäre $a\notin A$. Wir erhalten einen Widerspruch.
 \end{beweis}
 
 
@@ -540,7 +543,7 @@ Falls $s \notin A$, besteht jeder Pfad $p \in \mathrm{Paths}_{s \rightarrow A}(M
 	\mathcal{E}_{s}(R) & = \sum_{p \in \mathrm{Paths}_{s \rightarrow A}(M)}{P(s,p_1) \cdot P(p_{\leftarrow 1}) \cdot (R(s,p_1) + R(p_{\leftarrow 1}))} \\
 	& = \sum_{t \in Q}{ P(s,t) \cdot \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot (R(s,t) + R(p')) } } \\
 	& = \sum_{t \in Q}{ P(s,t) \cdot \left(R(s,t) + \sum_{p' \in \mathrm{Paths}_{t \rightarrow A}(M)}{ P(p') \cdot R(p') } \right) } \\
-	& = \sum_{t \in Q}{ P(s,t) \cdot \left(R(s,t) + \mathcal{E}_{t}(R) \right) } \label{expect_recursive}
+	& = \sum_{t \in Q}{ P(s,t) \cdot \big(R(s,t) + \mathcal{E}_{t}(R) \big) } \label{expect_recursive}
 \end{align}
 Die Gleichungen \ref{expect_trivial} und \ref{expect_recursive} geben uns ein System von $|Q|$ linearen Gleichungen in $|Q|$ Variablen:
 \begin{align}
@@ -559,7 +562,7 @@ was sich in Matrixschreibweise mit $\mu = (\mu_s)_{s \in Q }$ ausdrücken lässt
 \mu = \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q} + P_{\rightarrow A} \cdot \mu 
 \end{equation}
 \begin{satz}[\expect{}e in \mc{}n]\label{th-exp}
-	Seien \mcex{} eine \mc{} und $\emptyset \neq A\subseteq Q$. Dann ist der Vektor $\mu = (\mu_s)_{s \in Q }$ der Erwartungswerte akkumulierter Kantengewichte einer Gewichtsfunktion $R$ auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems	
+	Seien \mcex{} eine \mc{} und $\emptyset \neq A\subseteq Q$ und sei von jedem Zustand $q\in Q$ ein Zustand in $A$ erreichbar. Dann ist der Vektor $\mu = (\mu_s)_{s \in Q }$ der Erwartungswerte akkumulierter Kantengewichte einer Gewichtsfunktion $R$ auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems	
 	 \begin{equation}
 	 (P_{\rightarrow A} - \mathbb{1}) \mu = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q}\text{.}\label{les-exp-mat}
 	 \end{equation}
@@ -645,7 +648,7 @@ Die Gleichungen (\ref{var_trivial}) und (\ref{var_recursive}) geben uns ähnlich
 
 %Sei die \reward{} $S$ auf definiert durch $S: Q^2 \to \mathbb{R}_+ : (s,t) \mapsto \big(\mathcal{E}_{t}(R) + R(s,t) - \mathcal{E}_{s}(R)\big)^2$ und sei $\nu = (\nu_s)_{s\in Q}$. Analog zu Gleichung (\ref{les-exp-mat}) bekommen wir durch Anwendung von Definition \ref{def-pmod} das äquivalente Gleichungssystem
 \begin{satz}[\var{}en in \mc{}n] \label{th-var}
-		Seien \mcex{} eine \mc{} und $\emptyset \neq A\subseteq Q$. Dann ist der Vektor $\nu = (\nu_s)_{s \in Q } = (\mvar_{s}(R))_{s \in Q }$ der Varianzen akkumulierter Kantengewichte einer Gewichtsfunktion $R$ auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems	
+		Sei \mcex{} eine \mc{}. Sei $\emptyset \neq A\subseteq Q$ und sei von jedem Zustand $q\in Q$ ein Zustand in $A$ erreichbar. Dann ist der Vektor $\nu = (\nu_s)_{s \in Q } = (\mvar_{s}(R))_{s \in Q }$ der Varianzen akkumulierter Kantengewichte einer Gewichtsfunktion $R$ auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems	
 	\begin{equation}
 	(P_{\rightarrow A} - \mathbb{1}) \nu = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot S(s,t) }\right)_{s \in Q}\text{,}\label{les-var-mat}
 	\end{equation}
@@ -679,7 +682,7 @@ Berechnen wir zuerst die inverse Matrix $(P_{\rightarrow A} - \mathbb{1})^{-1}$,
 			100 & 4 & 81 & 121 & 49 & 0 \\
 		\end{pmatrix}
 	\end{equation*}
-	Tatsächlich sind für die weitere Berechnung bei Weitem nicht alle Einträge der Matrix relevant, sondern nur die für solche Paare $(s,t)$, die Kante in $P_{\rightarrow \{5,6\}}$ darstellen, d.h. $(s,t) \in \mathrm{supp}(P_{\rightarrow \{5,6\}})$. Es reicht also eine Matrix $\tilde{S}$ mit
+	Tatsächlich sind für die weitere Berechnung bei Weitem nicht alle Einträge der Matrix relevant, sondern nur die für solche Paare $(s,t)$, die Kanten in $P_{\rightarrow \{5,6\}}$ darstellen, d.h. $(s,t) \in \mathrm{supp}(P_{\rightarrow \{5,6\}})$. Es reicht also eine Matrix $\tilde{S}$ mit
 	\begin{equation*}
 		\tilde{S} = \begin{pmatrix}
 			0 & 16 & 16 & 0 & 0 & 0 \\
@@ -746,7 +749,7 @@ Falls $s \notin A$, besteht jeder Pfad $p \in \mathrm{Paths}_{s \rightarrow A}(M
 	\end{pmatrix}\Bigg) \label{cov_recursive}
 \end{align}
 Gleichung (\ref{step1}) erhalten wir durch Partitionierung der Pfade nach der ersten Transition.
-Mittels Anwendung von Definition \ref{def-expect} erhalten wir Gleichung(\ref{step2}).
+Mittels Anwendung von Definition \ref{def-expect} erhalten wir Gleichung (\ref{step2}).
 Gleichung (\ref{step3}) erhalten wir durch teilweises Ausmultiplizieren und anschließendes Anwenden der Linearität von Erwartungswerten (\ref{eq-linearity}). Um Gleichung (\ref{step4}) zu erhalten, addieren wir an geeigneter Stelle $- \mathcal{E}_{t}(X)\mathcal{E}_{t}(Y) + \mathcal{E}_{t}(X)\mathcal{E}_{t}(Y) = 0$. Danach können wir die ersten zwei Summanden der großen Klammer nach Lemma \ref{lemma-cov-exp} als \cov{} auffassen sowie den Rest durch geschicktes Ausklammern kompakt darstellen und erhalten Gleichung (\ref{cov_recursive}).
 
 Sei die \reward{} $S$ auf $M$ definiert als
@@ -761,7 +764,7 @@ c_s & = & \sum_{t \in Q}P(s,t) \cdot \big(c_t + S(s,t)\big) && \text{(falls $s \
 \end{aligned} \label{les-cov}
 \end{align}
 \begin{satz}[\cov{}en in \mc{}n] \label{th-cov}
-	Seien \mcex{} eine \mc{} und $\emptyset \neq A\subseteq Q$. Dann ist der Vektor $c = (c_s)_{s \in Q } = (\mcov_{s}(X,Y))_{s \in Q }$ der \cov{}en akkumulierter Kantengewichte bezüglich Gewichtsfunktionen $X,Y$ auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems
+	\; Seien \mcex{} eine \mc{} und $\emptyset \neq A\subseteq Q$. Sei von jedem Zustand $q\in Q$ ein Zustand in $A$ erreichbar. Dann ist der Vektor $c = (c_s)_{s \in Q } = (\mcov_{s}(X,Y))_{s \in Q }$ der \cov{}en akkumulierter Kantengewichte bezüglich Gewichtsfunktionen $X,Y$ auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems
 	\begin{equation}
 	(P_{\rightarrow A} - \mathbb{1}) c = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot S(s,t) }\right)_{s \in Q} \text{,}\label{les-cov-mat}
 	\end{equation}
@@ -777,7 +780,7 @@ c_s & = & \sum_{t \in Q}P(s,t) \cdot \big(c_t + S(s,t)\big) && \text{(falls $s \
 \end{equation}
 Das entspricht dem Zurückführen der Berechnung von Kovarianzen auf die Berechnung von Erwartungswerten. Um die \cov{}en $(\mcov_q(X,Y))_{q\in Q}$ in einer \mc{} zu berechnen, genügt es die \expect{}e $(\mathcal{E}_q(X))_{q\in Q}$ sowie $(\mathcal{E}_q(Y))_{q\in Q}$ im ersten Schritt und $(\mathcal{E}_q(S))_{q\in Q}$ im zweiten Schritt zu berechnen. Es ist wie bei den Varianzen möglich, zuerst die inverse Matrix $(P_{\rightarrow A} - \mathbb{1})^{-1}$ zu berechnen, um danach nur noch Matrixmultiplikationen ausführen zu müssen.
 
-\subsection{Die initiale Verteilung und die gesamte \mc{}}
+\subsection{Die initiale Verteilung}
 
 Wir haben bisher nur über die Erwartungswerte und (Ko-) Varianzen für den Start in einem speziellen Zustand gesprochen. Wenn es darum geht, diese Kenngrößen einer \mc{} \mcex{} insgesamt zu berechnen, muss aber auch die initiale Zufallsverteilung $I : Q \to [0,1]$ in Betracht gezogen werden. Der Erwartungswert der \mc{} ist als die gewichtete Summe $\mu = \sum_{q\in Q}{I(q) \cdot \mu_q}$ definiert. Um nicht Erwartungswert und (Ko-) Varianz der gesamten \mc{} auf diese Weise gesondert betrachten zu müssen, können wir uns dem Trick bedienen, mit $Q' \coloneqq Q \cup \{q_{start}\}$ einen neuen Zustand $q_{start} \notin Q$ hinzuzufügen. Mit $I'$ und $P'$ definiert als
 \begin{multicols}{2}
@@ -798,11 +801,11 @@ Wir haben bisher nur über die Erwartungswerte und (Ko-) Varianzen für den Star
 \end{multicols}
 erhalten wir eine neue \mc{} $M'=(Q',P',I')$, wobei \expect{} und (Ko-) Varianz von $M$ und $M'$ mit den entsprechenden Werten von $q_{start}$ übereinstimmen.
 
-Wir wollen uns deshalb mit der zustandsweisen Betrachtung der Größen begnügen. Ferner können wir die genannten Größen neben alternativen Mög\-lich\-keit\-en mithilfe genau dieser Betrachtung definieren. Seien dazu $R, S$ Gewichtsfunktionen und A eine Zielzustandsmenge. Wir definieren:
+Wir wollen uns deshalb mit der zustandsweisen Betrachtung der Größen begnügen. Ferner können wir die genannten Größen neben alternativen Mög\-lich\-keit\-en mithilfe genau dieser Betrachtung definieren. Seien dazu $R, S$ Gewichtsfunktionen und A eine Zielzustandsmenge. Wir erweitern $R$ entsprechend so, dass $R(s,t) = 0$, wenn $q_{start} \in \{s,t\}$ und analog für $S$. Wir definieren \expect{}, \var{} und \cov{} für $M$ als:
 \begin{align*}
-\mathcal{E}_{M,A}(R) \coloneqq \;& \mathcal{E}_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R) \\
-\mvar_{M,A}(R) \coloneqq \;& \mvar_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R) \\
-\mcov_{M,A}(R,S) \coloneqq \;& \mcov_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R,S) \\
+\mathcal{E}(R) \coloneqq \;& \mathcal{E}_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R) \\
+\mvar(R) \coloneqq \;& \mvar_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R) \\
+\mcov(R,S) \coloneqq \;& \mcov_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R,S) \\
 \end{align*}
 	
 \subsection{Komplexität}
@@ -810,26 +813,26 @@ Wir wollen uns deshalb mit der zustandsweisen Betrachtung der Größen begnügen
 Zum Berechnen von Erwartungswerten, Varianzen bzw. Kovarianzen unter Zuhilfenahme der gezeigten linearen Gleichungssysteme, sind mehrere Schritte notwendig:
 
 \begin{itemize}
-	\item Zunächst berechnen wir die Matrix $M_{(P,A)} \coloneqq (P_{\rightarrow A} - \mathbb{1})$.
-	\item Danach berechnen wir $b_{(P,A,R)} \coloneqq - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q}$
-	\item Anschließend lösen wir das lineare Gleichungssystem $M_{(P,A)}x_{(P,A,R)} = b_{(P,A,R)}$, wobei gilt $x_{(P,A,R)} = M_{(P,A)}^{-1}b_{(P,A,R)}$.
+	\item Zunächst berechnen wir die Matrix $M \coloneqq (P_{\rightarrow A} - \mathbb{1})$.
+	\item Danach berechnen wir $b \coloneqq - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q}$
+	\item Anschließend lösen wir das lineare Gleichungssystem $Mx = b$, wobei gilt $x = M^{-1}b$.
 \end{itemize}
 
-Für das Berechnen von Erwartungswerten müssen wir nichts weiter tun, denn es gilt $\forall s\in Q : x_{(P,A,R)}(s) = \mathcal{E}_s(R)$.
+Für das Berechnen von Erwartungswerten müssen wir nichts weiter tun, denn es gilt $\forall s\in Q : x(s) = \mathcal{E}_s(R)$.
 Für die Berechnung von Varianzen und Kovarianzen müssen wir die Schritte lediglich mehrfach ausführen, um zunächst die Erwartungswerte zu berechnen und danach aus diesen einen neuen Reward zu definieren.
 
-Das Berechnen des neuen Rewards ist in $\mathcal{O}(\#edges)$ möglich, wobei $\#edges$ die Zahl der Kanten in der Markovkette bezeichnen soll. Die Ermittlung von $M_{(P,A)}$ ist auf jeden Fall in $\mathcal{O}(|Q^2|)$ möglich. Geht man von dünn besetzten Matrizen aus, so ist bei entsprechender Speicherverwaltung die Berechnung sogar in $\mathcal{O}(\#edges)$ möglich, da nur über echte Kanten iteriert werden muss, nicht aber über entartete Kanten $(s,t)$ im Sinne von $P(s,t) = 0$. Den Vektor $b_{(P,A,R)}$ können wir in $\mathcal{O}(|Q^2|)$ Schritten berechnen, bzw. analog in $\mathcal{O}(\#edges)$ bei einer dünn besetzten Matrix und entsprechender Speicherung.
+Das Berechnen des neuen Rewards ist in $\mathcal{O}(\#edges)$ möglich, wobei $\#edges$ die Zahl der Kanten in der \mc{} bezeichnen soll. Die Ermittlung von $M$ ist in $\mathcal{O}(|Q^2|)$ möglich. Geht man von dünn besetzten Matrizen aus, so ist bei entsprechender Speicherverwaltung die Berechnung sogar in $\mathcal{O}(\#edges)$ möglich, da nur über echte Kanten iteriert werden muss, nicht aber über entartete Kanten $(s,t)$ im Sinne von $P(s,t) = 0$. Den Vektor $b$ können wir in $\mathcal{O}(|Q^2|)$ Schritten berechnen, bzw. analog in $\mathcal{O}(\#edges)$ bei einer dünn besetzten Matrix und entsprechender Speicherung.
 
 Das Lösen linearer Gleichungssysteme ist ein Standardproblem und wurde dementsprechend ausführlich untersucht. Ohne ins Detail zu gehen, können wir festhalten, dass sich das lineares Gleichungssystem $Mx = b$ mit $M \in \mathbb{R}^{|Q|\times|Q|}$  in $\mathcal{O}(|Q^3|)$ lösen lässt unter der Annahme, dass jede einzelne Additions- und Multiplikationsoperation in einem Zeitschritt erfolgt. Ein Beispiel für einen Algorithmus ist das Gaußsche Eliminationsverfahren. Will man allerdings ein solches Gleichungssystem unter Verwendung von durch BigInteger dargestellten rationalen Zahlen explizit und ohne Verlust von Genauigkeit lösen, dann benötigen einzelne Additions- bzw. Multiplikationsschritte mit herkömmlicher Rechentechnik im Allgemeinen mehr als nur einen Taktzyklus des Prozessors. Ein Algorithmus \cite{Dixon1982} arbeitet unter einem Zeitaufwand in $\mathcal{O}(n^3(\log n)^2)$ unter Nutzung von p-adischen Körper\-er\-wei\-ter\-ung\-en von $\mathbb{Q}$.
 
-Auch kann das Lösen nicht in weniger als $\mathcal{O}(\#edges)$ Schritten möglich sein, da es mindestens so viele Schritte braucht, die Matrix $M$ überhaupt einzulesen. Dies gibt uns sozusagen eine feste untere Schranke, die kein neuer, in der Zukunft entdeckter Algorithmus brechen kann. 
+Auch kann das Lösen nicht in weniger als $\mathcal{O}(\#edges)$ Schritten möglich sein, da es mindestens so viele Schritte braucht, die Matrix $M$ überhaupt einzulesen. Dies gibt uns eine feste untere Schranke für alle Algorithmen. 
 
-Zusammenfassend können wir festhalten, dass der Zeitaufwand für die Berechnung von \expect{}en bzw. (Ko-) \var{}en im wesentlichen vom Algorithmus zum Lösen des linearen Gleichungssystems abhängt, da der Aufwand zur Berechnung von $M$ und $b$ wesentlich geringer ist. 
+Wir können zusammenfassen, dass der Zeitaufwand für die Berechnung von \expect{}en bzw. (Ko-) \var{}en im wesentlichen vom Algorithmus zum Lösen des linearen Gleichungssystems abhängt, da der asymptotische Aufwand zur Berechnung von $M$ und $b$ höchstens genauso groß oder geringer ist. Ausgehend von bekannten Verfahren zur expliziten Lösung linearer Gleichungssysteme ist er wesentlich geringer.
 
 
 \section{Performancemessung am praktischen Beispiel}
 
-Wir wollen die beschriebene Berechnung von Erwartungswerten, Varianzen und Kovarianzen praktisch an zwei Beispielen demonstrieren. Als Beispiele dienen uns Markovketten, welches unter anderem in den \textit{PRISM Case Studies} \cite{PRISMCS} zu finden ist. Zum einen wollen wir \textit{Herman's self-stabilising algorithm} \cite{Her90}, kurz \textit{herman}, zum anderen das \textit{Synchronous Leader Election Protocol} von Itai und Rodeh \cite{IR90}, kurz \textit{leader\_sync}. Ersteres Beispiel wollen wir zur Veranschaulichung hier einmal ausführlich beschreiben.
+Wir wollen die beschriebene Berechnung von Erwartungswerten, Varianzen und Kovarianzen praktisch an zwei Beispielen demonstrieren. Als Beispiele dienen uns Modelle, welches unter anderem in den \textit{PRISM Case Studies} \cite{PRISMCS} zu finden sind. Zum einen wollen wir \textit{Herman's self-stabilising algorithm} \cite{Her90}, kurz \textit{herman}, zum anderen das \textit{Synchronous Leader Election Protocol} von Itai und Rodeh \cite{IR90}, kurz \textit{leader\_sync}. Ersteres Beispiel wollen wir zur Veranschaulichung hier einmal ausführlich beschreiben, für \textit{leader\_sync} zumindest die Intuition angeben.
 
 \subsection{Herman's selbst-stabilisierender Algorithmus}
 
@@ -851,15 +854,16 @@ Herman hat dazu die folgende Lösung präsentiert:
 	\end{itemize}
 	Sei weiterhin $f$ die Funktion
 	\[
-	f : 2^n \to 2^n : f(y)(i) :=  y(i) \Leftrightarrow y(i-1 \mod n)
+	f : 2^n \to 2^n : f(y)(i) :=  y(i) \Leftrightarrow y(i-1 \mod n)\text{,}
 	\]
+	wobei $2^n$ die Menge aller Funktionen $y : n\to2$ bezeichnet.
 	Mit $z \coloneqq f(y)$ erhalten wir einen prozessbezogenen booleschen Wert, der die gewünschte Bedingung erfüllt, also der bei Grenzwertbetrachtung mit Wahrscheinlichkeit 1 nach endlichen Schritten nur für genau einen Prozess $1$ ergibt. Wohlgemerkt kann jeder Prozess $P_i$ seinen Wert $z(i)$ berechnen, da er dafür nur bereits bekannte Stellen von $y$ kennen muss. Als Intuition kann man formulieren, $f(y)(i)$ ist genau dann 1, wenn Prozess $i$ seinen Nachfolgezustand nicht-deterministisch bzw. probabilistisch aussucht.
 \end{algorithmus}
 
-Dass dieser Algorithmus die geforderte Eigenschaft erfüllt, wollen wir hier nicht zeigen und verweisen auf Hermans Betrachtungen dazu \cite{Her90}. Jedoch sei angemerkt, dass es sich relativ leicht sehen lässt, wie von jedem Zustand aus ein stabiler Zustand erreicht werden kann sowie dass die Menge der stabilen Zustände abgeschossen ist unter der Zustandsübergangsfunktion, welche aus Hermans Algorithmus hervorgeht.
+Dass dieser Algorithmus die geforderte Eigenschaft erfüllt, wollen wir hier nicht zeigen und verweisen auf Hermans Betrachtungen dazu \cite{Her90}. Jedoch sei angemerkt, dass es sich relativ leicht sehen lässt, wie von jedem Zustand aus ein stabiler Zustand erreicht werden kann, sowie dass die Menge der stabilen Zustände unter der Zustandsübergangsfunktion abgeschossen ist, welche aus Hermans Algorithmus hervorgeht.
 
 
-Ein ringförmiges Netzwerk, welches sich nach Hermans Algorithmus verhält, lässt sich als \mc{} \mcex{} auffassen. Die Zustände $Q \coloneqq \{ y \in 2^n\}$ sind die Konfigurationen der Prozesse. Wir sehen leicht, dass für jeden Zustand $y$ alle ausgehenden Kanten mit dergleichen Wahrscheinlichkeit beschriftet sind, nämlich $p_y \coloneqq 2^{-|\mathrm{supp}\>f(y)|}$. Der Support einer Funktion $f : A \to B$, $0\in B$, bezeichnet durch $\mathrm{supp}(f)$, ist dabei die Menge aller Urbilder, welche nicht auf $0$ abgebildet werden, d.h. $\mathrm{supp}(f)\coloneqq\{x \in A \mid f(x) \neq 0\}$. Die Menge der Folgezustände für ein $y \in Q$, bezeichnet durch $\mathrm{Succ}(y)$, können wir schreiben als
+Ein ringförmiges Netzwerk, welches sich nach Hermans Algorithmus verhält, lässt sich als \mc{} \mcex{} auffassen. Die Zustände $Q \coloneqq \{ y \in 2^n\}$ sind die Konfigurationen der Prozesse, also Abbildungen von $\{0, \dots , n-1\}$ in die Menge $\{true, false\}$. Wir sehen leicht, dass für jeden Zustand $y$ alle ausgehenden Kanten mit dergleichen Wahrscheinlichkeit beschriftet sind, nämlich $p_y \coloneqq 2^{-|\mathrm{supp}\>f(y)|}$. Der Support einer Funktion $f : A \to B$, $0\in B$, bezeichnet durch $\mathrm{supp}(f)$, ist dabei die Menge aller Urbilder, welche nicht auf $0$ abgebildet werden, d.h. $\mathrm{supp}(f)\coloneqq\{x \in A \mid f(x) \neq 0\}$. Die Menge der Folgezustände für ein $y \in Q$, bezeichnet durch $\mathrm{Succ}(y)$, können wir schreiben als
 \[
 	\mathrm{Succ}(y) \coloneqq \{ y' \in Q \mid \neg f(y)(i) \Rightarrow y'(i) \neq y(i) \}
 \]
@@ -876,11 +880,14 @@ Für die initiale Verteilung nehmen wir an, dass alle Prozesse mit einem Zufalls
 	\forall y \in Q : I(y) \coloneqq 2^{-n}
 \end{equation*}
 
-Als Menge der Zielzustände  $A = \{ y \in Q \mid 1 = |\mathrm{supp}\>f(y)|\}$ betrachten wir jene Zustände mit genau einem privilegierten Prozess.
+Als Menge der Zielzustände  $A = \{ y \in Q \mid 1 = |\mathrm{supp}\>f(y)|\}$ betrachten wir jene Zustände mit genau einem privilegierten Prozess. Für eine geeignete Gewichtsfunktion weisen wir einfach allen Kanten das Gewicht $1$ zu.
+
+\bigskip
+Unser zweites Beispiel, \textit{leader\_sync}, welches wir für Messungen heranziehen wollen, basiert ebenfalls auf dem Problem, in einem ringförmigen Netzwerk von $n$ unabhängigen Prozessoren einen Prozessor auszuwählen. Für \textit{leader\_sync} ist ein zusätzlicher Parameter $K$ festzulegen ist. Nach dem Protokoll wählt jeder Prozessor zufällig eine Zahl aus $\{1, \dots , K\}$ als ID. Wurde eine ID von nur einem Prozessor gewählt, so gewinnt der Prozessor, welcher die größte nicht mehrfach gewählte ID hat. Andernfalls wird eine neue Runde gestartet.
 
 \subsection{Implementation}
 
-Zu dieser schriftlichen Abhandlung wurde eine Implementation zur Berechnung von \expect{}en, \var{}en und \cov{}en angefertigt und ist öffentlich auf \textit{github.com} einsehbar \cite{MCA}. Wir wollen diese Implementation nutzen, um die Performance der vorgestellten Verfahren an anwendungsorientierten Beispielen zu testen. Zunächst sollen aber hier der wesentliche Aufbau und die wesentlichen Features der Softwarelösung kurz beschrieben werden.
+Zu dieser schriftlichen Abhandlung wurde eine Implementierung zu den vorgestellten Berechnungsmethoden angefertigt und ist öffentlich auf \textit{github.com} einsehbar \cite{MCA}. Wir wollen diese Implementation nutzen, um die Performance der vorgestellten Verfahren an anwendungsorientierten Beispielen zu testen. Zunächst sollen aber hier der wesentliche Aufbau und die wesentlichen Features der Softwarelösung kurz beschrieben werden und auf die verwendeten Bibliotheken eingegangen werden.
 
 
 Das Tool \textit{MC Analyzer} \cite{MCA} liefert Algorithmen zur Berechnung von Erwartungswerten, Varianzen und Kovarianzen von akkumulierten Kantengewichten in \mc n.
@@ -889,7 +896,7 @@ Dazu muss zunächst eine \mc{} geladen werden. Hierfür ist es möglich Dateien,
 
 Zum Lösen linearer Gleichungssysteme wurde die \textit{header-only C++ library AMGCL} von Demidov \cite{Demidov2019} verwendet. Diese verwendet algebraische Mehrgitterverfahren zum näherungsweisen Lösen großer linearer Gleichungsysteme mit dünnbesetzter Koeffizientenmatrix $A_1$. 
 %Im Prinzip löst diese Implementation Gleichungssysteme mit vergleichsweise kleinen Matrizen direkt. Sobald die Koeffizientenmatrix eine gewisse Größe überschreitet, so wird eine Matrix von kleinerer Dimension 
-Ist eine Koeffizientenmatrix $A_i$ zum direkten Lösen in angemessener Zeit zu groß, wird so lange eine gröbere Matrix $A_{i+1}$ geringerer Dimension gebildet zusammen mit einem sogenannten Prolongationsoperator $P_i$ und einem sogenannten Restriktionsoperator $R_i$ mit $A_{i+1} = R_iA_iP_i$, bis wir eine direkt lösbare Matrix $A_n$ erhalten. Nachdem solch eine Hierarchie aufgestellt worden ist, werden zunächst von der feinsten bis zur gröbsten Hierarchieebene jeweils iterativ Näherungslösungen berechnet. Die Fehler werden in die jeweils gröbere Hierarchiestufe propagiert durch Anwenden der Restriktionsoperation. Das lineare Gleichungssystem aus der gröbsten Stufe wird direkt gelöst. Danach werden die Hierarchieebenen in umgekehrter Reihenfolge betrachtet, jeweils die Lösung der gröberen Ebene wird in die feinere propagiert unter Anwendung des Prolongationsoperators. In jeder Ebene werden dabei verbliebene Fehler iterativ minimiert. Nähere Details bietet der Artikel von Demidov \cite{Demidov2019}.
+Ist eine Koeffizientenmatrix $A_i$ zum direkten Lösen in angemessener Zeit zu groß, wird so lange eine gröbere Matrix $A_{i+1}$ geringerer Dimension gebildet zusammen mit einem sogenannten Prolongationsoperator $P_i$ und einem sogenannten Restriktionsoperator $R_i$ mit $A_{i+1} = R_iA_iP_i$, bis wir eine in vernünftiger Zeit direkt lösbare Matrix $A_n$ erhalten. Nachdem solch eine Hierarchie aufgestellt worden ist, werden zunächst von der feinsten bis zur gröbsten Hierarchieebene jeweils iterativ Näherungslösungen berechnet. Die Fehler werden durch Anwenden der Restriktionsoperation in die jeweils gröbere Hierarchiestufe propagiert. Das lineare Gleichungssystem aus der gröbsten Stufe wird direkt gelöst. Danach werden die Hierarchieebenen in umgekehrter Reihenfolge betrachtet, jeweils die Lösung der gröberen Ebene wird in die feinere propagiert unter Anwendung des Prolongationsoperators. In jeder Ebene werden dabei verbliebene Fehler iterativ minimiert. Nähere Details bietet der Artikel von Demidov \cite{Demidov2019}.
 
 Da in diesem Verfahren einzelne Schritte stets Restfehler verkleinern, tritt im Gegensatz zur klassischen Methode von Gauß-Jordan zum direkten Lösen linearer Gleichungssysteme nicht das typische Problem der numerischen Instabilität in Verbindung mit der floating-point Arithmetik auf. Dieses provozieren wir zum Beispiel, wenn wir zwei positive Zahlen mit sehr geringen Beträgen am Rande des Darstellbaren multiplizieren und in der floating-point Arithmetik als Resultat eine $0$ erhalten, da die die Genauigkeit nicht mehr ausreicht.
 
@@ -1012,7 +1019,7 @@ Da in diesem Verfahren einzelne Schritte stets Restfehler verkleinern, tritt im 
 % time_solve_linear_system @ size_edges
 
 \begin{figure}
-	\caption{Zeitaufwand in Abhängigkeit der Kanten in der Markovkette}
+	\caption{Zeitaufwand in Abhängigkeit der Kanten in der \mc{}}
 	\label{fig-in-edges}
 	\centering
 	\begin{tikzpicture}
@@ -1050,7 +1057,7 @@ Da in diesem Verfahren einzelne Schritte stets Restfehler verkleinern, tritt im 
 % time_solve_linear_system @ size_nodes
 
 \begin{figure}
-	\caption{Zeitaufwand in Abhängigkeit der Knoten in der Markovkette}
+	\caption{Zeitaufwand in Abhängigkeit der Knoten in der \mc{}}
 	\label{fig-in-nodes}
 	\centering
 	\begin{tikzpicture}
@@ -1086,23 +1093,23 @@ Da in diesem Verfahren einzelne Schritte stets Restfehler verkleinern, tritt im 
 \end{figure}
 
 Wir sehen im Folgenden Messwerte für die Beispiele \textit{herman} und \textit{leader\_sync}. Gemessen wurde auf einem Windows 10 Pro 1909 mit einem Intel Core i9-9900K mit einer nominalen Taktrate von 3.60GHz.
-Bei \textit{leader\_sync} handelt es sich um ein anderes Verfahren, um in einer Ringstruktur einen privilegierten Prozess ("\textit{leader}") auszuwählen. Abbildung \ref{fig-percentage} zeigt zunächst einmal welchen Anteil das Lösen des linearen Gleichungssystems an der Gesamtzeit hat. Wir sehen, dass sich für beide Beispiel unsere Erkenntnis aus den theoretischen Betrachtungen bestätigt, nämlich dass die Berechnungszeit im wesentlichen vom Aufwand zum Lösen des linearen Gleichungssystems abhängt. Wäre dies nicht der Fall, wäre zu überprüfen, ob die Implementierung hinsichtlich Effizienz im Speicherzugriff gröbere Fehler beinhaltet. Genau diese Fehler können wir mit den Messdaten an dieser Stelle ausschließen.
+Abbildung \ref{fig-percentage} zeigt zunächst einmal welchen Anteil das Lösen des linearen Gleichungssystems an der Gesamtzeit hat. Wir sehen, dass sich für beide Beispiel unsere Erkenntnis aus den theoretischen Betrachtungen bestätigt, nämlich dass die Berechnungszeit im wesentlichen vom Aufwand zum Lösen des linearen Gleichungssystems abhängt. Wäre dies nicht der Fall, wäre zu überprüfen, ob die Implementierung hinsichtlich Effizienz im Speicherzugriff gröbere Fehler beinhaltet. Genau diese Fehler können wir mit den Messdaten an dieser Stelle ausschließen.
 
 % hinzufügen: Speicherbedarf im wesentlichen von Matrix abhängig, A;GCl braucht nichjt nennenswert ,ehr Speicher,.
-Sowohl \textit{herman} als auch \textit{leader\_sync} geben uns für verschieden große Parameter entsprechend Markovketten in abhängiger Größe. Für \textit{leader\_sync} wurden alle Modelle in Betracht gezogen, welche in den \textit{PRISM Case Studies} \cite{PRISMCS} zu finden waren. Bei \textit{herman} lässt sich beobachten, dass mit $N=17$ bereits ein Speicherbedarf in der Größenordnung von 60GB besteht. Deswegen konnte nur bis $N=15$ gemessen werden. Abbildung \ref{fig-leader-sync} zeigt die Anzahl der Kanten in der Markovkette in Abhängigkeit der Zahl der Knoten für das Beispiel \textit{leader\_sync}. Wir erkennen eine lineare Korrelation zwischen Anzahl der Kanten und Anzahl der Knoten: Im Diagramm mit logarithmischer Achsenskalierung sehen wir einen linearen Graphen mit Anstieg eins, bezogen auf jene Exponenten. Aus $\lg (\#edges) \approx a \lg (\#nodes) + b$ mit $a \approx 1$ folgt $\#edges = k \cdot \#nodes$. Abbildung \ref{fig-herman} zeigt uns ähnliche Kenngrößen für \textit{herman}. Wir sehen, dass sich Anzahl der Knoten sowie Anzahl der Kanten exponentiell in der Anzahl der Prozesse $N$ verhalten. Dabei steigt die Anzahl der Kanten schneller als die der Knoten und lässt sich mit dem Quadrat der Anzahl der Knoten nach oben abschätzen.
+Sowohl \textit{herman} als auch \textit{leader\_sync} geben uns für verschieden große Parameter entsprechend \mc{}n in abhängiger Größe. Für \textit{leader\_sync} wurden alle Modelle in Betracht gezogen, welche in den \textit{PRISM Case Studies} \cite{PRISMCS} zu finden waren. Bei \textit{herman} lässt sich beobachten, dass mit $N=17$ bereits ein Speicherbedarf in der Größenordnung von 60GB besteht. Deswegen konnte nur bis $N=15$ gemessen werden. Abbildung \ref{fig-leader-sync} zeigt die Anzahl der Kanten in der \mc{} in Abhängigkeit der Zahl der Knoten für das Beispiel \textit{leader\_sync}. Wir erkennen eine lineare Korrelation zwischen Anzahl der Kanten und Anzahl der Knoten: Im Diagramm mit logarithmischer Achsenskalierung sehen wir einen linearen Graphen mit Anstieg eins, bezogen auf jene Exponenten. Aus $\lg (\#edges) \approx a \lg (\#nodes) + b$ mit $a \approx 1$ folgt $\#edges = k \cdot \#nodes$. Abbildung \ref{fig-herman} zeigt uns ähnliche Kenngrößen für \textit{herman}. Wir sehen, dass sich Anzahl der Knoten sowie Anzahl der Kanten exponentiell in der Anzahl der Prozesse $N$ verhalten. Dabei steigt die Anzahl der Kanten schneller als die der Knoten und lässt sich mit dem Quadrat der Anzahl der Knoten nach oben abschätzen.
 Im selben Diagramm sehen wir noch die Zeit, welche es zum Lösen des linearen Gleichungssystems braucht. Auffällig ist hier der Rückgang der Zeit bei $N=13$ im Vergleich zu $N=11$. Schaut man in die Logs von AMGCL bei der Berechnung, so stellt man fest, dass erst bei $N=13$ das erste Mal im Rahmen des Mehrgitterverfahrens eine zweite, gröbere Matrix aufgestellt wird. Dies erklärt, warum der Zeitaufwand nicht streng monoton in Abhängigkeit von $N$ steigt. Bei allen vorigen Instanzen, d.h. $N\leq 11$ rechnet das Verfahren nur auf der ursprünglichen Matrix. Der Vorteil, welchen die Mehrgittermethode bringen soll, kommt bis dahin gar nicht zum Einsatz. Weiterhin sind die Lücken zwischen den Messpunkten ziemlich groß, sodass man sagen kann, dass die Messwerte aus dem Beispiel \textit{herman} allein recht wenig aussagekräftig sind. Weiterhin fällt auf, dass die Matrizen bei \textit{herman} schon ziemlich viele Einträge verschieden von null aufweisen, bei gleicher Zahl an Knoten deutlich mehr im Vergleich zu \textit{leader\_sync}.
 
 Nach dieser Art Vorbetrachtung wollen wir nun den Zeitaufwand zur Lösung des linearen Gleichungssystems einmal in Abhängigkeit von den Kanten (Abbildung \ref{fig-in-edges}) und einmal in Abhängigkeit von den Knoten (Abbildung \ref{fig-in-nodes}) betrachten. Schauen wir zunächst auf erstere Darstellung, so erkennen wir, dass auch \textit{leader\_sync} keinen monotonen Graphen aufweist, da AMGCL bei Gewissen Größen beginnt, mehr Matrizen in der Hierarchie des Mehrgitterverfahrens aufzustellen. Wir sehen drei maximale Intervalle mit monoton steigenden Messwerten für den Zeitaufwand, entsprechend wurden keine, genau eine, beziehungsweise genau zwei zusätzliche Matrizen aufgestellt. Betrachten wir die Messwerte für größere Kantenanzahlen, so lässt sich Ablesen, dass der Zeitaufwand sich in etwa linear zur Zahl der Kanten verhält. Schlüsse auf den Verlauf des Graphen für noch größere Eingaben scheinen hier sehr gewagt und möchten wir hier nicht vornehmen.
 
 Betrachten wir in Abbildung \ref{fig-in-nodes} die Berechnungszeit abhängig von der Zahl der Knoten, so lässt sich für \textit{leader\_sync} logischerweise qualitativ kein Unterschied zur Abhängigkeit von der Zahl der Kanten feststellen, da Knoten und Kanten bereits linear oder zumindest annähernd linear korreliert sind. Interessant ist es an dieser Stelle, die Werte von \textit{herman} zu betrachten. Hier ist die erforderliche Zeit in etwa quadratisch in der Anzahl der Knoten und die Messwerte von \textit{herman} und \textit{leader\_sync} liegen für größere \mc{}n deutlich auseinander. Dies ist jedoch ebenfalls nur ein logische Konsequenz von der Tatsache, dass bei \textit{herman} sich die Zahl der Kanten in etwa quadratisch zur Zahl der Knoten verhält.
-Zumindest im Rahmen der Aussagekraft unserer Messdaten lässt sich also darauf schließen, dass die Zahl der Kanten kennzeichnend für die benötigte Rechenzeit ist und dass diese Rechenzeit sich linear zur Zahl der Kanten verhält, bis auf Abweichungen im Bereich kleinerer Markovketten, wo sich die Rechenschritte der Mehrgittermethode letztlich auf das Rechnen auf einer einzigen Matrix reduzieren.
+Zumindest im Rahmen der Aussagekraft unserer Messdaten lässt sich also darauf schließen, dass die Zahl der Kanten kennzeichnend für die benötigte Rechenzeit ist und dass diese Rechenzeit sich linear zur Zahl der Kanten verhält, bis auf Abweichungen im Bereich kleinerer \mc{}n, wo sich die Rechenschritte der Mehrgittermethode letztlich auf das Rechnen auf einer einzigen Matrix reduzieren.
 
 \subsection{Grenzen der Aussagekraft}
 
 Wie bereits kurz zur Erläuterung der Abbildungen erwähnt, steigt der Speicherbedarf natürlich recht schnell an, wenn \mc{}n eines bestimmten Modells betrachtet werden und die Zahl der Kanten in Abhängigkeit der Parameter des Modells exponentiell wachsen. Bei Speicherung der Matrizen mittels HashMaps ist davon auszugehen, dass sich der Speicherbedarf linear zur Zahl der Kanten verhält.
 Bei Rechenzeiten unter $100\mathrm{s}$ ist hier nicht die Zeit und damit die Taktfrequenz des Prozessors die limitierende Ressource, sondern vielmehr der zur Verfügung stehende Speicherplatz. Ausgaben des Debuggers und Logs von AMGCL zu Folge ist der für das Lösen des linearen Gleichungssystems benötigte Speicherplatz nach Aufstellen der Eingabematrix im Vergleich zu dieser Matrix bei den gemessenen Beispielen verschwindend gering. Es genügt im Wesentlichen also zu schauen, wie viel Platz zur Darstellung der \mc{} im Speicher benötigt wird.
 
-Wir haben in den besten Fällen gesehen, dass AMGCL drei Matrizen im Mehrgitterverfahren verwendet. Ob sich die lineare Abhängigkeit der Rechenzeit von der Zahl der Kanten auch bei noch größeren Markovketten und den mit diesen verbundenen Matrizen fortsetzt, lässt sich an dieser Stelle schwer einschätzen. Auch wäre es interessant zu analysieren, wie es sich bei derart größeren \mc{} verhält, bei welchen dann entsprechend mehr Matrizen in der Mehrgitterhierarchie berechnet werden.
+Wir haben in den besten Fällen gesehen, dass AMGCL drei Matrizen im Mehrgitterverfahren verwendet. Ob sich die lineare Abhängigkeit der Rechenzeit von der Zahl der Kanten auch bei noch größeren \mc{}n und den mit diesen verbundenen Matrizen fortsetzt, lässt sich an dieser Stelle schwer einschätzen. Auch wäre es interessant zu analysieren, wie es sich bei derart größeren \mc{} verhält, bei welchen dann entsprechend mehr Matrizen in der Mehrgitterhierarchie berechnet werden.
 
 
 
