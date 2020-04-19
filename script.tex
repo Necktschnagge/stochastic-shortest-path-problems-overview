@@ -1313,16 +1313,38 @@ Wir nutzen wieder die übliche Fortsetzung von Kantengewichten auf Pfade. Nach v
 \end{beweis}
 
 \begin{center}
-\begin{tikzpicture}[domain=0:4]
-\draw[very thin,color=gray] (-0.1,-1.1) grid (3.9,3.9);
-\draw[->] (-0.2,0) -- (4.2,0) node[right] {$x$};
-\draw[->] (0,-1.2) -- (0,4.2) node[above] {$f(x)$};
-\draw[color=red] plot[id=x] function{x} 
-node[right] {$f(x) =x$};
-\draw[color=blue] plot[id=sin] function{sin(x)} 
-node[right] {$f(x) = \sin x$};
-\draw[color=orange] plot[id=exp] function{0.05*exp(x)} 
-node[right] {$f(x) = \frac{1}{20} \mathrm e^x$};
+\begin{tikzpicture}[domain=0:10, y=1cm/25, x=1cm]
+\begin{axis}[
+xlabel={Kantenzahl},
+ylabel={Zeit zum Lösen des Gleichungssystems (ms) },
+xmin=0,
+xmax=10,
+%xmode=log,
+%ymode=log,
+ymin= -0.1,
+ymax=299.9,
+legend pos=north west,
+ymajorgrids=true,
+grid style=dashed,
+]
+\end{axis}
+\draw[very thin,color=gray] (-0.1,-0.1) grid (9.9,299.9);
+\draw[->] (-0.2,0) -- (10.2,0) node[right] {$t$};
+\draw[->] (0,-0.2) -- (0,300.2) node[above] {$\mvt(M_\mathcal{S},t)$};
+\draw[] plot[id=x] function{(x-4)*(x-4)+1} 
+node[right] {$\mathcal{S}_0$};
+\draw[] plot[id=x] function{(x-4.8)*(x-4.8)+0.76} 
+node[right] {$\mathcal{S}_1$};
+\draw[] plot[id=x] function{(x-5.52)*(x-5.52)+2.32} 
+node[right] {$\mathcal{S}_2$};
+\draw[] plot[id=x] function{(x-6.17)*(x-6.17)+5.45} 
+node[right] {$\mathcal{S}_3$};
+\draw[] plot[id=x] function{(x-6.75)*(x-6.75)+9.87} 
+node[right] {$\mathcal{S}_4$};
+\draw[] plot[id=x] function{(x-7.28)*(x-7.28)+15.37} 
+node[right] {$\mathcal{S}_5$};
+\draw[] plot[id=x] function{(x-12)*(x-12)+229} 
+node[right] {$\mathcal{S}_\infty$};
 \end{tikzpicture}
 \end{center}
 
