@@ -27,6 +27,7 @@ script:
   - texliveonfly script.tex
   # You can use latexmk to automatically handle bibtex and references (recommended)
   #- latexmk -pdf script.tex
+  - biber script
   - pdflatex -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
   - cat custom_log.log
   - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
