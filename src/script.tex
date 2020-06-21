@@ -4,12 +4,143 @@
 \input{../latex-std/lang-de.tex}
 
 
+\usepackage[affil-it]{authblk}
 
-\begin{document}	
+%%%%%%% bibliography. biber
+\usepackage{microtype} % get rid of bad boxes (overful hbox) in bibliography {https://www.mrunix.de/forums/showthread.php?76019-Biblatex-Overfull-Boxes-im-Literaturverzeichnis-beheben-kein-minimal-bsp}
+
+\usepackage{csquotes} % {"When using babel or polyglossia with biblatex, loading csquotes is recommended to ensure that quoted texts are typeset according to the rules of your main language."} {https://tex.stackexchange.com/questions/229638/package-biblatex-warning-babel-polyglossia-detected-but-csquotes-missing/229653}
+\usepackage[backend=biber]{biblatex}
+\addbibresource{bibliography.bib}
+\usepackage{bbold}
+\usepackage[noend]{algpseudocode}
+\usepackage{multicol}
+\usepackage[official]{eurosym} % € - Symbol
+\newcommand{\mc}{Markow-Kette}
+\title{Effiziente Berechnung von Varianzen in \mc{}n}%und stabile
+\author{Maximilian Starke}
+\affil{Fakultät für Informatik, Technische Universität Dresden}
+\date{\today}
+\usepackage{mathtools}
+\usepackage{ragged2e}
+\usepackage{framed}
+\usepackage{amsmath, amssymb}
+\usepackage{enumerate}
+\usepackage{tabularx}
+\DeclareMathOperator*{\argmin}{\arg\min}
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm,compat=1.10}
+\usepgfplotslibrary{fillbetween}
+\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+\usepackage{listings}
+\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+\newcolumntype{L}[1]{>{\flushleft\arraybackslash}m{#1}}
+\usepackage{tikz}
+\usepackage{verbatim}
+\usetikzlibrary{%
+	arrows,
+	shapes,
+	shapes.misc,% wg. rounded rectangle
+	shapes.arrows,%
+	chains,%
+	matrix,%
+	positioning,% wg. " of "
+	backgrounds,
+	fit,
+	petri,
+	scopes,%
+	decorations.pathmorphing,% /pgf/decoration/random steps | erste Graphik
+	shadows,%
+	calc
+}
+%#1
+\tikzstyle{vertex}=[circle, minimum size=20pt, line width = 1pt, draw = black]
+\tikzstyle{target} = [vertex, double, double distance = 1pt]
+\tikzstyle{edge} = [draw,shorten > = 1pt, shorten < = 1pt, line width=1pt,->]
+\tikzstyle{medge} = [draw, line width = 8pt, yellow!50]
+\tikzstyle{weight} = [font=\small]
+\tikzstyle{selected edge} = [draw,line width=5pt,-,red!50]
+\tikzstyle{ignored edge} = [draw,line width=5pt,-,black!20]
+
+\usepackage{relsize}
+
+\usepackage{xcolor}
+% maybe install minted some day and make syntax highlighting###
+
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{amsmath, amssymb}
+\usepackage{enumerate}
+\usepackage{multicol} % multiple collums in enumerate
+
+\usepackage[thmmarks,amsmath,hyperref,noconfig]{ntheorem} 
+% erlaubt es, Sätze, Definitionen etc. einfach durchzunummerieren.
+\newtheorem{satz}{Satz}[section] % Nummerierung nach Abschnitten
+\newtheorem{proposition}[satz]{Proposition}
+\newtheorem{korollar}[satz]{Korollar}
+\newtheorem{lemma}[satz]{Lemma}
+\newtheorem{vermutung}[satz]{Vermutung}
+
+\theorembodyfont{\upshape}
+\newtheorem{beispiel}[satz]{Beispiel}
+\newtheorem{bemerkung}[satz]{Bemerkung}
+\newtheorem{definition}[satz]{Definition} %[section]
+\newtheorem{algorithmus}[satz]{Algorithmus}
+
+\theoremstyle{nonumberplain}
+\theoremheaderfont{\itshape}
+\theorembodyfont{\normalfont}
+\theoremseparator{.}
+\theoremsymbol{\ensuremath{_\Box}}
+\newtheorem{beweis}{Beweis}
+\newtheorem{beweiss}{Beweisskizze}
+
+\qedsymbol{\ensuremath{_\Box}}
+
+\usepackage{chngcntr}
+\counterwithin{figure}{section}
+
+\tikzstyle{block} = [rectangle, draw, fill=blue!40, 
+text width=7em, text centered, rounded corners, minimum height=5em, node distance= 4.5cm, line width = 2pt]
+
+
+\tikzstyle{cblock} = [rectangle, draw, fill=blue!40, 
+text width=7em, text centered, rounded corners, minimum height=5em, node distance= 3.0cm, line width = 2pt]
+
+
+\tikzstyle{line} = [draw, -latex', line width = 1pt]
+
+
+\tikzstyle{cloud} = [ fill = white, rectangle, draw, rounded corners, node distance=2cm,
+minimum height=2.5em]
+
+\pgfdeclarelayer{bg}
+%\pgfsetlayers{bg,main}	
+
+\pgfdeclarelayer{foreground}
+\pgfdeclarelayer{background}
+% tell TikZ how to stack them (back to front)
+\pgfsetlayers{bg,background,main,foreground}
+
+\newenvironment{meta}
+{\begin{center} \Large \color{red} META: \hspace{2ex} \large \color{blue}}
+	{\end{center}}
+
+\begin{document}
+
 	\section{Einführung}
+	
+	Zur Analyse relevanter Zielgrößen in probabilistischen Systemen sind \mc{}n mit Kantengewichten ein wesentliches, häufig genutztes Modell. Mit dessen Hilfe kann beispielsweise die Dauer eines Verbindungsaufbaus in Netzwerken modelliert werden. Wir wollen in dieser Arbeit Varianzen akkumulierter Kantengewichte auf endlichen Pfaden in \mc{}n bis zum Erreichen einer Menge von Zielzuständen und deren effiziente Berechnung betrachten.
+	Während Erwartungswerte der akkumulierten Kantengewichte in der wissenschaftlichen Literatur bereits ausführlich untersucht worden sind, trifft dies nicht auf die Varianzen zu, obgleich diese besonders in sicherheitskritischen Systemen oder zur Beurteilung von Risiken durch Abweichung von der Erwartung besondere Relevanz erhalten.
+	Verhoeff \cite{Verh04} trug praktische Anwendungen zusammen, von denen wir hier zwei erläutern wollen:
 	
 	Die niederländische Regierung entschied einst in Bezug auf Probleme mit hohem Verkehrsaufkommen, anstatt auf möglichst geringe Erwartungswerte der Fahrtzeit hinzuwirken, eher die Minimierung der Varianz der Fahrtzeit in den Fokus zu nehmen. Auf diese Weise ist man im Durchschnitt zwar länger unterwegs, erreicht aber mehr Planungssicherheit, kann also Ankunftszeiten genauer vorhersagen:
 	Wenn wir mit einer gewissen Wahrscheinlichkeit $\geq p$ rechtzeitig an einem Ort ankommen möchten, dann subtrahieren wir von der gewünschten Ankunftszeit den Erwartungswert der Fahrtdauer und einen Zeitpuffer, welcher wesentlich von der Varianz abhängt.
 	
+	In der Wirtschaft kommt es immer wieder vor, dass Budgets für bestimmte Ausgaben geplant werden. Insofern größere Abweichungen der Kosten nach oben unbedingt zu vermeiden sind, kann es von Vorteil sein, anstatt eine Investition in Höhe von fiktiven 1000\euro{} zu planen, bei der mit 300\euro{} Abweichung der tatsächlichen Kosten gerechnet werden muss, eine alternative Investition zum selben Zweck .in Höhe von erwarteten 1100\euro{} anzustreben, bei welcher eine Abweichung von nur 50\euro{} erwartet wird.
+	
+	
+	Verhoeff präsentierte lineare Gleichungssysteme für die Berechnung von Varianzen und Kovarianzen \cite{Verh04}. Wir werden zunächst die erforderlichen Grundlagen zu Wahrscheinlichkeitstheorie sowie \mc{}n für den Leser darlegen. Anschließend werden wir einen Algorithmus zur Berechnung von Varianzen und Kovarianzen akkumulierter Kantengewichte formal herleiten. Wir werden  die Betrachtungen von Verhoeff insbesondere um eine ausführliche Herleitung für die Berechnung von Kovarianzen erweitern und zeigen, dass alle ermittelten Gleichungssysteme tatsächlich eindeutig lösbar sind. Danach werden wir eine Implementation des hergeleiteten Algorithmus' hinsichtlich ihrer Performance analysieren. Zum Abschluss werden wir noch einmal den Blick auf Markow-Entscheidungsprozesse lenken und uns der Problemstellung widmen, wie Varianzen minimiert werden können.
+
 	
 \end{document}
