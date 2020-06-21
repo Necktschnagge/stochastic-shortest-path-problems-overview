@@ -117,6 +117,8 @@ acs-*.bib
 
 # gnuplottex
 *-gnuplottex-*
+*.gnuplot
+*.table
 
 # gregoriotex
 *.gaux
@@ -274,3 +276,6 @@ TSWLatexianTemp*
 
 # Makeindex log files
 *.lpz
+
+# PDF output files
+*.pdf
