@@ -2,8 +2,9 @@ language: generic
 
 dist: bionic
 
-## Uncomment the following lines if you require extra dependencies
-#before_install:
+##Uncomment the following lines if you require extra dependencies
+before_install:
+  - sudo apt-get install biber
 # - sudo apt-get install ghostscript # If you use latex > dvips > ps2pdf
 # - sudo apt-get install python-pygments # If you use the minted package
   # If you use custom fonts:
@@ -13,7 +14,6 @@ dist: bionic
      
 install:
   - source ./texlive/texlive_install.sh
-  - apt install biber
 
 cache:
   directories:
