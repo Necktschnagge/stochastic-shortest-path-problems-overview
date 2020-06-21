@@ -13,6 +13,7 @@ dist: bionic
      
 install:
   - source ./texlive/texlive_install.sh
+  - apt install biber
 
 cache:
   directories:
