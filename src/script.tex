@@ -768,33 +768,5 @@ minimum height=2.5em]
 	\end{equation}
 	Das entspricht dem Zurückführen der Berechnung von Kovarianzen auf die Berechnung von Erwartungswerten. Um die \cov{}en $(\mcov_q(X,Y))_{q\in Q}$ in einer \mc{} zu berechnen, genügt es die \expect{}e $(\mathcal{E}_q(X))_{q\in Q}$ sowie $(\mathcal{E}_q(Y))_{q\in Q}$ im ersten Schritt und $(\mathcal{E}_q(S))_{q\in Q}$ im zweiten Schritt zu berechnen. Es ist wie bei den Varianzen möglich, zuerst die inverse Matrix $(P_{\rightarrow A} - \mathbb{1})^{-1}$ zu berechnen, um danach nur noch Matrixmultiplikationen ausführen zu müssen.
 	
-	\subsection{Die initiale Verteilung}
-	
-	Wir haben bisher nur über die Erwartungswerte und (Ko-) Varianzen für den Start in einem speziellen Zustand gesprochen. Wenn es darum geht, diese Kenngrößen einer \mc{} \mcex{} insgesamt zu berechnen, muss aber auch die initiale Zufallsverteilung $I : Q \to [0,1]$ in Betracht gezogen werden. Der Erwartungswert der \mc{} ist als die gewichtete Summe $\mu = \sum_{q\in Q}{I(q) \cdot \mu_q}$ definiert. Um nicht Erwartungswert und (Ko-) Varianz der gesamten \mc{} auf diese Weise gesondert betrachten zu müssen, können wir uns dem Trick bedienen, mit $Q' \coloneqq Q \cup \{q_{start}\}$ einen neuen Zustand $q_{start} \notin Q$ hinzuzufügen. Mit $I'$ und $P'$ definiert als
-	\begin{multicols}{2}
-		\noindent
-		\begin{equation*}
-		\hspace{-1ex}I'(q) \coloneqq \begin{cases}
-		1 & q = q_{start}\\
-		0 & q \neq q_{start}
-		
-		\end{cases}
-		\end{equation*}
-		\begin{equation*}
-		\hspace{-1ex}P'(s, t)  \coloneqq \begin{cases}
-		I(t) & s = q_{start} \land t \in Q \\
-		0 & t = q_{start}\\
-		P(s,t) & s,t \in Q
-		\end{cases}
-		\end{equation*}
-	\end{multicols}
-	erhalten wir eine neue \mc{} $M'=(Q',P',I')$, wobei \expect{} und (Ko-) Varianz von $M$ und $M'$ mit den entsprechenden Werten von $q_{start}$ übereinstimmen.
-	
-	Wir wollen uns deshalb mit der zustandsweisen Betrachtung der Größen begnügen. Ferner können wir die genannten Größen neben alternativen Mög\-lich\-keit\-en mithilfe genau dieser Betrachtung definieren. Seien dazu $R, S$ Gewichtsfunktionen und A eine Zielzustandsmenge. Wir erweitern $R$ entsprechend so, dass $R(s,t) = 0$, wenn $q_{start} \in \{s,t\}$ und analog für $S$. Wir definieren \expect{}, \var{} und \cov{} für $M$ als:
-	\begin{align*}
-	\mathcal{E}(R) \coloneqq \;& \mathcal{E}_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R) \\
-	\mvar(R) \coloneqq \;& \mvar_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R) \\
-	\mcov(R,S) \coloneqq \;& \mcov_{(\mathrm{Paths}_{q_{start} \rightarrow A}(M'), P')}(R,S) \\
-	\end{align*}
-	
+
 \end{document}
