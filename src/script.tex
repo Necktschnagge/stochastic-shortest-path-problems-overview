@@ -141,6 +141,366 @@ minimum height=2.5em]
 	
 	
 	Verhoeff präsentierte lineare Gleichungssysteme für die Berechnung von Varianzen und Kovarianzen \cite{Verh04}. Wir werden zunächst die erforderlichen Grundlagen zu Wahrscheinlichkeitstheorie sowie \mc{}n für den Leser darlegen. Anschließend werden wir einen Algorithmus zur Berechnung von Varianzen und Kovarianzen akkumulierter Kantengewichte formal herleiten. Wir werden  die Betrachtungen von Verhoeff insbesondere um eine ausführliche Herleitung für die Berechnung von Kovarianzen erweitern und zeigen, dass alle ermittelten Gleichungssysteme tatsächlich eindeutig lösbar sind. Danach werden wir eine Implementation des hergeleiteten Algorithmus' hinsichtlich ihrer Performance analysieren. Zum Abschluss werden wir noch einmal den Blick auf Markow-Entscheidungsprozesse lenken und uns der Problemstellung widmen, wie Varianzen minimiert werden können.
-
+	
+	\section{Grundlagen}
+	
+	\subsection{Wahrscheinlichkeitstheorie}
+	
+	\newcommand{\probspace}{diskreter Wahr\-schein\-lich\-keits\-raum}
+	\newcommand{\probspacen}{diskreten Wahr\-schein\-lich\-keits\-raum}
+	\newcommand{\probspaceexraw}{(\Omega, P)}
+	\newcommand{\probspaceex}{$(\Omega, P)$}
+	\begin{definition}[\probspace{}] \label{def-probspace}
+		\hspace{-0.5em} Wir nennen ein Paar \probspaceex{} einen \probspacen{}, wenn $\Omega$ eine abzählbare Menge ist und $P : \Omega \to [0,1] $ eine Funktion mit
+		\begin{equation}
+		\sum_{\omega \in \Omega} P(\omega) = 1 \text{.}
+		\end{equation} Wir nennen $\Omega$ in diesem Zusammenhang auch Ergebnismenge und $P$ eine Wahr\-schein\-lich\-keitsverteilung auf $\Omega$.
+	\end{definition}
+	\newcommand{\rvar}{Zufallsvariable}
+	\begin{definition}[\rvar{}] \label{def-rvar}
+		Sei \probspaceex{} ein \probspace{}. Eine Funktion $X : \Omega \to \mathbb{R}$ heißt \rvar{} auf \probspaceex{}. Wir nennen $X$ auch kurz \rvar{}, falls der Kontext \probspaceex{} klar ist.
+	\end{definition}
+	\newcommand{\expect}{Erwartungswert}
+	\newcommand{\mexp}{\mathcal{E}}
+	\begin{definition}[\expect{}] \label{def-expect}
+		\hspace{1ex} Sei \probspaceex{} ein \probspace{} und $X$ eine \rvar{} auf \probspaceex{}. Mit
+		\begin{equation}
+		\mathcal{E}_{\probspaceexraw{}}(X) \coloneqq \sum_{\omega \in \Omega}{P(\omega) \cdot X(\omega)}
+		\end{equation}
+		bezeichnen wir den \expect{} von $X$ auf \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir auch kurz $\mathcal{E}(X)$. Es sei angemerkt, dass es für $|\Omega|=\infty$ Fälle gibt, bei denen die Summe nicht beschränkt ist. Wir schreiben dafür $\mathcal{E}(X) = \infty$ bzw. $\mathcal{E}(X) = -\infty$ und sagen, dass der Erwartungswert nicht existiert.
+	\end{definition}
+	\begin{beispiel}
+		Seien $\Omega = \mathbb{N}_{>0}$, $P : \Omega \to [0,1] : n \mapsto 2^{-n}$ und $R : \Omega \to \mathbb{R} : n \mapsto 2^{n}$. Dann gibt es offensichtlich für jede Zahl $a \in \mathbb{R}$ eine endliche Teilmenge von $T \subseteq \Omega$ mit $\sum_{n \in T}{P(n) \cdot R(n)} \geq a$. Dazu wählen wir einfach $T \coloneqq \{n \in \mathbb{N}_{>0}\mid n \leq \lceil a \rceil \}$ und erhalten $\sum_{n \in T}{P(n) \cdot R(n)} = |T| = \lceil a \rceil \leq \mathcal{E}(R)$. Damit erhalten wir $\mathcal{E}(R) = \infty$.
+	\end{beispiel}
+	Wir werden uns im Folgenden nur auf \rvar n beziehen, für welche ein Erwartungswert existiert.
+	\begin{beispiel}\label{example-expect}
+		Ein manipulierter Spielwürfel habe 6 Seiten $\Omega = \{1,2,3,4,5,6\}$, wobei die $1$ im Vergleich zu einem herkömmlichen Würfel mit einer $2$ überklebt wurde. Dies drücken wir durch die Zufallsvariable $X : \Omega \to \mathbb{R} : s \mapsto \max(2,s)$ aus. Außerdem wurde der Würfel mit ungleichmäßig verteilter Masse so gefertigt, dass nach einem Wurf nicht alle Seiten gleich wahrscheinlich oben liegen. Wir nehmen für dieses Beispiel eine Wahrscheinlichkeitsverteilung mit $P(1)=0,1$, $P(2)=0,15$, $P(3)=0,15$, $P(4)=0,15$, $P(5)=0,15$, $P(6)=0,3$ an.
+		Dann ist eine Augenzahl pro Wurf von
+		\[
+		\mathcal{E}(X) = (0,1 + 0,15) \cdot 2 + 0,15 \cdot (3 + 4 + 5) + 0,3 \cdot 6 = 4,1
+		\]
+		zu erwarten und damit $0,6$ Augen mehr als bei einem ungezinkten Würfel mit \expect{} $3,5$. Würden wir nun alle beschrifteten Zahlen noch zusätzlich quadrieren, erhielten wir einen Würfel mit $Y : \Omega \to \mathbb{R} : s \mapsto \max(4, s^2)$ und würden im Schnitt $19,3$ Augen bei einem Wurf erwarten:
+		\[
+		\mathcal{E}(Y) = (0,25) \cdot 4 + 0,15 \cdot (9 + 16 + 25) + 0,3 \cdot 36 = 19,3
+		\]
+	\end{beispiel}
+	
+	Es lässt sich leicht die folgende Linearität des \expect{}es beobachten:
+	
+	\begin{lemma} \label{lem-explin}
+		Seien $X$, $Y$ Zufallsvariablen auf demselben \probspace{}, $c,d \in \mathbb{R}$. Dann gilt:
+		\begin{equation}
+		\mathcal{E}(X + cY + d) = \mathcal{E}(X) + c \mathcal{E}(Y) + d \label{eq-linearity}
+		\end{equation}
+		Dabei ist  $X + cY + d$ die übliche Notation für die \rvar{} gegeben durch $Z : \Omega \to \mathbb{R} : \omega \mapsto X(\omega) + c \cdot Y(\omega)+ d$.
+	\end{lemma}
+	\begin{beweis}
+		\begin{align}
+		\mathcal{E}(X + cY + d) & = \sum_{\omega \in \Omega}{P(\omega) \cdot (X + cY + d)(\omega) } \nonumber \\
+		& = \sum_{\omega \in \Omega}{P(\omega) \cdot X(\omega) + c \cdot P(\omega) \cdot Y(\omega) + d \cdot P(\omega)} \nonumber \\
+		& = \mathcal{E}(X) + c \mathcal{E}(Y) + d \nonumber
+		\end{align}
+	\end{beweis}
+	\newcommand{\var}{Varianz}
+	\newcommand{\mvar}{\mathcal{V}\!ar}
+	\begin{definition}[\var]\label{def-var}
+		Sei \probspaceex{} ein \probspace{} und $X$ eine \rvar{} auf \probspaceex{}. Mit
+		\begin{equation}
+		\mvar_{\probspaceexraw{}}(X) \coloneqq  \mathcal{E}_{\probspaceexraw{}}\left(\left(X - \mathcal{E}_{\probspaceexraw{}} (X)\right)^{2}\right)
+		\end{equation}
+		bezeichnen wir die \var{} von $X$ auf  \probspaceex{}. Sollte der Kontext \probspaceex{} klar sein, schreiben wir kurz $\mvar(X)$.
+	\end{definition}
+	\newcommand{\cov}{Kovarianz}
+	\newcommand{\mcov}{\mathcal{C}\!ov}
+	\begin{definition}[\cov]\label{def-cov}
+		Seien \probspaceex{} ein \probspace{} und $X, Y$ \rvar n auf \probspaceex{}. Die \cov{} $\mcov{}_{\probspaceexraw}(X,Y)$ ist definiert durch:
+		\begin{equation}
+		\mcov{}_{\probspaceexraw}(X,Y) \coloneqq \mathcal{E} \Big( \big(X - \mathcal{E}(X)\big)\big(Y - \mathcal{E}(Y) \big)\Big)
+		\end{equation}
+	\end{definition}
+	
+	Offensichtlich ist die \var{} ein Spezialfall der \cov{}, denn aus den Definitionen folgt unmittelbar $\mvar_{\probspaceexraw}(X) = \mcov{}_{\probspaceexraw}(X,X)$. Wir betrachten im Folgenden, wie sich Kovarianzen durch Erwartungswerte beschreiben lassen.
+	
+	\begin{lemma}\label{lemma-cov-exp}
+		Seien $X$ und $Y$ \rvar{}n auf demselben \probspace{}. Dann gilt:
+		\begin{equation}
+		\mcov{}(X,Y) = \mathcal{E}(XY) - \mathcal{E}(X)\mathcal{E}(Y)
+		\end{equation}
+	\end{lemma}
+	\begin{beweis}
+		\begin{align*}
+		\mcov{}(X,Y) & = \mathcal{E}\big( \left(X - \mathcal{E}(X)\right)\left(Y - \mathcal{E}(Y)\right)\big) && \text{(Definition \ref{def-cov})} \\
+		& = \mathcal{E}\big(XY - X \mathcal{E}(Y) - Y \mathcal{E}(X) + \mathcal{E}(X)\mathcal{E}(Y)\big) \\
+		& = \mathcal{E}(XY) - 2 \mathcal{E}(X) \mathcal{E}(Y) + \mathcal{E}(X) \mathcal{E}(Y) && \text{(Lemma \ref{lem-explin})}\\
+		& = \mathcal{E}(XY) - \mathcal{E}(X)\mathcal{E}(Y) \\
+		\end{align*}
+	\end{beweis}
+	
+	Betrachten wir den Spezialfall $X = Y$  von Lemma \ref{lemma-cov-exp}, dann erhalten wir folgende Beziehung für \var{}en:
+	
+	\begin{korollar}\label{kor-var-exp}
+		Sei $X$ eine \rvar{} auf einem \probspace{}. Dann gilt:
+		\begin{equation}
+		\mvar(X) = \mathcal{E}(X^{2}) - \mathcal{E}\left(X\right)^{2}
+		\end{equation}
+	\end{korollar}
+	%\begin{beweis}
+	%	\begin{align*}
+	%		\mvar(X) & = \mathcal{E}\left( \left(X - \mathcal{E}(X)\right)^{2}\right) && \text{(Definition \ref{def-var})} \\
+	%		& = \mathcal{E}(X^{2} - 2 X \mathcal{E}(X) + \mathcal{E}(X)^{2}) \\
+	%		& = \mathcal{E}(X^2) - 2 \mathcal{E}(X) \mathcal{E}(X) + \mathcal{E}(X)^{2} && \text{(Linearität (\ref{eq-linearity}))}\\
+	%		& = \mathcal{E}(X^{2}) - \mathcal{E}\left(X\right)^{2} \\
+	% 	\end{align*}
+	%\end{beweis}
+	Ähnlich zur Linearität von \expect{}en (\ref{eq-linearity}) lässt sich für \var{}en folgende Beziehung feststellen:
+	\begin{lemma}\label{lemma-var-qlinear}
+		Sei $X$ eine \rvar{} auf einem \probspace{}, $c,d \in \mathbb{R}$. Dann gilt:
+		\begin{equation}
+		\mvar(cX + d) = c^2\cdot\mvar(X)
+		\end{equation}
+	\end{lemma}
+	\begin{beweis}
+		\begin{align*}
+		\mvar(cX + d) & = \mathcal{E}\Big(\big(cX + d - \mathcal{E}(cX + d)\big)^2\Big) && \text{(Defintion \ref{def-var})} \\
+		& = \mathcal{E}\Big(\big(cX + d - c\mathcal{E}(X) - d\big)^2\Big) && \text{(Lemma \ref{lem-explin}}\\
+		& = \mathcal{E}\Big(c^2 \cdot \big(X - \mathcal{E}(X) \big)^2\Big)\\
+		& = c^2 \cdot \mathcal{E}\Big( \big(X - \mathcal{E}(X) \big)^2\Big) && \text{(Lemma \ref{lem-explin}}\\
+		& = c^2 \cdot \mvar(X) && \text{(Defintion \ref{def-var})}
+		\end{align*}
+	\end{beweis}
+	Entsprechend der Intuition ist die Varianz, das Quadrat der Standardabweichung, invariant unter Addition einer Konstanten zur \rvar{}. Wird jedoch die \rvar{} mit einem Faktor skaliert, so ändert sich die Varianz um das Quadrat des Faktors. Aus gutem Grund wird die Varianz auch mittlere quadratische Abweichung genannt.
+	
+	
+	Durch das Wegfallen von $d$ lässt sich recht trivial auf Gleichungen schließen, welche unter Umständen nicht mehr auf dem ersten Blick als klar und offensichtlich angesehen werden können. Das folgende Korollar soll dies verdeutlichen:
+	\begin{korollar}
+		Sei $X$ eine Zufallsvariable und $c \in \mathbb{R}$. Dann gilt:
+		\begin{equation}
+		\mathcal{E}\left((c+X)^2\right) = (c+ \mathcal{E}(X))^2 + \mvar(X)
+		\end{equation}
+	\end{korollar}
+	\begin{beweis}
+		Aus Korollar \ref{kor-var-exp} folgt unmittelbar \[\mvar(X+c) = \mathcal{E}\left((X+c)^{2}\right) - \left(\mathcal{E}\left(X+c\right)\right)^{2}\text{.}\] Die linke Seite kann nach Lemma \ref{lemma-var-qlinear} vereinfacht werden zu $\mvar(X+c) = \mvar(X)$. Der Subtrahend $\left(\mathcal{E}\left(X+c\right)\right)^{2}$ lässt sich aufgrund der Linearität (Lemma \ref{lem-explin}) auch als $\left( \mathcal{E}(X)+c\right)^{2}$ 
+		schreiben.
+	\end{beweis}
+	
+	\begin{beispiel}
+		Wir wollen nun Beispiel \ref{example-expect} fortsetzen. 
+		Nach Korollar \ref{kor-var-exp} beträgt die \var{} beim ursprünglichen Würfel also $\mvar(X) = \mathcal{E}(X^2) - \mathcal{E}(X)^2 = \mathcal{E}(Y) - \mathcal{E}(X)^2 = 19,3 - 16,81 = 2,49$. Es sei bemerkt, dass wir $Y$ geschickt so gewählt haben, dass $Y = X^2$ gilt. Und tatsächlich ergibt die Berechnung nach Definition \ref{def-var} denselben Wert:
+		\begin{align*}
+		\mvar(X) & = 0,15 \cdot \big((3- 4,1)^2 + (4-4,1)^2 + (5-4,1)^2\big) + && \\
+		& \hspace{1.2em} + 0,25 \cdot (2 - 4,1)^2 + 0,3 \cdot (6-4,1)^2 && \\
+		& = 0,25 \cdot 4,41 + 0,15 \cdot \big(1,21 + 0,01 + 0,81\big) + 0,3 \cdot 3,61 && \\
+		& = 2,49 &&
+		\end{align*}
+		Die \cov{} lässt sich nach Lemma \ref{lemma-cov-exp} berechnen als $\mcov(X,Y) = \mathcal{E}(XY) - \mathcal{E}(X)\mathcal{E}(Y)$.
+		Wir kennen bereits $\mathcal{E}(X)$ sowie $\mathcal{E}(Y)$ und es gilt:
+		\[
+		\mexp(XY) = \mexp(X^3) = 0,25 \cdot 2^3 + 0,15 \cdot (3^3 + 4^3 + 5^3) + 0.3 \cdot 6^3 = 99.2
+		\]
+		Dann ist  $\mcov(X,Y) = 99.2 - 4,1 \cdot 19,3 = 20.07$ und tatsächlich ergibt die explizite Rechnung denselben Wert:
+		\begin{align*}
+		\mcov(X,Y) &= \mathcal{E} \Big( \big(X - \mathcal{E}(X)\big)\big(Y - \mathcal{E}(Y) \big)\Big) \\
+		&= 0,25 \cdot (2-4,1)(4-19,3) \\
+		& \hspace{1.2em} + 0,15 \cdot (3-4,1)(9-19,3) + 0,15 \cdot (4-4.1)(16-19,3) \\
+		& \hspace{1.2em} +  0,15 \cdot (5-4,1)(25-19,3)) + 0.3 \cdot (6-4,1)(36-19,3) \\
+		&= 20.07
+		\end{align*}
+	\end{beispiel}
+	
+	\subsection{\mc{}n}
+	
+	\newcommand{\mcex}{$M = (Q, P, I)$}
+	\begin{definition}[\mc]\label{def-mc}
+		Eine \mc{} ist ein Tupel $(Q, P, I)$ mit den Eigenschaften
+		\begin{enumerate}[(a)]
+			\item $Q$ ist eine abzählbare Menge.
+			\item $P : Q \times Q \to [0,1]$ mit der Eigenschaft $\forall q \in Q : \sum_{q' \in Q}{P(q,q') = 1}$.
+			\item $I : Q \to [0,1]$ ist eine Wahrscheinlichkeitsverteilung auf $Q$.
+		\end{enumerate}	
+		Die Bilder von $P$ nennen wir auch Transitionswahrscheinlichkeiten und definieren mit welcher Wahrscheinlichkeit, nämlich $P(q,q')$ vom aktuellen Zustand $q$ in den Zustand $q'$ übergegangen wird. $I$ ist die initiale Verteilung, welche definiert, mit welcher Wahrscheinlichkeit ein Zustand als Startzustand gewählt wird.
+	\end{definition}
+	
+	Für theoretische Betrachtungen ist es durchaus sinnvoll unendliche \mc{}n zu betrachten. Wir werden uns jedoch auf endliche beschränken, d.h. $|Q| < \infty$, sobald wir zur Berechnung von u.a. Varianzen entsprechende Gleichungssysteme herleiten. Andernfalls bestünde das Gleichungssystem aus unendlich vielen Gleichungen in unendlich vielen Variablen.
+	
+	\newcommand{\gpath}{Pfad}
+	\newcommand{\pfin}{\mathrm{Paths}}%_{fin}
+	\begin{definition}[\gpath]\label{def-path}
+		Sei \mcex{} eine \mc{}. Die Menge aller endlichen \gpath e in $M$ sei definiert durch
+		\begin{equation}
+		\pfin(M) \coloneqq \{p \in Q^{k} \mid k \in \mathbb{N}_{>0} \land \forall 0 \leq i < k : P(p_i,p_{i+1}) > 0\}
+		\end{equation}
+		Wir bezeichnen mit $|p|$ die Größe des Tupels $p$, d.h. $|p| = k$ für $p \in Q^k$. Wir beginnen Indizes bei $0$.
+		Die Wahrscheinlichkeit $\mathrm{\tilde{P}}(p)$ eines Pfades ist gegeben durch
+		\begin{equation}
+		\mathrm{\tilde{P}}(p) \coloneqq \prod_{i = 0}^{|p| - 2}{P(p_i,p_{i+1})}
+		\end{equation}
+		Insbesondere ist $\mathrm{\tilde{P}}(p) = 1$ für alle Pfade $p$ mit $|p| = 1$. Für Tupel $p \in Q^k$, $k \in \mathbb{N}_{>0}$, die keine Pfade sind, gilt entsprechend $\mathrm{\tilde{P}}(p) = 0$.
+		
+		Für $|p| = 2$ entspricht die Wahrscheinlichkeit $\mathrm{\tilde{P}}(p)$ genau der Wahrscheinlichkeit gegeben durch die Funktion $P$, nämlich der Transitionswahrscheinlichkeit aus der \mc{}. $\mathrm{\tilde{P}}$ ergibt sich als eindeutige Fortsetzung von $P$, es gilt $P = \mathrm{\tilde{P}}\vert_{Q\times Q}$, und wir schreiben daher im Folgenden einfach nur $P$.
+	\end{definition}
+	
+	\newcommand{\reward}{Gewichtsfunktion}
+	\begin{definition}[\reward]
+		Sei \mcex{} eine \mc{}. Eine \reward{} auf $M$ ist eine Abbildung
+		\begin{equation}
+		R : Q \times Q \to \mathbb{R}\text{.}
+		\end{equation} 
+	\end{definition}
+	Wir bezeichnen Gewichtsfunktionen typischerweise mit $R$ in Anlehnung an das englische Wort \textit{reward}.
+	Offenbar gibt es analog zur Wahrscheinlichkeit $P$ eine eindeutige Fortsetzung für eine \reward{} $R$ auf Pfade, gegeben durch Aufsummierung aller Kantengewichte entlang eines solchen:
+	\begin{equation}
+	\mathrm{\tilde{R}} : \bigcup_{k \in \mathbb{N}_{>0}}{Q^k} \to \mathbb{R} : p \mapsto \sum_{i = 0}^{|p| - 2}{R(p_i,p_{i+1})}
+	\end{equation}
+	Wir schreiben im Folgenden einfach $R$.
+	\begin{definition}\label{def-path-to}
+		Sei \mcex{} eine \mc{}, $s \in Q$ ein beliebiger Zustand, genannt Startzustand, und $A \subseteq Q$ eine Menge von Zielzuständen. Wir bezeichnen die Menge der Pfade, welche in $s$ starten und in $A$ enden, jedoch $A$ nicht zwischenzeitlich schon erreichen, mit:
+		\begin{equation}
+		\pfin_{s \rightarrow A}(M) \coloneqq \{ p \in \pfin(M) \mid p_0 = s \land p_{|p|-1} \in A \land \forall i < |p| - 1 : p_i \notin A \}
+		\end{equation}
+		
+	\end{definition}
+	
+	Wir ziehen nun Erkenntnisse heran, die Baier und Katoen in Kapitel 10.1 ihres Buches \textit{Principles of Model Checking} \cite{Bai08} beschreiben, speziell im Abschnitt \textit{Reachability Probabilities}.
+	Setzen wir einmal voraus, dass von jedem Zustand $q\in Q$, welcher von $s$ erreichbar ist, ein Pfad in die Zielzustandsmenge $A$ existiert, das heißt
+	\[
+	\pfin_{s \rightarrow \{q\}}(M) \neq \emptyset  \quad \Rightarrow \quad \pfin_{q \rightarrow A}(M) \neq \emptyset \text{.}
+	\]
+	Unter dieser Voraussetzung beobachteten Baier und Katoen, dass es ein fast sicheres Ereignis ist, nach endlich vielen Übergängen an einem Zustand aus $A$ vorbeizukommen.
+	Die endlichen Pfade, welche wir ausschließlich betrachten wollen, lassen sich als Präfixe der unendlichen Pfade $\mathrm{Paths}_{inf}(s) \coloneqq \{p \in Q^\omega \mid p(0) = s \land \forall i \in \mathbb{N}: P(p_i,p_{i+1})>0 \}$ der \mc{} auffassen.
+	Man sieht leicht, dass sich ein endlicher Pfad mit der Menge an jenen unendlichen Pfaden identifizieren lässt, welche diesen als  Präfix haben.
+	Eine Menge endlicher Pfade ist abzählbar, da wir die Pfade als endliche Wörter über dem Alphabet bestehend aus den Zuständen auffassen können.
+	Nach dieser Beobachtung ist dann
+	\[
+	(\mathrm{Paths}_{s \rightarrow A}(M), P)
+	\] ein \probspace{}, da die Menge aller Pfade, welche $A$ nie besuchen, ein fast unmögliches Ereignis darstellt. Die Fortsetzung von $R$ ist eine \rvar{} auf $\mathrm{Paths}_{s \rightarrow A}(M)$. 
+	\begin{beispiel} \label{example-mc}
+		Gegeben sei eine \mc{} \mcex{} mit
+		\begin{align*}
+		Q &=\{1,2,3,4,5,6\} \\
+		P &=\begin{pmatrix}
+		0 & 0,5 & 0,5 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 1 \\
+		0 & 0,25 & 0 & 0,5 & 0,25 & 0 \\
+		0 & 0 & 0 & 0,8 & 0,2 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 1 \\
+		0 & 0 & 0 & 0 & 1 & 0 \\
+		\end{pmatrix} \\
+		I &=\begin{pmatrix} 1 & 0 & 0 & 0 & 0 & 0\end{pmatrix}^\intercal
+		\end{align*}
+		Wir betrachten also eine \mc{} mit dem einzigen initialen Zustand $1$. Weiterhin sei $\{5,6\}$ die betrachtete Menge an Zielzuständen, welche wir auf Pfaden erreichen wollen.	
+		Eine \mc{} lässt sich immer auch als Graph auffassen: Wir beschriften alle Kanten $(i,j)$ mit Übergangswahrscheinlichkeit und Wert der Gewichtsfunktion $R$ in der Schreibweise $P(i,j) : R(i,j)$. Sei die Gewichtsfunktion $R$ implizit definiert durch folgenden Graphen:
+		\begin{center}%#2
+			\begin{tikzpicture}[auto,swap,scale=3]
+			
+			% First we draw the vertices
+			\foreach \pos/\name in {{(0,0)/1}, {(1,0)/3}, {(2,0)/4}, {(0,1)/2}}
+			\node[vertex] (\name) at \pos {$\name$};
+			
+			% First we draw the vertices
+			\foreach \pos/\name in {{(1,1)/6}, {(2,1)/5}}
+			\node[target] (\name) at \pos {$\name$};
+			
+			% Connect vertices with edges and draw weights
+			\foreach \source/ \dest /\weight in {
+				1/2/{\frac{1}{2}:4},
+				2/6/{1:2},
+				5/6/{1:3},
+				6/5/{1:7}
+			}
+			\path[edge] (\source) to[bend left] node[weight]{$\weight$} (\dest);
+			
+			% Connect vertices with edges and draw weights
+			\foreach \source/ \dest /\weight in {
+				1/3/{\frac{1}{2}:5},
+				3/4/{\frac{1}{2}:2},
+				4/5/{\frac{1}{5}:3}
+			}
+			\path[edge] (\source) to[bend right] node{$\weight$} (\dest);
+			
+			% Connect vertices with edges and draw weights
+			\foreach \source/ \dest /\weight in {
+				3/2/{\frac{1}{4}:5},
+				3/5/{\frac{1}{4}:3}
+			}
+			\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+			
+			\foreach \source/ \dest /\weight in {
+				4/4/{\frac{4}{5}:2}
+			}
+			\path[edge] (\source) to[loop right] node[weight]{$\weight$} (\dest);
+			
+			% Draw initial state
+			\path[edge] (-0.5,0) to (1);
+			
+			\end{tikzpicture}
+		\end{center}
+		Wir wollen nun zur Veranschaulichung den Erwartungswert und die Varianz von $R$ im Wahrscheinlichkeitsraum $(\mathrm{Paths}_{1 \rightarrow \{5,6\}}(M), P)$ betrachten. Die von $5$ beziehungsweise $6$ ausgehenden Kanten samt Beschriftung sind für diesen Fall irrelevant. Die Tupel aus $Q^n$ können wir mit Wörtern über dem Alphabet $Q$ identifizieren. Wir erhalten so:
+		\begin{equation*}
+		\Omega \coloneqq \mathrm{Paths}_{1 \rightarrow \{5,6\}}(M) = \big\{126,1326,135\big\} \; \cup \big\{134^n5 \in Q^{n+3} \mid n\geq 1\big\} 
+		\end{equation*}
+		Für den Erwartungswert $\mathcal{E}(R)$ ergibt sich:
+		\newcommand{\exres}{10}
+		\begin{align*}
+		\mathcal{E}(R) & = \sum_{p \in \Omega}{P(p) \cdot R(p)}\\
+		& = \frac{1}{2}\cdot 6_{\scriptscriptstyle [126]} + \frac{1}{8}\cdot 12_{\scriptscriptstyle [1326]} + \frac{1}{8}\cdot 8_{\scriptscriptstyle [135]} + \sum_{n = 0}^{\infty}{\frac{1}{20}\cdot\left(\frac{4}{5}\right)^n \cdot (10 + 2n)}_{\scriptscriptstyle [134^n5]} \\
+		& = \exres{}
+		\end{align*}
+		Für das Berechnen der unendlichen Summe möchten wir an dieser Stelle auf den Appendix verweisen. Mit Korollar \ref{kor-geosum} und \ref{kor-infsum} und der Zerlegung
+		\begin{equation*}
+		\sum_{n = 0}^{\infty}{\frac{1}{20}\cdot\left(\frac{4}{5}\right)^n \cdot (10 + 2n)}
+		= \frac{1}{2}\sum_{n = 0}^{\infty}{\left(\frac{4}{5}\right)^n} + \frac{1}{10} \sum_{n = 0}^{\infty}{\left(\frac{4}{5}\right)^n \cdot n}
+		\end{equation*}
+		lässt sich der Wert dieser Summe, nämlich $4,5$, leicht ausrechnen.
+		Als Varianz $\mvar(R)$ erhalten wir, diesmal unter Verwendung von Korollar \ref{kor-infqsum}:
+		\begin{align*}
+		\mvar(R) & = \mathcal{E}\big((R - \exres{})^2\big) \\
+		& = \frac{1}{2}\cdot (6 - \exres)^2+ \frac{1}{8}\cdot (12-\exres)^2 + \frac{1}{8}\cdot (8-\exres)^2 + \\
+		& \hspace{1.2em} + \sum_{n = 0}^{\infty}{\frac{1}{20}\cdot\left(\frac{4}{5}\right)^n \cdot (10 + 2n - \exres)^2} \\
+		& = 9 + \frac{1}{5}\sum_{n = 0}^{\infty}{\left(\frac{4}{5}\right)^n \cdot n^2} \\
+		& = 9 + 36 \\
+		& = 45
+		\end{align*}
+		Es sei angemerkt, dass die Zufallsvariable $X \coloneqq (R-\exres)^2$, per Definition
+		\[
+		(R-\exres)^2 : \mathrm{Paths}_{1 \rightarrow \{5,6\}}(M) \to  \mathbb{R} : p \mapsto (R(p) - \exres)^2\text{,}
+		\]
+		im Allgemeinen nicht die Eigenschaft der eindeutigen Fortsetzung von Kanten zu Pfaden erfüllt:
+		\[
+		\forall n \in \mathbb{N}, p \in Q^n : n>1 \Rightarrow X(p) = \sum_{i=0}^{n-2}{X(p(i),p(i+1))}
+		\]
+		Beispielsweise verletzt $X(1,3) + X(3,2) = 25 + 25 \neq 0 = X(132)$ diese Eigenschaft. Während im Graphen eingezeichnete Kantengewichte immer zu einer \rvar{} auf der Menge der Pfade fortgesetzt werden können, können wir nicht alle \rvar{}n auf Kantengewichte zurückführen, insbesondere X also nicht durch Kantengewichte im Graphen einzeichnen.
+		
+		
+		An diesem Beispiel sehen wir, dass die explizite Berechnung von Varianzen bereits kompliziert werden kann, wenn nur ein Kreis trivialer Länge im Graphen der \mc{} enthalten ist. Stellen wir uns einen Graphen vor, in dem Knoten $a$ und $b$ existieren sowie Kanten $(a,a), (a,b), (b,a)$. Dann gibt es nicht mehr nur eine Möglichkeit, einen Kreis zu finden, sondern unendlich viele mit beispielsweise $(a)^\omega, (ab)^\omega, (aab)^\omega, (aaab)^\omega, (aaaab)^\omega,\dots$\;.
+	\end{beispiel}
+	
+	\begin{definition}\label{def-pmod}
+		Sei \mcex{} eine endliche \mc, $A\subseteq Q$ eine Zielmenge. Dann bezeichnen wir mit $P_{\rightarrow A}$ die folgende Matrix:
+		\begin{equation}
+		P_{\rightarrow A} : Q^2 \to [0,1] : \begin{cases}
+		P(s,t) & \text{falls } s\notin A\\
+		0 & \text{falls } s\in A
+		\end{cases}
+		\end{equation}
+	\end{definition}
+	
+	Diese Modifikation entspricht dem Entfernen von allen ausgehenden Kanten von Zielzuständen $a\in A$.
+	
+	\begin{satz}\label{th-unique}
+		Sei \mcex{} eine endliche \mc, $A\subseteq Q$ eine Zielmenge, die von jedem Knoten aus erreichbar ist ($\forall s\in Q: \mathrm{Paths}_{s\rightarrow A}(M)\neq\emptyset$). 
+		Dann ist die Matrix $D \coloneqq P_{\rightarrow A} - \mathbb{1}$ invertierbar.
+	\end{satz}
+	\begin{beweis}
+		%Sei $R: Q^2 \to \mathbb{R} : (s,t) \mapsto 0$ die triviale \reward{} auf $M$. 
+		Aus der linearen Algebra ist bekannt, dass $D$ genau dann invertierbar ist, wenn $Dx = 0$ nur die Lösung $x=0$ hat.
+		Nehmen wir also an, $x \in \mathbb{R}^Q$ mit $x\neq 0$ erfüllt $Dx = 0$. O.B.d.A. habe $x$ einen positiven Eintrag. (Hat $x$ keinen positiven Eintrag, so hat es einen negativen Eintrag. Dann finden wir mit $-x$ eine Lösung mit einem positivem Eintrag, da $D(-x) = - Dx = 0$.)
+		%Dann gilt auch $\forall k \in \mathbb{R}: D (kx) = 0$. Wählen wir ein geeignetes $k$, so erhalten wir eine Lösung $z$ mit einem positiven Eintrag, d.h. $Dz = 0$ und $\exists q \in Q : z_q > 0$.
+		Sei $E \subseteq Q$ die Indexmenge aller maximalen Einträge von $x$, also $e \in E :\Leftrightarrow \forall q \in Q : x_q \leq x_e$.
+		Sei $s\in A$. Dann folgt aus $(Dx)_s = 0$, dass $\sum_{q\in Q}{(P_{\rightarrow A}- \mathbb{1})_{(s,q)} \cdot x_q} = -\sum_{q\in Q}{\mathbb{1}_{(s,q)} \cdot x_q} = 0$  und damit $x_s = 0$.
+		
+		Sei nun $s \in E$ frei gewählt. Dann ist $x_s > 0$ und daher $s\notin A$. Aus $(Dx)_s = 0$ folgt dann $\sum_{q\in Q}{(P_{\rightarrow A}- \mathbb{1})_{(s,q)} \cdot x_q} = 0$. Damit bekommen wir $\sum_{q\in Q}{P_{(s,q)} \cdot x_q} = x_s$. Da nach Definition \ref{def-mc} die Abbildung $q \mapsto P(s,q)$ eine Wahrscheinlichkeitsverteilung auf $Q$ ist, folgt schließlich $\forall q\in Q: (P(s,q) > 0 \Rightarrow x_q = x_s)$. Schließlich kann die gewichtete Summe nur genau dann den maximalen Wert $x_s$ annehmen, wenn alle zu gewichtenden Summanden bereits maximal sind. D.h. für jeden Nachfolgeknoten $t\in Q$ von $s\in E$ in der \mc{} $M$ liegt $t$ selbst wieder in $E$. Da ein Knoten $a\in A$ von $s$ aus erreichbar ist, gilt auch $a\in E$. Aber dann wäre $a\notin A$. Wir erhalten einen Widerspruch.
+	\end{beweis}
+	
+	
 	
 \end{document}
