@@ -4,7 +4,6 @@ dist: bionic
 
 ##Uncomment the following lines if you require extra dependencies
 before_install:
-  - biber --version
   - sudo apt-get -y install biber
   - biber --version
 # - sudo apt-get install ghostscript # If you use latex > dvips > ps2pdf
