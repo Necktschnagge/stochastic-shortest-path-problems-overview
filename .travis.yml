@@ -4,7 +4,7 @@ dist: bionic
 
 ##Uncomment the following lines if you require extra dependencies
 before_install:
-  - sudo add-apt-repository ppa:bryant1410/biber
+  - sudo add-apt-repository ppa:bryant1410/biber -y
   - sudo apt-get update
   - sudo apt-get -y install biber
   - biber --version
