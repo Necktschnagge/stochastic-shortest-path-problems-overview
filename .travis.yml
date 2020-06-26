@@ -4,8 +4,8 @@ dist: bionic
 
 ##Uncomment the following lines if you require extra dependencies
 before_install:
-  - sudo add-apt-repository ppa:bryant1410/biber -y
-  - sudo apt-get update
+#  - sudo add-apt-repository ppa:bryant1410/biber -y
+#  - sudo apt-get update
   - sudo apt-get -y install biber
   - biber --version
 # - sudo apt-get install ghostscript # If you use latex > dvips > ps2pdf
