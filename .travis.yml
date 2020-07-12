@@ -8,7 +8,7 @@ before_install:
 #  - sudo apt-get update
 #  - sudo apt-get -y install biber
   - wget -P ./downloads/biber.tar.gz "https://github.com/plk/biber/archive/v2.14.tar.gz"
-  - tar ./downloads/uncompressed ./downloads/biber.tar.gz
+  - tar downloads/uncompressed downloads/biber.tar.gz
   - ls -la ./downloads/
   - biber --version
 # - sudo apt-get install ghostscript # If you use latex > dvips > ps2pdf
