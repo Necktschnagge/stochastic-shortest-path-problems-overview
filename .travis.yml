@@ -6,8 +6,10 @@ dist: bionic
 before_install:
 #  - sudo add-apt-repository ppa:bryant1410/biber -y
   - sudo add-apt-repository universe
+  - wget -P ./downloads/biber.deb "http://archive.ubuntu.com/ubuntu/pool/universe/b/biber/biber_2.14-1_all.deb"
+  - sudo apt install ./downloads/biber.deb
   - sudo apt-get update
-  - sudo apt-get -y install biber
+#  - sudo apt-get -y install biber
   - wget -P ./downloads/biber.tar.gz "https://github.com/plk/biber/archive/v2.14.tar.gz"
   - cd ./downloads/
   - tar xvzf biber.tar.gz
