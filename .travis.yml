@@ -11,7 +11,7 @@ before_install:
   - echo 'Check unpacked content...'
   - ls -la
   - cd $HOME/
-  - echo 'Add biber to environment variable PATH...' && export PATH="$HOME/downloads/biber.tar.gz/biber-2.14:$PATH"
+  - echo 'Add biber to environment variable PATH...' && export PATH="$HOME/downloads/biber.tar.gz/biber-2.14/bin:$PATH"
   - echo 'Check biber version...' && biber --version
      
 install:
