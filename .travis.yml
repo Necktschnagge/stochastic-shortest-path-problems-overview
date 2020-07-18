@@ -5,8 +5,9 @@ dist: bionic
 ##Uncomment the following lines if you require extra dependencies
 before_install:
 #  - sudo add-apt-repository ppa:bryant1410/biber -y
-#  - sudo apt-get update
-#  - sudo apt-get -y install biber
+  - sudo add-apt-repository universe
+  - sudo apt-get update
+  - sudo apt-get -y install biber
   - wget -P ./downloads/biber.tar.gz "https://github.com/plk/biber/archive/v2.14.tar.gz"
   - cd ./downloads/
   - tar xvzf biber.tar.gz
