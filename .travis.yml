@@ -5,15 +5,23 @@ dist: bionic
 ##Uncomment the following lines if you require extra dependencies
 before_install:
 #  - sudo add-apt-repository ppa:bryant1410/biber -y
+  - ls
+  - cd $TRAVIS_BUILD_DIR/
+  - ls
+  - cd $HOME/
+  - ls
   - sudo add-apt-repository universe
   - wget -P ./downloads/biber.deb "http://archive.ubuntu.com/ubuntu/pool/universe/b/biber/biber_2.14-1_all.deb"
   - sudo apt install ./downloads/biber.deb
   - sudo apt-get update
 #  - sudo apt-get -y install biber
   - wget -P ./downloads/biber.tar.gz "https://github.com/plk/biber/archive/v2.14.tar.gz"
-  - cd ./downloads/
-  - tar xvzf biber.tar.gz
-  - cd ..
+  - cd ./downloads/biber.tar.gz
+  - tar xvzf v2.14.tar.gz # unpacked biber
+  - cd ./biber-2.14/
+  - ls -la
+  - export PATH="$HOME/bin:$PATH"
+  - cd ../../..
   - ls -la ./downloads/
   - biber --version
 # - sudo apt-get install ghostscript # If you use latex > dvips > ps2pdf
