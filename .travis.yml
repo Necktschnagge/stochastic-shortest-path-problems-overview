@@ -2,36 +2,20 @@ language: generic
 
 dist: bionic
 
-##Uncomment the following lines if you require extra dependencies
 before_install:
-#  - sudo add-apt-repository ppa:bryant1410/biber -y
-  - ls
-  - cd $TRAVIS_BUILD_DIR/
-  - ls
   - cd $HOME/
-  - ls
-  - sudo add-apt-repository universe
-  - wget -P ./downloads/biber.deb "http://archive.ubuntu.com/ubuntu/pool/universe/b/biber/biber_2.14-1_all.deb"
-  - sudo apt install ./downloads/biber.deb
-  - sudo apt-get update
-#  - sudo apt-get -y install biber
-  - wget -P ./downloads/biber.tar.gz "https://github.com/plk/biber/archive/v2.14.tar.gz"
+  - echo 'Manually download biber from github realease archive...' && wget -P ./downloads/biber.tar.gz "https://github.com/plk/biber/archive/v2.14.tar.gz"
   - cd ./downloads/biber.tar.gz
   - tar xvzf v2.14.tar.gz # unpacked biber
   - cd ./biber-2.14/
+  - echo 'Check unpacked content...'
   - ls -la
-  - export PATH="$HOME/bin:$PATH"
-  - cd ../../..
-  - ls -la ./downloads/
-  - biber --version
-# - sudo apt-get install ghostscript # If you use latex > dvips > ps2pdf
-# - sudo apt-get install python-pygments # If you use the minted package
-  # If you use custom fonts:
-# - mkdir $HOME/.fonts
-# - cp -a $TRAVIS_BUILD_DIR/src/fonts/. $HOME/.fonts/
-# - fc-cache -f -v
+  - cd $HOME/
+  - echo 'Add biber to environment variable PATH...' && export PATH="$HOME/downloads/biber.tar.gz/biber-2.14:$PATH"
+  - echo 'Check biber version...' && biber --version
      
 install:
+  - cd $TRAVIS_BUILD_DIR/
   - source ./texlive/texlive_install.sh
 
 cache:
@@ -39,12 +23,10 @@ cache:
     - /tmp/texlive
     - $HOME/.texlive
 
-# Change working directory so including files will work
 before_script:
   - cd $TRAVIS_BUILD_DIR/src/
 script:
-  # Texliveonfly will download packages automatically
-  - texliveonfly script.tex
+  - texliveonfly script.tex # Texliveonfly will download packages automatically
   # You can use latexmk to automatically handle bibtex and references (recommended)
   #- latexmk -pdf script.tex
   - biber script
