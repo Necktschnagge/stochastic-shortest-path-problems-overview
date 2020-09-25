@@ -1,6 +1,6 @@
 language: generic
 
-dist: bionic
+dist: focal
 
 before_install:
   - sudo apt-get install biber -y
