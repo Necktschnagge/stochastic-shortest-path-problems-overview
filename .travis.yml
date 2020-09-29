@@ -1,17 +1,20 @@
 language: generic
 
-dist: bionic
+dist: focal
 
 ## Uncomment the following lines if you require extra dependencies
-#before_install:
+before_install:
 # - sudo apt-get install ghostscript # If you use latex > dvips > ps2pdf
 # - sudo apt-get install python-pygments # If you use the minted package
   # If you use custom fonts:
 # - mkdir $HOME/.fonts
 # - cp -a $TRAVIS_BUILD_DIR/src/fonts/. $HOME/.fonts/
 # - fc-cache -f -v
+  - sudo apt-get install biber -y
+  - echo 'Check biber version...' && biber --version
      
 install:
+  - cd $TRAVIS_BUILD_DIR/
   - source ./texlive/texlive_install.sh
 
 cache:
@@ -23,10 +26,10 @@ cache:
 before_script:
   - cd $TRAVIS_BUILD_DIR/src/
 script:
-  # Texliveonfly will download packages automatically
-  - texliveonfly script.tex
+  - texliveonfly script.tex # Texliveonfly will download packages automatically
   # You can use latexmk to automatically handle bibtex and references (recommended)
   #- latexmk -pdf script.tex
+  - biber script
   - pdflatex -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
   - cat custom_log.log
   - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
