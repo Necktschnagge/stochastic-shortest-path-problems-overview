@@ -29,6 +29,7 @@ script:
   - texliveonfly script.tex # Texliveonfly will download packages automatically
   # You can use latexmk to automatically handle bibtex and references (recommended)
   #- latexmk -pdf script.tex
+  - pdflatex -synctex=1 -interaction=nonstopmode script.tex # as preparation in order to run biber.
   - biber script
   - pdflatex -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
   - cat custom_log.log
