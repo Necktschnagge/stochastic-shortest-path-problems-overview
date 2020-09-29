@@ -13,8 +13,8 @@ before_install:
   - sudo apt-get install biber -y
   - echo 'Check biber version...' && biber --version
   - sudo apt-get install texlive-base
-  - tlmgr init-usertree
-  - tlmgr install hyphen-german
+  - sudo tlmgr init-usertree
+  - sudo tlmgr install hyphen-german
   
 install:
   - cd $TRAVIS_BUILD_DIR/
