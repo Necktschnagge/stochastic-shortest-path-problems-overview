@@ -12,6 +12,7 @@ before_install:
 # - fc-cache -f -v
   - sudo apt-get install biber -y
   - echo 'Check biber version...' && biber --version
+  - tlmgr install hyphen-german
      
 install:
   - cd $TRAVIS_BUILD_DIR/
@@ -29,9 +30,9 @@ script:
   - texliveonfly script.tex || true # Texliveonfly will download packages automatically #ignore errors here because tex will be recompiled
   # You can use latexmk to automatically handle bibtex and references (recommended)
   #- latexmk -pdf script.tex
-  - pdflatex -synctex=1 -interaction=nonstopmode script.tex # as preparation in order to run biber.
+  - pdflatex -synctex=1 -interaction=nonstopmode script.tex -shell-escape || true # as preparation in order to run biber.
   - biber script
-  - pdflatex -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
+  - pdflatex -synctex=1 -interaction=nonstopmode script.tex -shell-escape > custom_log.log
   - cat custom_log.log
   - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
   - $TRAVIS_BUILD_DIR/script/check_empty.sh
