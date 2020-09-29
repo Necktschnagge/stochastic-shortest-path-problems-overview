@@ -34,9 +34,9 @@ script:
   - texliveonfly script.tex || true # Texliveonfly will download packages automatically #ignore errors here because tex will be recompiled
   # You can use latexmk to automatically handle bibtex and references (recommended)
   #- latexmk -pdf script.tex
-  - pdflatex -synctex=1 -interaction=nonstopmode -shell-escape script.tex || true # as preparation in order to run biber.
+  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex || true # as preparation in order to run biber.
   - biber script
-  - pdflatex -synctex=1 -interaction=nonstopmode -shell-escape script.tex > custom_log.log
+  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
   - cat custom_log.log
   - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
   - $TRAVIS_BUILD_DIR/script/check_empty.sh
