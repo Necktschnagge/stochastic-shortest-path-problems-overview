@@ -22,7 +22,7 @@ install:
   - sudo apt-get install texlive-base
   #- sudo tlmgr init-usertree
   - sudo apt-get install gnuplot
-  #- sudo tlmgr install hyphen-german
+  - sudo tlmgr install hyphen-german
 cache:
   directories:
     - /tmp/texlive
