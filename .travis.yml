@@ -18,7 +18,6 @@ install:
   - sudo apt-get update
   - sudo apt-get install biber -y
   - echo 'Check biber version...' && biber --version
-  - sudo apt-get install texlive-base
   - sudo apt-get install gnuplot
 cache:
   directories:
