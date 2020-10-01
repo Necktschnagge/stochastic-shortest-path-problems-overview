@@ -10,15 +10,14 @@ before_install:
 # - mkdir $HOME/.fonts
 # - cp -a $TRAVIS_BUILD_DIR/src/fonts/. $HOME/.fonts/
 # - fc-cache -f -v
-
   
 install:
   - cd $TRAVIS_BUILD_DIR/
   - source ./texlive/texlive_install.sh
   - sudo apt-get update
-  - sudo apt-get install biber -y
+  - sudo apt-get install biber gnuplot -y
   - echo 'Check biber version...' && biber --version
-  - sudo apt-get install gnuplot
+
 cache:
   directories:
     - /tmp/texlive
@@ -33,15 +32,13 @@ script:
   #- latexmk -pdf script.tex
   - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex || true # as preparation in order to run biber.
   - biber script
-  - ls -la
-  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex || true # rereun for broken references.
+  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex || true # rerun for broken references.
   - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
   - cat custom_log.log
   - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
   - $TRAVIS_BUILD_DIR/script/check_empty.sh
   - cat custom_errors.log
   - mv script.pdf $TRAVIS_BUILD_DIR/build/
-
 
   # But you could use any other compiler as well instead of latexmk. Example:
 #  - pdflatex main.tex
