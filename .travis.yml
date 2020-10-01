@@ -10,6 +10,11 @@ before_install:
 # - mkdir $HOME/.fonts
 # - cp -a $TRAVIS_BUILD_DIR/src/fonts/. $HOME/.fonts/
 # - fc-cache -f -v
+
+  
+install:
+  - cd $TRAVIS_BUILD_DIR/
+  - source ./texlive/texlive_install.sh
   - sudo apt-get update
   - sudo apt-get install texlive-lang-german
   - sudo apt-get install biber -y
@@ -18,11 +23,6 @@ before_install:
   #- sudo tlmgr init-usertree
   - sudo apt-get install gnuplot
   #- sudo tlmgr install hyphen-german
-  
-install:
-  - cd $TRAVIS_BUILD_DIR/
-  - source ./texlive/texlive_install.sh
-
 cache:
   directories:
     - /tmp/texlive
@@ -42,7 +42,7 @@ script:
   - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
   - cat custom_log.log
   - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
-  - $TRAVIS_BUILD_DIR/script/check_empty.sh
+  - $TRAVIS_BUILD_DIR/script/check_empty.sh || true
   - cat custom_errors.log
   - mv script.pdf $TRAVIS_BUILD_DIR/build/
 
