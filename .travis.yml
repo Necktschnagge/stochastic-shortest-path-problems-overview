@@ -30,12 +30,12 @@ script:
   - texliveonfly script.tex || true # Texliveonfly will download packages automatically #ignore errors here because tex will be recompiled
   # You can use latexmk to automatically handle bibtex and references (recommended)
   #- latexmk -pdf script.tex
-  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex || true # as preparation in order to run biber.
+  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex # as preparation in order to run biber.
   - biber script
-  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex || true # rerun for broken references.
+  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex # rerun for broken references.
   - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
   - cat custom_log.log
-  - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
+  - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log
   - $TRAVIS_BUILD_DIR/script/check_empty.sh
   - cat custom_errors.log
   - mv script.pdf $TRAVIS_BUILD_DIR/build/
