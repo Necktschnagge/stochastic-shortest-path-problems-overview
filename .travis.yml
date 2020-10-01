@@ -10,6 +10,11 @@ before_install:
 # - mkdir $HOME/.fonts
 # - cp -a $TRAVIS_BUILD_DIR/src/fonts/. $HOME/.fonts/
 # - fc-cache -f -v
+
+  
+install:
+  - cd $TRAVIS_BUILD_DIR/
+  - source ./texlive/texlive_install.sh
   - sudo apt-get update
   - sudo apt-get install texlive-lang-german
   - sudo apt-get install biber -y
@@ -18,12 +23,6 @@ before_install:
   #- sudo tlmgr init-usertree
   - sudo apt-get install gnuplot
   #- sudo tlmgr install hyphen-german
-  
-  
-install:
-  - cd $TRAVIS_BUILD_DIR/
-  - source ./texlive/texlive_install.sh
-
 cache:
   directories:
     - /tmp/texlive
