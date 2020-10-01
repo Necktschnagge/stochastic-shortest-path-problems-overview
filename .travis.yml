@@ -3,25 +3,21 @@ language: generic
 dist: focal
 
 ## Uncomment the following lines if you require extra dependencies
-before_install:
+#before_install:
 # - sudo apt-get install ghostscript # If you use latex > dvips > ps2pdf
 # - sudo apt-get install python-pygments # If you use the minted package
   # If you use custom fonts:
 # - mkdir $HOME/.fonts
 # - cp -a $TRAVIS_BUILD_DIR/src/fonts/. $HOME/.fonts/
 # - fc-cache -f -v
-
   
 install:
   - cd $TRAVIS_BUILD_DIR/
   - source ./texlive/texlive_install.sh
   - sudo apt-get update
-  - sudo apt-get install texlive-lang-german
-  - sudo apt-get install biber -y
+  - sudo apt-get install biber gnuplot -y
   - echo 'Check biber version...' && biber --version
-  #- sudo tlmgr init-usertree
-  - sudo apt-get install gnuplot
-  #- sudo tlmgr install hyphen-german
+
 cache:
   directories:
     - /tmp/texlive
@@ -34,17 +30,15 @@ script:
   - texliveonfly script.tex || true # Texliveonfly will download packages automatically #ignore errors here because tex will be recompiled
   # You can use latexmk to automatically handle bibtex and references (recommended)
   #- latexmk -pdf script.tex
-  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex || true # as preparation in order to run biber.
+  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex # as preparation in order to run biber.
   - biber script
-  - ls -la
-  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex || true # rereun for broken references.
+  - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex # rerun for broken references.
   - pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
   - cat custom_log.log
   - cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
   - $TRAVIS_BUILD_DIR/script/check_empty.sh
   - cat custom_errors.log
   - mv script.pdf $TRAVIS_BUILD_DIR/build/
-
 
   # But you could use any other compiler as well instead of latexmk. Example:
 #  - pdflatex main.tex
