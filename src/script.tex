@@ -571,7 +571,7 @@ was sich in Matrixschreibweise mit $\mu = (\mu_s)_{s \in Q }$ ausdrücken lässt
 \mu = \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q} + P_{\rightarrow A} \cdot \mu 
 \end{equation}
 \begin{satz}[\expect{}e in \mc{}n]\label{th-exp}
-	Seien \mcex{} ei\-ne \mc{} und $\emptyset \neq A\subseteq Q$ und sei von jedem Zustand $q\in Q$ ein Zustand in $A$ erreichbar. Dann ist der Vektor $\mu = (\mu_s)_{s \in Q }$ der Erwartungswerte akkumulierter Kantengewichte einer Gewichtsfunktion $R$ auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems	
+	Seien \mcex{} eine \mc{} und $\emptyset \neq A\subseteq Q$ und sei von jedem Zustand $q\in Q$ ein Zustand in $A$ erreichbar. Dann ist der Vektor $\mu = (\mu_s)_{s \in Q }$ der Erwartungswerte akkumulierter Kantengewichte einer Gewichtsfunktion $R$ auf Pfaden von $s$ in die Menge $A$ die eindeutige Lösung des Gleichungssystems	
 	 \begin{equation}
 	 (P_{\rightarrow A} - \mathbb{1}) \mu = - \left(\sum_{t \in Q}{ P_{\rightarrow A}(s,t) \cdot R(s,t) }\right)_{s \in Q}\text{.}\label{les-exp-mat}
 	 \end{equation}
@@ -1128,7 +1128,7 @@ Markow-Entscheidungsprozesse (\textit{Markov-Decision-Processes, MDPs}) können 
 		\begin{equation}
 			\forall q\in Q : 0 < | \mathrm{Act}(q) | < \infty
 		\end{equation}
-		Dabei bezeichnen wir für $q \in Q$ mit $\mathrm{Act}(q) \coloneqq \{\alpha \in A \mid \exists q' \in Q : P(q,\alpha,q') > 0\}$ die Menge der Aktionen, für die eine Wahrscheinlichkeits\-verteilung für Folgezustände existiert. \label{item-b-270820}
+		Dabei bezeichnen wir für $q \in Q$ mit $\mathrm{Act}(q) \coloneqq \{\alpha \in A \mid \exists q' \in Q : P(q,\alpha,q') > 0\}$ die Menge der Aktionen, für die eine Wahrscheinlichkeitsverteilung für Folgezustände existiert. \label{item-b-270820}
 	\end{enumerate}
 \end{definition}	
 Die Semantik eines MDP ist so zu verstehen, dass von einem Zustand $q \in Q$ aus zunächst eine Aktion $\alpha \in \mathrm{Act}(q)$ gewählt werden muss. Danach erfolgt ein probabilistischer Zustandsübergang wie in einer \mc{}, definiert durch $q' \mapsto P(q,\alpha,q')$. Die initiale Verteilung $I$ ordnet jedem Zustand wie bei \mc{}n die Wahrscheinlichkeit zu, dass ein Lauf in diesem Zustand startet.
