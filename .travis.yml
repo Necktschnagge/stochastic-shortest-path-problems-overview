@@ -19,7 +19,6 @@ install:
   - sudo apt-get install texlive-lang-german
   - sudo apt-get install biber -y
   - echo 'Check biber version...' && biber --version
-  - sudo apt-get install texlive-base
   #- sudo tlmgr init-usertree
   - sudo apt-get install gnuplot
   #- sudo tlmgr install hyphen-german
