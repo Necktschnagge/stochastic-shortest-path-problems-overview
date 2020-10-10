@@ -1,26 +1,24 @@
 \documentclass[a4paper]{article}
+
+% LANGAGE
 \input{../latex-std/lang-de.tex}
-\usepackage[affil-it]{authblk}
+\input{../latex-std/lang-de-extensions.tex}
 
 
-%quasi-historischer Header:
-\usepackage{verbatim}
-\usepackage{scrextend}
+% DOCUMENT PRE POST META
+\input{../latex-std/doc-pre-post.tex}
 
-\usepackage{microtype} % get rid of bad boxes (overful hbox) in bibliography {https://www.mrunix.de/forums/showthread.php?76019-Biblatex-Overfull-Boxes-im-Literaturverzeichnis-beheben-kein-minimal-bsp}
-
-\usepackage{csquotes} % {"When using babel or polyglossia with biblatex, loading csquotes is recommended to ensure that quoted texts are typeset according to the rules of your main language."} {https://tex.stackexchange.com/questions/229638/package-biblatex-warning-babel-polyglossia-detected-but-csquotes-missing/229653}
-
-\usepackage[backend=biber]{biblatex}
+\input{../latex-std/doc-biber.tex}
 \addbibresource{bibliography.bib}
 
-%\usepackage{algorithm}
-%\usepackage{algorithmicx}[noend]
-\usepackage{bbold}
-\usepackage[noend]{algpseudocode}
-\usepackage{multicol}
 
-\usepackage[official]{eurosym} % € - Symbol
+% TEXT STRUCTURE ENVIRONMENTS
+\input{../latex-std/articul-comments.tex}
+\input{../latex-std/articul-structure.tex}
+
+
+% MATH SYMBOLS
+\input{../latex-std/symb-math.tex}
 
 \newcommand{\mc}{Markow-Kette}
 \title{Effiziente Berechnung von Varianzen in \mc{}n}%und stabile
@@ -33,7 +31,6 @@
 
 \usepackage{framed}
 \usepackage{amsmath, amssymb}
-\usepackage{enumerate}
 \usepackage{tabularx}
 
 \DeclareMathOperator*{\argmin}{\arg\min}
@@ -50,7 +47,6 @@
 
 
 \usepackage{tikz}
-\usepackage{verbatim}
 
 \usetikzlibrary{%
 	arrows,
@@ -83,10 +79,7 @@
 % maybe install minted some day and make syntax highlighting###
 
 \usepackage[utf8]{inputenc}
-\usepackage[ngerman]{babel}
 \usepackage{amsmath, amssymb}
-\usepackage{enumerate}
-\usepackage{multicol} % multiple collums in enumerate
 
 \usepackage[thmmarks,amsmath,hyperref,noconfig]{ntheorem} 
 % erlaubt es, Sätze, Definitionen etc. einfach durchzunummerieren.
