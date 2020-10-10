@@ -1,6 +1,12 @@
 \documentclass[a4paper]{article}
+
+
+
 \input{../latex-std/lang-de.tex}
-\usepackage[affil-it]{authblk}
+\input{../latex-std/lang-de-extensions.tex}
+
+\input{../latex-std/doc-title.tex}
+
 
 
 %quasi-historischer Header:
@@ -14,13 +20,9 @@
 \usepackage[backend=biber]{biblatex}
 \addbibresource{bibliography.bib}
 
-%\usepackage{algorithm}
-%\usepackage{algorithmicx}[noend]
 \usepackage{bbold}
 \usepackage[noend]{algpseudocode}
 \usepackage{multicol}
-
-\usepackage[official]{eurosym} % € - Symbol
 
 \newcommand{\mc}{Markow-Kette}
 \title{Effiziente Berechnung von Varianzen in \mc{}n}%und stabile
@@ -50,7 +52,6 @@
 
 
 \usepackage{tikz}
-\usepackage{verbatim}
 
 \usetikzlibrary{%
 	arrows,
@@ -83,7 +84,6 @@
 % maybe install minted some day and make syntax highlighting###
 
 \usepackage[utf8]{inputenc}
-\usepackage[ngerman]{babel}
 \usepackage{amsmath, amssymb}
 \usepackage{enumerate}
 \usepackage{multicol} % multiple collums in enumerate
