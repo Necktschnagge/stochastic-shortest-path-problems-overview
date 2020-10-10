@@ -1,15 +1,20 @@
 \documentclass[a4paper]{article}
 
-
+% LANGAGE
 \input{../latex-std/lang-de.tex}
 \input{../latex-std/lang-de-extensions.tex}
 
+
+% DOCUMENT PRE POST META
 \input{../latex-std/doc-pre-post.tex}
 
+\input{../latex-std/doc-biber.tex}
+\addbibresource{bibliography.bib}
+
+
+% TEXT STRUCTURE ENVIRONMENTS
 \input{../latex-std/articul-comments.tex}
 	
-\usepackage[backend=biber]{biblatex}
-\addbibresource{bibliography.bib}
 
 \usepackage{bbold}
 \usepackage[noend]{algpseudocode}
