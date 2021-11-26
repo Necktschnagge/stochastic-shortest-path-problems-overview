@@ -1,0 +1,91 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+  branches:
+    include:
+    - '*'
+    exclude:
+    - artifacts
+
+
+stages:
+ - stage: build_latex
+      
+   jobs:
+    - job: build_latex_script
+      strategy:
+        matrix:
+          ubuntu_20_04:
+            image_name: 'ubuntu-20.04'
+            agent_pool_name: 'Azure Pipelines'
+
+#          Ubuntu_20_04:
+#            agent_pool_name: 'Performance'
+            
+      pool:
+        vmImage: $(image_name)
+        name: $(agent_pool_name)
+      #condition: eq(variables['Build.Reason'], 'IndividualCI')
+      timeoutInMinutes: 30
+      steps:
+       #Boost
+#       - script: sudo apt-get install libboost-all-dev libtbb-dev
+#         displayName: "Linux: Install Boost"
+#         condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
+       #real Tasks:
+       - script: git submodule update --init --recursive && echo $PATH
+         displayName: "Init Git Submodules"
+         condition: succeeded()
+       - script: sudo apt-get update #&& sudo apt-get install biber gnuplot -y
+         displayName: "Install biber"
+         condition: succeeded()
+       - script: |
+            source ./texlive/texlive_install.sh && echo $PATH
+            sudo apt-get install biber gnuplot -y
+            cd src
+            texliveonfly script.tex || true
+            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex
+            biber script
+            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex
+            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
+         displayName: "Install texlive and build PDF"
+         condition: succeeded()
+       - script: cat src/custom_log.log
+         displayName: "Show final build log"
+         condition: succeeded()
+       - script: cd src && cat custom_log.log | grep -E 'at\s*line(s|)\s*[0-9]+' > custom_errors.log || true
+         displayName: "Search errors in log only"
+         condition: succeeded()
+       - script: cat src/custom_errors.log
+         displayName: "Show only errors"
+         condition: succeeded()
+       - script: cd src && ../script/check_empty.sh
+         displayName: "Check that error list is empty"
+         condition: succeeded()         
+       - script: echo 'Check biber version...' && biber --version
+         displayName: "Check biber version"
+         condition: succeeded()
+       - script: ./script/conditional_deploy_artifacts.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$(System.PullRequest.PullRequestNumber)"
+         displayName: "Deploy PDF artifact"
+         condition: succeeded()
+# - mv script.pdf $TRAVIS_BUILD_DIR/build/
+  
+  
+  
+#       - script: cmake --build ./build
+#         displayName: "CMake: Compile and Link"
+#         condition: succeeded()
+#       
+#       - script: ./build/src/Syntactic-Reducer ./res/config.json
+#         displayName: "Run Syntactic-Reducer with given config.json"
+#         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#       - script: ls -la ./RESULTS/
+#         displayName: "Check directory content of RESULTS"
+#         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+#       - script: ./script/ci/upload-generated-models.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)"
+#         displayName: "Upload generated models"
+#         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+         
