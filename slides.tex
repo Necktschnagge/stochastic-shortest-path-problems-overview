@@ -94,7 +94,10 @@ Stochastic Shortest Paths
 	scopes,%
 	decorations.pathmorphing,% /pgf/decoration/random steps | erste Graphik
 	shadows,%
-	calc
+	calc,
+	angles,
+	positioning,
+	quotes
 }
 %#1
 \tikzstyle{vertex}=[circle, minimum size=20pt, line width = 1pt, draw = black]
@@ -421,31 +424,6 @@ minimum height=2.5em]
 		}
 		\path[edge] (\source) to node[weight]{$\weight$} (\dest);
 		
-		\only<3>{
-			\foreach \source/ \dest /\weight in {
-				0/1/{1},
-				1/2/{1},
-				2/3/{2},
-				3/6/{4},
-				5/7/{5},
-				6/5/{2}
-			}
-			\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);
-		}
-		
-		
-		\only<3>{
-			\foreach \source/ \dest /\weight in {
-				0/1/{1},
-				1/2/{1},
-				2/3/{2},
-				3/6/{4},
-				4/7/{7},
-				5/7/{5},
-				6/5/{2}
-			}
-			\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);
-		}
 		
 		%			\foreach \source/ \dest /\weight in {
 		%				4/4/{\frac{4}{5}}
@@ -455,13 +433,15 @@ minimum height=2.5em]
 		% Draw initial state
 		\path[edge] (-0.5,0) to (0);
 		
+		%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = 1--0--2};
 		\end{tikzpicture}
 	\end{center}
 	\pause
+	\item Markov Decision Process (MDP)
+	\pause
 	\item Task
 	\begin{itemize}
-		\item Find the path with the minimal weight sum!
-		\onslide<4->{\item Give a strategy to always reach the goal while collecting minimal weight!}
+		\item Give a strategy to reach the goal with minimal \textit{expected} accumulated weights!
 	\end{itemize}
 \end{itemize}
 \end{frame}
