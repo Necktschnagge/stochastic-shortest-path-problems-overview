@@ -33,7 +33,7 @@
 %%\usepackage{algorithmicx}[noend]
 \usepackage{bbold}
 %\usepackage[noend]{algpseudocode}
-%\usepackage{multicol}
+\usepackage{colonequals}
 %
 %\usepackage[official]{eurosym} % € - Symbol
 %
@@ -445,6 +445,95 @@ minimum height=2.5em]
 	\end{itemize}
 \end{itemize}
 \end{frame}
+
+\section{Essential Definitions}
+
+\begin{frame}
+\begin{itemize}
+	\item MDP
+	\item Expectation
+	\item Conditional Expectation
+	\item Variance-penalized Expectation
+	\item schedulers, kind of schedulers...
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{The classic stochastic shortest path problem}
+	\begin{itemize}
+		\item given:
+		\begin{itemize}
+			\item a single goal state
+			\item positive cycle condition: There is no cycle with $\sum{wgt} \geq 0$
+			\item goal is reachable from each state
+		\end{itemize}
+		\item goal: Maximize the expected accumulated weight until reaching goal state.
+		\item Well known for a long time:
+		\begin{itemize}
+			\item There exists an optimal memoryless deterministic scheduler $\mathfrak{S}$.
+			\item $\mathfrak{S}$ is computable by solving a LP
+			\item iterative algorithm:
+			\begin{itemize}
+				\item start at any feasible scheduler
+				\item iterative improvement
+				\item stop at an optimal vertex of the LP (corresponding to some MD scheduler)
+			\end{itemize}
+		\end{itemize}
+	\end{itemize}
+\end{frame}%[3]
+
+\begin{frame}
+\frametitle{The classic stochastic shortest path problem}
+\begin{itemize}
+	\item Can we do it better?
+	\item YES! - using \textbf{spider construction}!
+	\item Assume furthermore:
+	\begin{itemize}
+		\item $\mathcal{M}$ is an MDP with arbitrary integer weights
+	\end{itemize}
+	\item The following can be solved in polynomial time:
+	\begin{itemize}
+		\item Check: $\mathbb{E}_{\mathcal{M},s}^{inf}(\boxplus \mathrm{goal}) > - \infty$?
+		\item Compute $\mathbb{E}_{\mathcal{M},s}^{inf}$ if it is finite
+	\end{itemize}
+
+\end{itemize}
+\end{frame}%[1]
+
+\begin{frame}
+	\frametitle{Spider Construction}
+	\begin{itemize}
+		\item Idea: construct a new MDP $\mathcal{N}$ from the given MDP $\mathcal{M}$
+		\item Pick a 0-BSCC $\mathcal{E}$ of $\mathcal{M}$ and some vertex $s_0$ in $\mathcal{E}$.
+		\item $\mathcal{M} \mapsto \mathcal{N} \coloneqq \mathrm{Spider}_{\mathcal{E}, s_0}(\mathcal{M})$
+		\item The spider construction is done by applying the following steps:
+		\begin{enumerate}
+			\item Remove all actions $(s, s_\alpha) \in \mathcal{E}$
+			\item Add actions $(s, \tau)$ for all $s\in \mathcal{E} \setminus \{s_0\}$ such that
+			\begin{itemize}
+				\item $P_{\mathcal{N}}(s,\tau,s_0) \coloneqq 1$
+				\item $wgt_{\mathcal{N}}(s,\tau) \coloneqq wgt (s, s_0)$
+			\end{itemize}
+			\item For each $s\in \mathcal{E}\setminus\{s_0\}$ and $\beta \in \mathrm{Act}_{\mathcal{M}}(s)\setminus\{\alpha_s\}$ let us replace $(s,\beta)$ by $(s_0,\beta)$ where
+			\begin{itemize}
+				\item $P_{\mathcal{N}}(s_0,\beta,u) \coloneqq P_{\mathcal{M}}(s,\beta,u)$
+				\item $wgt_{\mathcal{N}}(s_0,\beta) + wgt (s, s_0) = wgt_{\mathcal{M}}(s,\beta)$
+			\end{itemize}
+		\end{enumerate}
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Classification of paths}
+	A path $\pi \in \mathrm{InfPaths}(\mathcal{M})$ is called 
+	\begin{itemize}
+		\item pumping $\ratio\Leftrightarrow \liminf_{n \to \infty}(\mathrm{wgt}(\mathrm{pref(\pi, n)})) = \infty$
+	\end{itemize}
+\end{frame}
+
+
+
 
 
 \begin{comment}
