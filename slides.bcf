@@ -2182,15 +2182,6 @@
     <bcf:datasource type="file" datatype="bibtex">bibliography.bib</bcf:datasource>
   </bcf:bibdata>
   <bcf:section number="0">
-    <bcf:citekey order="1">Verh04</bcf:citekey>
-    <bcf:citekey order="2">Verh04</bcf:citekey>
-    <bcf:citekey order="3">Bai08</bcf:citekey>
-    <bcf:citekey order="4">Dixon1982</bcf:citekey>
-    <bcf:citekey order="5">PRISMCS</bcf:citekey>
-    <bcf:citekey order="6">Her90</bcf:citekey>
-    <bcf:citekey order="7">Her90</bcf:citekey>
-    <bcf:citekey order="8">MCA</bcf:citekey>
-    <bcf:citekey order="9">MCA</bcf:citekey>
   </bcf:section>
   <!-- SORTING TEMPLATES -->
   <bcf:sortingtemplate name="nty">
@@ -2222,13 +2213,4 @@
     </bcf:sort>
   </bcf:sortingtemplate>
   <!-- DATALISTS -->
-  <bcf:datalist section="0"
-                name="nty/global//global/global"
-                type="entry"
-                sortingtemplatename="nty"
-                sortingnamekeytemplatename="global"
-                labelprefix=""
-                uniquenametemplatename="global"
-                labelalphanametemplatename="global">
-  </bcf:datalist>
 </bcf:controlfile>
