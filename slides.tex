@@ -482,6 +482,8 @@ minimum height=2.5em]
 	\end{itemize}
 \end{frame}%[3]
 
+\section{The classic stochastic shortest path problem}
+
 \begin{frame}
 \frametitle{The classic stochastic shortest path problem}
 \begin{itemize}
@@ -529,9 +531,83 @@ minimum height=2.5em]
 	A path $\pi \in \mathrm{InfPaths}(\mathcal{M})$ is called 
 	\begin{itemize}
 		\item pumping $\ratio\Leftrightarrow \liminf_{n \to \infty}(\mathrm{wgt}(\mathrm{pref(\pi, n)})) = \infty$
+		\item \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent $\ratio\Leftrightarrow$ \begin{tabular}{c} $\limsup_{n \to \infty}$ \\ $\liminf_{n \to \infty}$ \end{tabular} $=$ \begin{tabular}{c} ${\infty}$ \\ ${-\infty}$ \end{tabular}
+		\item gambling $\ratio\Leftrightarrow$ $\pi$ is positively and negatively weight divergent
+		\item bounded from below $\ratio\Leftrightarrow \liminf_{n \to \infty} \mathrm{wgt}(\mathrm{pref}(\pi,n)) \in \mathbb{Z}$
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
+\frametitle{Classification of end components}
+We distinguish end components by the following types
+\begin{itemize}
+	\item pumping ECs: $\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}(\pi \text{ is pumping}) = 1$
+	\item \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent ECs: $\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}(\pi \text{ is }$ \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent $) = 1$
+	\item gambling ECs: $\mathbb{E}(\mathrm{MP}) = 0$ and it is positively and negatively weight divergent
+	\item bounded EC: There exists an upper bound and a lower bound
+\end{itemize}
+\end{frame}
+
+
+\section{Different variants of the stochastic shortest path problem}
+
+\begin{frame}
+	Imagine to not reach goal with probability 1.
+	\begin{itemize}
+		\item maximal conditional expected auccumulated reward
+		\item partial expected accumulated reward.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\begin{tabular}{|p{5cm}|p{5cm}|}
+		\hline
+		conditional expectation & partial expectation \\ \hline
+		$\mathbb{CE}$ & $\mathbb{PE}$ \\ \hline
+		$\mathbb{CE} = \mathbb{E}(\boxplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$ & $\pi \nvDash \diamondsuit\mathrm{goal} \Rightarrow \mathrm{wgt}(\pi)\coloneqq0$ \\ \hline
+		good approximation for \newline maximizing probability and reward until goal & may lead to quite high $\mathbb{CE}$ paired with \newline low probability of reaching goal \\ \hline
+		
+	\end{tabular}
+\end{frame}
+
+\begin{frame}
+	\frametitle{conditional expected accumulated reward}
+	Given:
+	\begin{itemize}
+		\item MDP $\mathcal{M}$ with non-negative integer weights
+		\item two sets of states $F, G \subseteq \mathrm{States}(\mathcal{M})$
+	\end{itemize}
+	\begin{definition}
+		\[
+		\mathbb{CE}^{max} \coloneqq \sup_{\mathfrak{S} \in S}(\mathcal{E}_{\mathcal{M}, s_init}^{\mathfrak{S}}(\boxplus F \mid \diamondsuit G))
+		\]
+		where $S$ is the set of schedulers: %\in \mathrm{schedulers}(\mathcal{M})
+		\[
+		S \coloneqq \{\mathfrak{S} \mid \mathbb{Pr}_{\mathcal{M},s_init}^{\mathfrak{S}}(\diamondsuit G) > 0 \land \mathbb{Pr}_{\mathcal{M},s_init}^{\mathfrak{S}}(\diamondsuit F \mid \diamondsuit G) = 1\}
+		\]
+		
+	\end{definition}
+	
+\end{frame}
+
+\begin{frame}
+\frametitle{results about conditional expected accumulated rewards}
+\begin{itemize}
+	\item There is a \textbf{PTime algorithm} to decide: \texttt{Is $\mathbb{CE}^{max}$ finite?}
+	\item There is a \textbf{pseudo-PTime algorithm} to \texttt{calculate an upperbound $\mathbb{CE}^{ub} \geq \mathbb{CE}^{max}$}
+	\item \textit{If we have $F=G$ and $\forall s \in \mathrm{States}(\mathcal{M}): s \vDash \exists \diamondsuit G \Rightarrow \mathbb{Pr}_{\mathcal{M},s}^{min}(\diamondsuit G) > 0$ } there is a \textbf{PTime algorithm} to \texttt{calculate an upperbound $\mathbb{CE}^{ub} \geq \mathbb{CE}^{max}$}
+	\item The problem \texttt{Decide if $\mathbb{CE}^{max} \bowtie t$} where we have
+	\begin{itemize}
+		\item $t\in \mathbb{Q}\dots$ some rational threshold
+		\item $\bowtie \in \{<\leq,\geq,>\}$
+	\end{itemize} is \textbf{PSPACE-hard}, solvable in \textbf{ExpTime} and \textit{for acyclic MDPs} \textbf{PSPACE-complete}
+	\item In \textbf{ExpTime} we can \texttt{compute $\mathbb{CE}^{max}$ together with an optimal scheduler}
+\end{itemize}
+
+\end{frame}
+
+
+\section{Keep an eye on the variance}
 
 
 
