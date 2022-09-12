@@ -102,6 +102,7 @@ Stochastic Shortest Paths
 }
 %#1
 \tikzstyle{vertex}=[circle, minimum size=20pt, line width = 1pt, draw = black]
+\tikzstyle{acdot}=[circle, inner sep=0pt, minimum size=5pt, line width = 1pt, fill = black]
 \tikzstyle{target} = [vertex, double, double distance = 1pt]
 \tikzstyle{edge} = [draw,shorten > = 1pt, shorten < = 1pt, line width=1pt,->]
 \tikzstyle{medge} = [draw, line width = 8pt, yellow!50]
@@ -186,6 +187,7 @@ minimum height=2.5em]
 	\frametitle{Inhalt}
 	\tableofcontents
 \end{frame}
+
 
 
 \section{Introduction}
@@ -381,13 +383,18 @@ minimum height=2.5em]
 	\begin{center}%#2
 		\begin{tikzpicture}[auto,swap,scale=3]
 		
+		% First we draw the action dots
+		\foreach \pos/\name in {{(0.3,0)/{a0}}, {(0,0.3)/{b0}}}
+		\node[acdot] (\name) at \pos {};
+
+
 		% First we draw the vertices
 		\foreach \pos/\name in {{(0,0)/{0}}, {(1,0)/1}, {(0.5,0.5)/{2}}, {(0,1)/3}, {(2,0)/4}, {(1.5,0.5)/{5}}, {(1,1)/6}}
-		\node[vertex] (\name) at \pos {$\name$};
+		\node[vertex] (\name) at \pos {$s_{\name}$};
 		
 		% First we draw the vertices
 		\foreach \pos/\name in {{(2,1)/7}}
-		\node[target] (\name) at \pos {$\name$};
+		\node[target] (\name) at \pos {$s_{\name}$};
 		
 		% Connect vertices with edges and draw weights
 		%			\foreach \source/ \dest /\weight in {
@@ -411,9 +418,11 @@ minimum height=2.5em]
 		
 		% Connect vertices with edges and draw weights
 		\foreach \source/ \dest /\weight in {
-			0/1/{1},
-			0/2/{3},
-			0/3/{8},
+			0/a0/{\alpha},
+			0/b0/{\beta},
+			a0/1/{\frac{1}{3} \colon 1},
+			a0/2/{\frac{2}{3} \colon 3},
+			b0/3/{1 \colon 8},
 			1/2/{1},
 			2/3/{2},
 			2/6/{7},	
@@ -447,17 +456,6 @@ minimum height=2.5em]
 		\item Give a strategy to reach the goal with minimal \textit{expected} accumulated weights!
 	\end{itemize}
 \end{itemize}
-\end{frame}
-
-\begin{frame}
-    \begin{tikzpicture}
-	\coordinate (B);
-	\coordinate (A) at (3,3);
-	\coordinate (C) at (3,0);
-	\draw (B) -- (C) (B) -- (A);
-	\path pic[draw, angle radius=6mm,"a",angle eccentricity=1.2] {angle = C--B--A};
-	\end{tikzpicture}
-	
 \end{frame}
 
 
