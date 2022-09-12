@@ -46,11 +46,11 @@ stages:
             source ./texlive/texlive_install.sh && echo $PATH
             sudo apt-get install biber gnuplot -y
             cd src
-            texliveonfly script.tex || true
-            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex
+            texliveonfly slides.tex || true
+            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode slides.tex
             biber script
-            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex
-            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex > custom_log.log
+            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode slides.tex
+            pdflatex -shell-escape -synctex=1 -interaction=nonstopmode slides.tex > custom_log.log
          displayName: "Install texlive and build PDF"
          condition: succeeded()
        - script: cat src/custom_log.log
