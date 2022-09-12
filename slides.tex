@@ -97,7 +97,8 @@ Stochastic Shortest Paths
 	calc,
 	angles,
 	positioning,
-	quotes
+	quotes,
+	patterns
 }
 %#1
 \tikzstyle{vertex}=[circle, minimum size=20pt, line width = 1pt, draw = black]
@@ -247,6 +248,8 @@ minimum height=2.5em]
 			\only<3>{
 				\foreach \source/ \dest /\weight in {
 					0/2/{},
+					0/3/{},
+					3/6/{},
 					2/6/{},	
 					6/7/{}	
 				}
@@ -433,7 +436,7 @@ minimum height=2.5em]
 		% Draw initial state
 		\path[edge] (-0.5,0) to (0);
 		
-		%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = 1--0--2};
+		%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = (1,1)--(0,0)--(2,0)};
 		\end{tikzpicture}
 	\end{center}
 	\pause
@@ -445,6 +448,18 @@ minimum height=2.5em]
 	\end{itemize}
 \end{itemize}
 \end{frame}
+
+\begin{frame}
+    \begin{tikzpicture}
+	\coordinate (B);
+	\coordinate (A) at (3,3);
+	\coordinate (C) at (3,0);
+	\draw (B) -- (C) (B) -- (A);
+	\path pic[draw, angle radius=6mm,"a",angle eccentricity=1.2] {angle = C--B--A};
+	\end{tikzpicture}
+	
+\end{frame}
+
 
 \section{Essential Definitions}
 
