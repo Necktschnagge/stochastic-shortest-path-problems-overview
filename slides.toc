@@ -1,6 +1,0 @@
-\select@language {ngerman}
-\beamer@sectionintoc {1}{Introduction}{3}{0}{1}
-\beamer@sectionintoc {2}{Essential Definitions}{15}{0}{2}
-\beamer@sectionintoc {3}{The classic stochastic shortest path problem}{18}{0}{3}
-\beamer@sectionintoc {4}{Different variants of the stochastic shortest path problem}{23}{0}{4}
-\beamer@sectionintoc {5}{Keep an eye on the variance}{28}{0}{5}
