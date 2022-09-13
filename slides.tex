@@ -545,7 +545,9 @@ minimum height=2.5em]
 			\item positive cycle condition: There is no cycle $\pi$ with ${\mathrm{wgt}(\pi)} \geq 0$
 			\item goal is reachable from each state
 		\end{itemize}
-		\item objective: Maximize the expected accumulated weight until reaching goal state.
+		\item objective: Minimize the expected accumulated weight until reaching goal state.\[
+			\mathbb{E}_{\mathcal{M},s}^{inf}(\rawdiaplus goal) \coloneqq \inf_{\mathfrak{S} \in \mathrm{Schedulers}(M)}\mathbb{E}_{\mathcal{M},s}^{\mathfrak{S}}(\rawdiaplus goal)
+		\]
 		\item Well known for a long time:
 		\begin{itemize}
 			\item There exists an optimal memoryless deterministic scheduler $\mathfrak{S}$.
@@ -563,11 +565,13 @@ minimum height=2.5em]
 \begin{frame}
 \frametitle{The classic stochastic shortest path problem}
 \begin{itemize}
-	\item Can we do it better?
-	\item YES! - using \textbf{spider construction}!
-	\item Assume furthermore:
+	\item Can we do it better? \pause $\longrightarrow$ \textcolor{red}{YES! - using \textbf{spider construction}!} \pause
+	\item given:
 	\begin{itemize}
+		\item a single goal state
+		\onslide<3>{\item positive cycle condition: There is no cycle $\pi$ with ${\mathrm{wgt}(\pi)} \geq 0$} \pause
 		\item $\mathcal{M}$ is an MDP with arbitrary integer weights
+		\item goal is reachable from each state
 	\end{itemize}
 	\item The following can be solved in polynomial time:
 	\begin{itemize}
@@ -618,19 +622,38 @@ minimum height=2.5em]
 We distinguish end components by the following types
 \begin{itemize}
 	\item pumping ECs: $\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}(\pi \text{ is pumping}) = 1$
-	\item \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent ECs: $\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}(\pi \text{ is }$ \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent $) = 1$
+	\item \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent ECs:\\ \hspace{-2ex}$\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}\Big(\pi \text{ is }$ \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent $\Big) = 1$
 	\item gambling ECs: $\mathbb{E}(\mathrm{MP}) = 0$ and it is positively and negatively weight divergent
 	\item bounded EC: There exists an upper bound and a lower bound
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{block}{Check Weight-Divergence of a SCC}
+	\begin{itemize}
+		\item can be done in \textbf{PTime}
+		\item two cases:
+		\begin{itemize}
+			\item "yes, weight-divergent" : finds a gambling or a pumping scheduler
+			\item "no" : returns an \textit{equivalent} MDP $\mathcal{N}$ without 0-ECs
+		\end{itemize}
+	\end{itemize}
+\end{block}
 \end{frame}
 
 
 \section{Different variants of the stochastic shortest path problem}
 
 \begin{frame}
-	Imagine to not reach goal with probability 1.
+	\frametitle{conditional expected accumulated weights}
 	\begin{itemize}
-		\item maximal conditional expected auccumulated reward
+		\item Imagine to not reach goal with probability 1...
+	\end{itemize}
+	\begin{block}{Maximizing the conditional expected accumulated weight}
+		$\mathbb{CE} = \mathbb{E}(\rawdiaplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$
+	\end{block}
+	\begin{itemize}
+		\item maximal conditional expected auccumulated weight
 		\item partial expected accumulated reward.
 	\end{itemize}
 \end{frame}
