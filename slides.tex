@@ -646,29 +646,31 @@ We distinguish end components by the following types
 
 \begin{frame}
 	\frametitle{conditional expected accumulated weights}
+	Assume:
 	\begin{itemize}
-		\item Imagine to not reach goal with probability 1...
+		\item ...to not reach goal with probability $1$
+		\item ...having non-negative integer weights
+		\item ...having two sets of states $F,G \subseteq S$
 	\end{itemize}
 	\begin{block}{Maximizing the conditional expected accumulated weight}
-		$\mathbb{CE} = \mathbb{E}(\rawdiaplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$
+		\[
+			\mathbb{CE} \coloneqq \mathbb{E}(\rawdiaplus \mathrm{goal} \mid \diamondsuit \mathrm{goal})
+		\]
+		\[
+			\mathbb{CE} \coloneqq \mathbb{E}(\rawdiaplus F \mid \diamondsuit G)
+		\]
+		\[
+			\mathbb{CE}^{max} \coloneqq \sup_{\mathfrak{S} \in \mathfrak{V}}\mathbb{E}_{\mathcal{M},s_init}^{\mathfrak{S}}(\rawdiaplus F \mid \diamondsuit G)
+		\]
+		\[
+			\mathfrak{V} \coloneqq \{\mathfrak{S} \in \mathrm{Schedulers}(\mathcal{M}) \mid \mathbb{Pr}_{\mathcal{M},s_{init}}^{\mathfrak{S}}(\diamondsuit G) > 0 \text{ and } \]\[ \hspace{20ex} \mathbb{Pr}_{\mathcal{M},s_{init}}^{\mathfrak{S}}(\diamondsuit F \mid \diamondsuit G) = 1 \}
+		\]		
 	\end{block}
-	\begin{itemize}
-		\item maximal conditional expected auccumulated weight
-		\item partial expected accumulated reward.
-	\end{itemize}
 \end{frame}
 
-\begin{frame}
-	\begin{tabular}{|p{5cm}|p{5cm}|}
-		\hline
-		conditional expectation & partial expectation \\ \hline
-		$\mathbb{CE}$ & $\mathbb{PE}$ \\ \hline
-		$\mathbb{CE} = \mathbb{E}(\boxplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$ & $\pi \nvDash \diamondsuit\mathrm{goal} \Rightarrow \mathrm{wgt}(\pi)\coloneqq0$ \\ \hline
-		good approximation for \newline maximizing probability and reward until goal & may lead to quite high $\mathbb{CE}$ paired with \newline low probability of reaching goal \\ \hline
-		
-	\end{tabular}
-\end{frame}
 
+\begin{comment}
+	
 \begin{frame}
 	\frametitle{conditional expected accumulated reward}
 	Given:
@@ -688,6 +690,7 @@ We distinguish end components by the following types
 	\end{definition}
 	
 \end{frame}
+\end{comment}
 
 \begin{frame}
 \frametitle{results about conditional expected accumulated rewards}
@@ -705,6 +708,76 @@ We distinguish end components by the following types
 
 \end{frame}
 
+\begin{frame}
+	\frametitle{Checking finiteness}
+	\begin{itemize}
+		\item \textbf{PTime} algorithm: given $\mathcal{M}, F, G$, two possible outcomes:
+		\begin{enumerate}[(1)]
+			\item $\mathbb{CE}^{max} = \infty$
+			\item $\mathbb{CE}^{max}$ is finite, equivalent MDP $\mathcal{N}$ with two trap states $goal, fail$
+		\end{enumerate}
+	\end{itemize}
+\pause
+\begin{block}{equivalence of $\mathcal{M}$ and $\mathcal{N}$, properties of $\mathcal{N}$}
+	\[
+		\mathbb{E}_{\mathcal{M},s_{init}}^{max} (\rawdiaplus F \mid \diamondsuit G) = \mathbb{E}_{\mathcal{N},s_{init}}^{max} (\rawdiaplus goal \mid \diamondsuit goal)
+	\]
+	\pause
+	in $\mathcal{N}$ the state $goal$ is reachable from all states $s \in S_\mathcal{N} \setminus \{fail\}$ and \[
+		\mathbb{Pr}_{\mathcal{N},s}^{min}\Big(\diamondsuit(goal \lor fail)\Big) = 1
+	\]
+	\pause
+	$\mathcal{N}$ has no \textit{critical} scheduler $\mathfrak{S}$: $\mathbb{Pr}^{\mathfrak{S}}(\diamondsuit fail) = 1$ and there is reachable positive $\mathfrak{S}$-cycle.
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Threashold algorithm}
+	We assume that we have such an MDP $\mathcal{N}$. \pause
+	\begin{block}{Observation}
+		\begin{itemize}
+			\item $\exists$ saturation point $t \in \mathbb{N}$ such that \pause
+			\begin{itemize}
+				\item after $\pi$ with $\mathrm{wgt}(\pi) \geq t$ we can rely on a memoryless, deterministic scheduler maximizing the probability to reach $goal$. \pause
+				\item Until reaching $t$ a deterministic reward-based scheduler is sufficient.
+			\end{itemize}
+		\end{itemize}
+	\end{block}
+\pause
+	\begin{block}{Threshold Algorithm}
+		\begin{itemize}
+			\item input: MDP $\mathcal{N}$ as before, threshold $t \in \mathbb{Q}_{\geq 0}$\pause
+			\item output:\begin{enumerate}[\text{case} (1)]
+				\item "no", we do not have $\mathbb{CE}^{max}>t$
+				\item "yes", $\mathbb{CE}^{max}>t$ and we found a deterministic, reward-based scheduler $\mathfrak{S}$ s.t. \pause $\mathfrak{S}$ is memoryless after saturation point $t$.
+			\end{enumerate}
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	Inhalt...
+\end{frame}
+
+\begin{frame}
+\begin{itemize}
+	\item maximal conditional expected auccumulated weight
+	\item partial expected accumulated reward.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\begin{tabular}{|p{5cm}|p{5cm}|}
+\hline
+conditional expectation & partial expectation \\ \hline
+$\mathbb{CE}$ & $\mathbb{PE}$ \\ \hline
+$\mathbb{CE} = \mathbb{E}(\boxplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$ & $\pi \nvDash \diamondsuit\mathrm{goal} \Rightarrow \mathrm{wgt}(\pi)\coloneqq0$ \\ \hline
+good approximation for \newline maximizing probability and reward until goal & may lead to quite high $\mathbb{CE}$ paired with \newline low probability of reaching goal \\ \hline
+
+\end{tabular}
+\end{frame}
 
 \section{Keep an eye on the variance}
 
