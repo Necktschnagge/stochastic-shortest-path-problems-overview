@@ -43,6 +43,7 @@ fi
 echo "Debug: Show git log history visually:"
 git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
 git log --graph --oneline --all
+git branch --all
 echo "Determine last git commit on feature branch:"
 git_hash_last_commit=$(git rev-parse HEAD^2) # CI merges the current feature branch commit into pull request base branch. Therefore on CI there is always one commit more. -> use ^2 for merge ancestor (see https://medium.com/@gabicle/git-ancestry-references-explained-bd3a84a0b821)
 echo -e "\tgit_hash_last_commit: ${git_hash_last_commit}" #last commit on feature branch
