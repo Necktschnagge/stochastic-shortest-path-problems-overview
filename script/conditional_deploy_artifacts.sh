@@ -43,8 +43,8 @@ fi
 echo "Debug: Show git log history visually:"
 echo git remote
 git remote
-echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
-git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --all #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --all #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
 echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --deepen=4 #Azure Pipelines per default fetches using '--depth=1'
 git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --deepen=4 #Azure Pipelines per default fetches using '--depth=1'
 echo git log --graph --oneline --all
