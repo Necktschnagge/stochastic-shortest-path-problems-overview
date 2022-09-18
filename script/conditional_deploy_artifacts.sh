@@ -42,6 +42,7 @@ fi
 #environment variables:
 echo "Debug: Show git log history visually:"
 git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --deepen=4 #Azure Pipelines per default fetches using '--depth=1'
 git log --graph --oneline --all
 git branch --all
 echo "Determine last git commit on feature branch:"
