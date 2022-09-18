@@ -41,6 +41,7 @@ fi
 
 #environment variables:
 echo "Debug: Show git log history visually:"
+git remote add deployment https://${git_username}:${git_access_token}@github.com/${user_repo_id}
 echo git remote -v
 git remote -v
 echo git fetch --all
