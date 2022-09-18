@@ -45,8 +45,10 @@ echo git remote -v
 git remote -v
 echo git fetch --all
 git fetch --all
-echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --all #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
-git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --all #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} artifacts #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} artifacts #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
 echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --deepen=4 #Azure Pipelines per default fetches using '--depth=1'
 git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --deepen=4 #Azure Pipelines per default fetches using '--depth=1'
 echo git log --graph --oneline --all
