@@ -521,7 +521,8 @@ minimum height=2.5em]
 	\end{block}
 
 \end{frame}
-
+\begin{comment}
+	
 \section{Essential Definitions}
 
 \begin{frame}
@@ -533,6 +534,7 @@ minimum height=2.5em]
 	\item schedulers, kind of schedulers...
 \end{itemize}
 \end{frame}
+\end{comment}
 
 \section{The classic stochastic shortest path problem}
 
@@ -757,31 +759,68 @@ We distinguish end components by the following types
 \end{frame}
 
 \begin{frame}
-	Inhalt...
-\end{frame}
-
-\begin{frame}
-\begin{itemize}
-	\item maximal conditional expected auccumulated weight
-	\item partial expected accumulated reward.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
+\frametitle{What about paths not reaching $goal$?}
 \begin{tabular}{|p{5cm}|p{5cm}|}
 \hline
-conditional expectation & partial expectation \\ \hline
-$\mathbb{CE}$ & $\mathbb{PE}$ \\ \hline
-$\mathbb{CE} = \mathbb{E}(\boxplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$ & $\pi \nvDash \diamondsuit\mathrm{goal} \Rightarrow \mathrm{wgt}(\pi)\coloneqq0$ \\ \hline
-good approximation for \newline maximizing probability and reward until goal & may lead to quite high $\mathbb{CE}$ paired with \newline low probability of reaching goal \\ \hline
-
+conditional expectation & partial expectation \\ \hline \pause 
+$\mathbb{CE}$ & $\mathbb{PE}$ \\ \hline \pause
+$\mathbb{CE} = \mathbb{E}(\rawdiaplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$ & $\pi \nvDash \diamondsuit\mathrm{goal} \Rightarrow \mathrm{wgt}(\pi)\coloneqq0$ \\ \hline \pause
+may lead to quite high $\mathbb{CE}$ paired with \newline low probability of reaching goal & good approximation for \newline maximizing probability and reward until goal\\ \hline
 \end{tabular}
+\pause
+
+\vspace{2ex}
+For both we know...
+\begin{itemize}
+	\item \textbf{PTime} algorithm to check finiteness of $\mathbb{CE}^{max}$ ($\mathbb{PE}^{max}$) \pause
+	\item Both have a saturation point: reward-based schedulers vs. memoryless, det. schedulers \pause
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Switching to integer weights...}
+	\begin{itemize}
+		\item It's not ensured that a saturation point exists \pause
+		\item Optimal schedulers may need infinite memory \pause
+		\item Optimal values may even become irrational \pause
+		\item LPs are not anymore sufficient for solving \pause
+		\item There are approximation methods using LPs
+	\end{itemize}
 \end{frame}
 
 \section{Keep an eye on the variance}
 
+\begin{frame}
+	\frametitle{Variance-penalized expectation}
+	Given:
+	\begin{itemize}
+		\item MDP $\mathcal{M}$ with non-negative weights \pause
+		\item only one trap state $goal$ which is reachable from all other states \pause
+		\item all states are reachable from $s_{init}$
+	\end{itemize} \pause
+	\begin{block}{Variance-penalized expectation}
+		\[
+		\mathbb{VPE}[\lambda]_{\mathcal{M}}^{\mathfrak{S}} \coloneqq \mathbb{E}_{\mathcal{M}}^{\mathfrak{S}}(\rawdiaplus goal) - \lambda \cdot \mathbb{V}_{\mathcal{M}}^{\mathfrak{S}}(\rawdiaplus goal)
+		\] \pause
+		\[
+		\mathbb{VPE}[\lambda]_{\mathcal{M}}^{max} \coloneqq \sup_{\mathfrak{S}} \mathbb{VPE}[\lambda]_{\mathcal{M}}^{\mathfrak{S}}
+		\]
+	\end{block}
+\end{frame}
 
+\begin{frame}
+	\frametitle{complexity result}
+	\begin{itemize}
+		\item Computing a variance-minimal scheduler among all $\mathbb{E}$-optimal schedulers is doable in \textbf{PTime}. The scheduler can be choosed memoryless. \pause
+		\item In \textbf{ExpSpace} we can compute $\mathbb{VPE}^{max}$ and a deterministic scheduler as witness. \pause
+		\item The threshold problem, i.e. checking $\mathbb{VPE}^{max} \geq t$ is decidable in \textbf{NExpTime} and is known to be \textbf{ExpTime-hard}.
+	\end{itemize}
+\end{frame}
+
+% idee für diplomarbeit
+% anwendungen des Problems...
+% partial expectation: saturation point finden, darüber MD scheduler, darunter zb mit LP lösen.
+% CE: satur. point finden, darunter kompliziert mehrfach mit threshold algorithmus optimale entscheidungen finden.
 
 
 \begin{comment}
