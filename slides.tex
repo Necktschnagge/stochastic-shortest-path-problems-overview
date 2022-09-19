@@ -543,21 +543,21 @@ minimum height=2.5em]
 	\begin{itemize}
 		\item given:
 		\begin{itemize}
-			\item a single goal state
-			\item positive cycle condition: There is no cycle $\pi$ with ${\mathrm{wgt}(\pi)} \geq 0$
-			\item goal is reachable from each state
+			\item a single goal state \pause
+			\item positive cycle condition: There is no cycle $\pi$ with ${\mathrm{wgt}(\pi)} \leq 0$ \pause
+			\item goal is reachable from each state \pause
 		\end{itemize}
 		\item objective: Minimize the expected accumulated weight until reaching goal state.\[
 			\mathbb{E}_{\mathcal{M},s}^{inf}(\rawdiaplus goal) \coloneqq \inf_{\mathfrak{S} \in \mathrm{Schedulers}(M)}\mathbb{E}_{\mathcal{M},s}^{\mathfrak{S}}(\rawdiaplus goal)
-		\]
+		\] \pause
 		\item Well known for a long time:
 		\begin{itemize}
-			\item There exists an optimal memoryless deterministic scheduler $\mathfrak{S}$.
-			\item $\mathfrak{S}$ is computable by solving a LP
-			\item iterative algorithm:
+			\item There exists an optimal memoryless deterministic scheduler $\mathfrak{S}$. \pause
+			\item $\mathfrak{S}$ is computable by solving a LP \pause
+			\item iterative algorithm: \pause
 			\begin{itemize}
-				\item start at any feasible scheduler
-				\item iterative improvement
+				\item start at any feasible scheduler \pause
+				\item iterative improvement \pause
 				\item stop at an optimal vertex of the LP (corresponding to some MD scheduler)
 			\end{itemize}
 		\end{itemize}
@@ -572,8 +572,8 @@ minimum height=2.5em]
 	\begin{itemize}
 		\item a single goal state
 		\onslide<3>{\item positive cycle condition: There is no cycle $\pi$ with ${\mathrm{wgt}(\pi)} \geq 0$} \pause
-		\item $\mathcal{M}$ is an MDP with arbitrary integer weights
-		\item goal is reachable from each state
+		\item $\mathcal{M}$ is an MDP with arbitrary integer weights \pause
+		\item goal is reachable from each state \pause
 	\end{itemize}
 	\item The following can be solved in polynomial time:
 	\begin{itemize}
