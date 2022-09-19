@@ -183,10 +183,10 @@ minimum height=2.5em]
 
 \frame{\titlepage}
 
-\begin{frame}
-	\frametitle{Inhalt}
-	\tableofcontents
-\end{frame}
+%\begin{frame}
+%	\frametitle{Inhalt}
+%	\tableofcontents
+%\end{frame}
 
 
 
@@ -469,17 +469,17 @@ minimum height=2.5em]
 \end{frame}
 
 \begin{frame}
-	\frametitle{MDP - Markov Decision Process}
+	\frametitle{MDP - Markov Decision Process (I)}
 	\begin{block}{definition}
 		An MDP is a tuple
 		\[ \mathcal{M} = (S, Act, P, s_{init}, wgt)
-		\]
+		\] \pause
 		where
 		\begin{itemize}
-			\item $S$ is a finite set of states.
-			\item $Act$ is a finite set of actions.
-			\item $P: S \times Act \to Distr(S)$ maps every $(s,\alpha)$ to a probability distribution over the states.
-			\item $s_{init} \in S$ is some designated initial state.
+			\item $S$ is a finite set of states. \pause
+			\item $Act$ is a finite set of actions. \pause
+			\item $P: S \times Act \dashrightarrow Distr(S)$ maps every enabled state - action - pair $(s,\alpha)$ to a probability distribution over the states. \pause
+			\item $s_{init} \in S$ is some designated initial state. \pause
 			\item $wgt : S \times Act \to \mathbb{Z}$ is some weight (reward) function.
 		\end{itemize}
 	\end{block}
@@ -498,24 +498,24 @@ minimum height=2.5em]
 	\end{tikzpicture}
 }
 \begin{frame}
-	\frametitle{MDP - Markov Decision Process}
+	\frametitle{MDP - Markov Decision Process (II)}
 	\begin{block}{Paths}
 		\[
-			\pi \in \mathrm{Paths}(\mathcal{M})
-		\] \begin{itemize}
-			\item $\pi = (s_0,\alpha_0,s_1,\alpha_1, \dots)$
-			\item $\pi$ is some maximal finite or infinite path
+			\pi \in \mathrm{Paths}(\mathcal{M}^{\mathfrak{S}})
+		\] \pause \begin{itemize}
+			\item $\pi = (s_0,\alpha_0,s_1,\alpha_1, \dots)$ \pause
+			\item $\pi$ is some maximal finite or infinite path \pause
 		\end{itemize}
 	\end{block}
-	Let $F \subseteq S$ be some set of goal states...
+	Let $F \subseteq S$ be some set of goal states... \pause
 	\begin{block}{accumulated weights until reaching a goal}
 	\[
-	\rawdiaplus F : \mathrm{Paths}(\mathcal{M}) \to \mathbb{Q} :
+	\rawdiaplus F : \mathrm{Paths}(\mathcal{M}^{\mathfrak{S}}) \to \mathbb{Q} :
 	\]
 	\[ 
 	\rawdiaplus F (\pi) = \bigg\{\begin{array}{lr}
 	wgt(\hat{\pi}), & \text{$\hat{\pi}$ is shortest prefix of $\pi$ s.t. $\mathrm{last}(\hat{\pi}) \in F$  }\\
-	\infty, & \text{otherwise, i.e. $\pi \nvDash \diamond F$}
+	\infty, & \text{otherwise, i.e. $\pi \nvDash \diamondsuit F$}
 	\end{array}
 	\]
 	\end{block}
