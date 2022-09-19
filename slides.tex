@@ -815,59 +815,52 @@ We distinguish end components by the following types
 	\frametitle{conditional expected accumulated reward}
 	\begin{center}%#2
 		\hspace{-1.5cm}\begin{tikzpicture}[auto,swap,scale=3]
-
-		% First we draw the action dots
-		\foreach \pos/\name in { {(0.3,2)/{a0}}, {(1.3,0.3)/{a1}}, {(1.3,-0.3)/{b1}} }
-		\node[acdot] (\name) at \pos {};
-		
-		
-		% First we draw the vertices
-		\foreach \pos/\name in {{(0,2)/0}, {(1,0)/1}, {(3,0)/3}}
-		\node[vertex] (\name) at \pos {$s_{\name}$};
-		
-		% First we draw the vertices
-		\foreach \pos/\name in { {(2,2)/2} }
-		\node[target] (\name) at \pos {$s_{\name}$};
-		
-		
-		% Connect vertices with edges and draw weights
-%		\foreach \source/ \dest /\weight in {
-%			0/a0/{\alpha},
-%			1/a1/{\alpha},
-%			1/b1/{\beta},
-			
-%			a0/1/{\frac{1}{2} \colon r}
-%			a0/2/{\frac{2}{3} \colon 3},
-%			b0/3/{1 \colon 8},
-%			a1/2/{1 \colon 1},
-%			2/a2/{\alpha},
-%			2/b2/{\beta},
-%			a2/3/{1 \colon 2},
-%			b2/6/{1 \colon 7},
-%			3/a3/{\alpha},
-%			a3/6/{1 \colon 4},
-%			4/a4/{\alpha},
-%			a4/7/{1 \colon 7},
-%			5/a5/{\alpha},
-%			5/b5/{\beta},
-%			a5/1/{\frac{1}{3} \colon 2},
-%			a5/4/{\frac{2}{3} \colon 3},
-%			b5/7/{1 \colon 5},
-%			6/a6/{\alpha},
-%			a6/5/{\frac{1}{2} \colon 2},
-%			a6/7/{\frac{1}{2} \colon 9}	
-%		}
-%		\path[edge] (\source) to node[weight]{$\weight$} (\dest);
-		% Connect vertices with edges and draw weights
-		
-		
-		% Draw initial state
-		\path[edge] (-1,0) to (0);
-		
-		%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = (1,1)--(0,0)--(2,0)};
-		\end{tikzpicture}
-	\end{center}
 	
+			% First we draw the action dots
+			\foreach \pos/\name in {{(0.42,1)/{a0}}, {(1.3,0.3)/{a1}}, {(2,-0.3)/{b1}}}
+			\node[acdot] (\name) at \pos {};
+			
+			% First we draw the vertices
+			\foreach \pos/\name in {{(0,1)/0}, {(1,0)/1}, {(3,0)/3}}
+			\node[vertex] (\name) at \pos {$s_{\name}$};
+			
+			% First we draw the vertices
+			\foreach \pos/\name in {{(2,1)/2}}
+			\node[target] (\name) at \pos {$s_{\name}$};
+			
+			
+			% Connect vertices with edges and draw weights
+			\foreach \source/ \dest /\weight in {
+				0/a0/{\alpha},
+				1/a1/{\alpha},
+				1/b1/{\beta},
+				a0/2/{\frac{1}{2} \colon r},
+				a0/1/{\frac{1}{2} \colon 0},
+				a1/2/{1 \colon 0},
+				b1/3/{\frac{1}{2} \colon 1}
+%				b1/1/{\frac{1}{2} \colon 1}
+			}
+			\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+
+			% Connect vertices with edges and draw weights
+			\foreach \source/ \dest /\weight in {
+				b1/1/{\frac{1}{2} \colon 1}
+			}
+			\path[edge] (\source) to[bend right] node[weight]{$\weight$} (\dest);
+			
+			
+			% Draw initial state
+			%\path[edge] (-1,0) to (0);
+			
+			%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = (1,1)--(0,0)--(2,0)};
+		\end{tikzpicture}
+	\end{center} \pause
+	\begin{block}{Finding the best scheduler...}
+		$\mathfrak{S}_n \colon $ select $\beta^n \alpha$. \pause
+		\[
+			\mathbb{CE} = \frac{\frac{r}{2}+\frac{1}{2}\cdot \frac{1}{2}^n \cdot n}{\frac{1}{2}+\frac{1}{2}^{n+1}} \hspace{10ex} \text{ choose scheduler } \mathfrak{S}_{r+2}
+		\]
+	\end{block}
 \end{frame}
 
 
