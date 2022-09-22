@@ -625,7 +625,7 @@ We distinguish end components by the following types
 \begin{itemize}
 	\item pumping ECs: $\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}(\pi \text{ is pumping}) = 1$ \pause
 	\item \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent ECs:\\ \hspace{-2ex}$\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}\Big(\pi \text{ is }$ \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent $\Big) = 1$ \pause
-	\item gambling ECs: $\mathbb{E}(\mathrm{MP}) = 0$ and it is positively and negatively weight divergent \pause
+	\item gambling ECs: There is a scheduler s.t. $\mathbb{E}(\mathrm{MP}) = 0$ and it is positively and negatively weight divergent \pause
 	\item bounded EC: There exists an upper bound and a lower bound
 \end{itemize}
 \end{frame}
@@ -856,7 +856,7 @@ We distinguish end components by the following types
 		\end{tikzpicture}
 	\end{center} \pause
 	\begin{block}{Finding the best scheduler...}
-		$\mathfrak{S}_n \colon $ select $\beta^n \alpha$. \pause
+		$\mathfrak{S}_n \colon $ select $\beta^n \alpha$, $n \in \mathbb{N}\cup\{\infty\}$ \pause
 		\[
 			\mathbb{CE} = \frac{\frac{r}{2}+\frac{1}{2}\cdot \frac{1}{2}^n \cdot n}{\frac{1}{2}+\frac{1}{2}^{n+1}} \hspace{10ex} \text{ choose scheduler } \mathfrak{S}_{r+2}
 		\]
@@ -922,7 +922,7 @@ We distinguish end components by the following types
 			\item input: MDP $\mathcal{N}$ as before, threshold $t \in \mathbb{Q}_{\geq 0}$\pause
 			\item output:\begin{enumerate}[\text{case} (1)]
 				\item "no", we do not have $\mathbb{CE}^{max}>t$
-				\item "yes", $\mathbb{CE}^{max}>t$ and we found a deterministic, reward-based scheduler $\mathfrak{S}$ s.t. \pause $\mathfrak{S}$ is memoryless after saturation point $t$.
+				\item "yes", $\mathbb{CE}^{max}>t$ and we found a deterministic, reward-based scheduler $\mathfrak{S}$ s.t. \pause $\mathfrak{S}$ is memoryless after some saturation point.
 			\end{enumerate}
 		\end{itemize}
 	\end{block}
@@ -930,12 +930,18 @@ We distinguish end components by the following types
 
 \begin{frame}
 \frametitle{What about paths not reaching $goal$?}
+\onslide<4->{\[
+\oplus goal(\pi) \coloneqq \bigg\{\begin{array}{lr}
+	\rawdiaplus(\pi), & \pi \vDash \diamondsuit F \\
+	0, & \text{otherwise, i.e. $\pi \nvDash \diamondsuit F$}
+\end{array} 
+\]}
 \begin{tabular}{|p{5cm}|p{5cm}|}
 \hline
 conditional expectation & partial expectation \\ \hline \pause 
 $\mathbb{CE}$ & $\mathbb{PE}$ \\ \hline \pause
-$\mathbb{CE} = \mathbb{E}(\rawdiaplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$ & $\pi \nvDash \diamondsuit\mathrm{goal} \Rightarrow \mathrm{wgt}(\pi)\coloneqq0$ \\ \hline \pause
-may lead to quite high $\mathbb{CE}$ paired with \newline low probability of reaching goal & good approximation for \newline maximizing probability and reward until goal\\ \hline
+$\mathbb{CE} = \mathbb{E}(\rawdiaplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$ & $\pi \nvDash \diamondsuit\mathrm{goal} \Rightarrow \mathrm{wgt}'(\pi)\coloneqq0$ \\ \hline \pause \pause
+may lead to quite high $\mathbb{CE}$ paired with a low probability of reaching goal & good approximation for \newline maximizing probability of reaching goal and reward until goal\\ \hline
 \end{tabular}
 \pause
 
@@ -943,9 +949,67 @@ may lead to quite high $\mathbb{CE}$ paired with \newline low probability of rea
 For both we know...
 \begin{itemize}
 	\item \textbf{PTime} algorithm to check finiteness of $\mathbb{CE}^{max}$ ($\mathbb{PE}^{max}$) \pause
-	\item Both have a saturation point: reward-based schedulers vs. memoryless, det. schedulers \pause
+	\item Both have a saturation point: reward-based schedulers vs. memoryless, det. schedulers
 \end{itemize}
 \end{frame}
+
+
+
+\begin{frame}
+\begin{center}%#2
+	\hspace{-1.5cm}\begin{tikzpicture}[auto,swap,scale=3]
+	
+	% First we draw the action dots
+	\foreach \pos/\name in {{(0.42,1)/{a0}}, {(1.3,0.3)/{a1}}, {(2,-0.3)/{b1}}}
+	\node[acdot] (\name) at \pos {};
+	
+	% First we draw the vertices
+	\foreach \pos/\name in {{(0,1)/0}, {(1,0)/1}, {(3,0)/3}}
+	\node[vertex] (\name) at \pos {$s_{\name}$};
+	
+	% First we draw the vertices
+	\foreach \pos/\name in {{(2,1)/2}}
+	\node[target] (\name) at \pos {$s_{\name}$};
+	
+	
+	% Connect vertices with edges and draw weights
+	\foreach \source/ \dest /\weight in {
+		0/a0/{\alpha},
+		1/a1/{\alpha},
+		1/b1/{\beta},
+		a0/2/{\frac{1}{2} \colon r},
+		a0/1/{\frac{1}{2} \colon 0},
+		a1/2/{1 \colon 0},
+		b1/3/{\frac{1}{2} \colon 1}
+		%				b1/1/{\frac{1}{2} \colon 1}
+	}
+	\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+	
+	% Connect vertices with edges and draw weights
+	\foreach \source/ \dest /\weight in {
+		b1/1/{\frac{1}{2} \colon 1}
+	}
+	\path[edge] (\source) to[bend right] node[weight]{$\weight$} (\dest);
+	
+	
+	% Draw initial state
+	%\path[edge] (-1,0) to (0);
+	
+	%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = (1,1)--(0,0)--(2,0)};
+	\end{tikzpicture}
+\end{center} \pause
+	\begin{block}{Finding the best scheduler...}
+		$\mathfrak{S}_n \colon $ select $\beta^n \alpha$, $n \in \mathbb{N}\cup\{\infty\}$ \pause
+		\[
+			\mathbb{CE} = \frac{\frac{r}{2}+\frac{1}{2}\cdot \frac{1}{2}^n \cdot n}{\frac{1}{2}+\frac{1}{2}^{n+1}} \hspace{10ex} \text{ choose scheduler } \mathfrak{S}_{r+2} \pause
+		\]
+		\[
+			\mathbb{PE} = \frac{1}{2} r + \frac{1}{2} \cdot \frac{1}{2}^n \cdot n \hspace{10ex} \text{ choose scheduler $\mathfrak{S}_{1}$ or $\mathfrak{S}_{2}$}
+		\]
+	\end{block}
+\end{frame}
+
+
 
 \begin{frame}
 	\frametitle{Switching to integer weights...}
@@ -964,7 +1028,7 @@ For both we know...
 	\frametitle{Variance-penalized expectation}
 	Given:
 	\begin{itemize}
-		\item MDP $\mathcal{M}$ with non-negative weights \pause
+		\item MDP $\mathcal{M}$ with non-negative integer weights \pause
 		\item only one trap state $goal$ which is reachable from all other states \pause
 		\item all states are reachable from $s_{init}$
 	\end{itemize} \pause
@@ -981,14 +1045,71 @@ For both we know...
 \begin{frame}
 	\frametitle{complexity result}
 	\begin{itemize}
-		\item Computing a variance-minimal scheduler among all $\mathbb{E}$-optimal schedulers is doable in \textbf{PTime}. The scheduler can be choosed memoryless. \pause
+		\item Computing a variance-minimal scheduler among all $\mathbb{E}$-optimal schedulers is doable in \textbf{PTime}. The scheduler can be chosen memoryless. \pause
 		\item In \textbf{ExpSpace} we can compute $\mathbb{VPE}^{max}$ and a deterministic scheduler as witness. \pause
 		\item The threshold problem, i.e. checking $\mathbb{VPE}^{max} \geq t$ is decidable in \textbf{NExpTime} and is known to be \textbf{ExpTime-hard}.
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
+	\begin{block}{\textbf{PTime} algorithm for chosing the best$_{(variance)}$ scheduler among all $\mathbb{E}$-optimal ones.}
+		\begin{enumerate}
+			\item PTime transformation $\mathcal{M} \mapsto \mathcal{M}'$ such that \begin{itemize} \pause
+				\item $\mathcal{M}'$ has no 0-ECs \pause
+				\item There are mappings from schedulers of $\mathcal{M}$ to $\mathcal{M}'$ and vice versa s.t. \begin{itemize} \pause
+					\item $\mathbb{E}, \mathbb{V}$ are preserved \pause
+				\end{itemize}
+			\end{itemize}
+			\item Transformation $\mathcal{M}' \mapsto \mathcal{M}''$ such that \begin{itemize} \pause
+				\item All actions not leading to $\mathcal{E}^{max}$ are removed.\pause
+				\item $\mathcal{M}''$ has no end components \pause
+				\item All schedulers of $\mathcal{M}''$ have equal value for $\mathbb{E}$. \pause
+			\end{itemize}
+			\item Solve a system of linear equations to find $\mathbb{V}^{min}$ + witnessing scheduler \pause \begin{itemize}
+				\item The scheduler can be chosen memoryless and deterministic
+			\end{itemize}
+		\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Applications}
+	\begin{itemize}
+		\item Worst-case expected termination times of probabilistic programs \pause
+		\item Finding optimal controls for a motion planning scenario having random external influences \pause
+		\item Traffic control systems, energy grids \pause
+		\item Decision making in financial markets \pause
+	\end{itemize}
+	\textcolor{red}{\textbf{Limits of applicability?}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Percentile queries}
+	\begin{block}{The problem}
+		Given a
+		\begin{itemize}
+			\item $\mathbb{Z}$-weighted MDP $\mathcal{M}$ \pause
+			\item weight threshold $t \in \mathcal{M}$ \pause
+			\item probability threshold $\alpha \in [0,1] \cap \mathbb{Q}$ \pause
+		\end{itemize}
+		\textbf{Decide:} \texttt{Is there a scheduler such that $\mathbb{Pr}(\rawdiaplus(\pi) \leq t) \geq \alpha$?}\pause
+		\begin{itemize}
+			\item ...\textbf{PSpace-hard} \pause
+			\item ...decidable in \textbf{pseudo-PTime}\pause
+			\item ...There is an optimal deterministic scheduler, computable in \textbf{ExpTime}
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Tools}
+	\begin{itemize}
+		\item Storm model checker
+		\item Prism model checker
+	\end{itemize}
+\end{frame}
+
 % idee für diplomarbeit
-% anwendungen des Problems...
 % partial expectation: saturation point finden, darüber MD scheduler, darunter zb mit LP lösen.
 % CE: satur. point finden, darunter kompliziert mehrfach mit threshold algorithmus optimale entscheidungen finden.
 
