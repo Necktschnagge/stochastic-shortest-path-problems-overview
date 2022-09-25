@@ -1,9 +1,8 @@
-# Effiziente Berechnung von Varianzen in Markow-Ketten
+## Latex example
 
-[![Build Status](https://travis-ci.com/Necktschnagge/efficient-variance-calulation-in-markov-chains.svg?branch=master)](https://travis-ci.com/Necktschnagge/efficient-variance-calulation-in-markov-chains)
+This is an example repository for latex documents and continuous integration using Azure Pipelines.
 
-Find current version here:
+Find current master build here:
 
-* Direct Download: https://necktschnagge.github.io/efficient-variance-calulation-in-markov-chains/script.pdf
+[a workaround link](repo/blob/master/other_file.md)
 
-* https://github.com/Necktschnagge/efficient-variance-calulation-in-markov-chains/blob/gh-pages/script.pdf
