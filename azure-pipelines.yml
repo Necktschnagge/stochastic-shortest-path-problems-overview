@@ -7,10 +7,10 @@ trigger:
 
 
 stages:
- - stage: build_latex
+ - stage: PDF_latex
       
    jobs:
-    - job: build_latex_script
+    - job: Check_Latex_Pull
       strategy:
         matrix:
           ubuntu_20_04:
