@@ -19,6 +19,8 @@ echo -e "\tgit_pull_url: ${git_pull_url}"
 links="no-links" #do not post a link to diagram if present
 git_branch_artifacts="artifacts"
 git_base_branch_for_artifacts="master"
+deployment_remote_name="deployment"
+
 
 #secret variables:
 git_username=${1}
@@ -40,6 +42,23 @@ fi
 ########################### PULL REQUEST ONLY VARIABLES #####################################
 
 #environment variables:
+echo "Debug: Show git log history visually:"
+git remote add deployment https://${git_username}:${git_access_token}@github.com/${user_repo_id}
+echo git remote -v
+git remote -v
+echo git fetch --all
+git fetch --all
+echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} artifacts #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} artifacts #--deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+echo git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} --deepen=4 #Azure Pipelines per default fetches using '--depth=1'
+echo git log --graph --oneline --all
+git log --graph --oneline --all
+echo git branch --all
+git branch --all
+echo "Determine last git commit on feature branch:"
 git_hash_last_commit=$(git rev-parse HEAD^2) # CI merges the current feature branch commit into pull request base branch. Therefore on CI there is always one commit more. -> use ^2 for merge ancestor (see https://medium.com/@gabicle/git-ancestry-references-explained-bd3a84a0b821)
 echo -e "\tgit_hash_last_commit: ${git_hash_last_commit}" #last commit on feature branch
 
@@ -91,8 +110,8 @@ LEFT_TRIES=10
 while true; do
 	echo -e "\tCheckout branch ${git_branch_artifacts}"
 	(git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} && git checkout ${git_branch_artifacts} --) || quit 4
-	echo -e "\tgit merge origin/${git_base_branch_for_artifacts}"
-	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge origin/${git_base_branch_for_artifacts} || quit 5 # this is possibly concurrent to another job creating the same merge commit.
+	echo -e "\tgit merge ${deployment_remote_name}/${git_base_branch_for_artifacts}"
+	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge ${deployment_remote_name}/${git_base_branch_for_artifacts} || quit 5 # this is possibly concurrent to another job creating the same merge commit.
 	echo -e "\tCopy script PDF"
 	mkdir -p ./artifacts/script
 	cp ./src/script.pdf "${artifact_path}" # if the file is already present, cp overwrites the old one.
