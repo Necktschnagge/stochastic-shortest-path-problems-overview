@@ -1,14 +1,14 @@
-trigger:
-  branches:
-    include:
-    - '*'
-    exclude:
-    - artifacts
 
 
 stages:
  - stage: build_latex
-      
+   trigger:
+     branches:
+       include:
+        - '*'
+       exclude:
+        - artifacts
+
    jobs:
     - job: build_latex_script
       strategy:
