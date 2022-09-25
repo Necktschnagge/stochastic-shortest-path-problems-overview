@@ -1,8 +1,3 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
   branches:
     include:
@@ -21,21 +16,14 @@ stages:
           ubuntu_20_04:
             image_name: 'ubuntu-20.04'
             agent_pool_name: 'Azure Pipelines'
-
-#          Ubuntu_20_04:
-#            agent_pool_name: 'Performance'
             
       pool:
         vmImage: $(image_name)
         name: $(agent_pool_name)
-      #condition: eq(variables['Build.Reason'], 'IndividualCI')
+
+      condition: eq(variables['Build.Reason'], 'IndividualCI')
       timeoutInMinutes: 30
       steps:
-       #Boost
-#       - script: sudo apt-get install libboost-all-dev libtbb-dev
-#         displayName: "Linux: Install Boost"
-#         condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux' ))
-       #real Tasks:
        - script: git submodule update --init --recursive && echo $PATH
          displayName: "Init Git Submodules"
          condition: succeeded()
@@ -71,21 +59,3 @@ stages:
        - script: ./script/conditional_deploy_artifacts.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$(System.PullRequest.PullRequestNumber)"
          displayName: "Deploy PDF artifact"
          condition: succeeded()
-# - mv script.pdf $TRAVIS_BUILD_DIR/build/
-  
-  
-  
-#       - script: cmake --build ./build
-#         displayName: "CMake: Compile and Link"
-#         condition: succeeded()
-#       
-#       - script: ./build/src/Syntactic-Reducer ./res/config.json
-#         displayName: "Run Syntactic-Reducer with given config.json"
-#         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
-#       - script: ls -la ./RESULTS/
-#         displayName: "Check directory content of RESULTS"
-#         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
-#       - script: ./script/ci/upload-generated-models.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)"
-#         displayName: "Upload generated models"
-#         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
-         
