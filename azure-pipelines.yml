@@ -21,7 +21,7 @@ stages:
         vmImage: $(image_name)
         name: $(agent_pool_name)
 
-      condition: neq(variables['Build.Reason'], 'IndividualCI') #to be executed only when this is a commit-of-branch build an no pull request build.
+      condition: eq(variables['Build.Reason'], 'PullRequest') #to be executed only when this is a pull request build.
       timeoutInMinutes: 30
       steps:
        - script: git submodule update --init --recursive && echo $PATH
