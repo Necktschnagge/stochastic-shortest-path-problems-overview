@@ -111,9 +111,9 @@ while true; do
 	sleep $(($LEFT_TRIES))s
 	let LEFT_TRIES=LEFT_TRIES-1
 	if [ $LEFT_TRIES -lt 1 ]; then
-		#echo -e "\tFAILED:   Uploading pdf build artifact."
+		echo -e "\tFAILED:   Uploading pdf build artifact."
 		#curl -H "Authorization: token ${git_access_token}" -X POST -d "{\"body\": \"ERROR: Failed to push preview artifact!\"}" "https://api.github.com/repos/${user_repo_id}/issues/${pull_id}/comments"
-		#quit 1
+		quit 1
 	fi
 done
 
