@@ -114,7 +114,8 @@ while true; do
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge ${deployment_remote_name}/${git_base_branch_for_artifacts} || quit 5 # this is possibly concurrent to another job creating the same merge commit.
 	echo -e "\tCopy script PDF"
 	mkdir -p ./artifacts/script
-	cp ./src/script.pdf "${artifact_path}" # if the file is already present, cp overwrites the old one.
+	# if the file is already present, cp overwrites the old one....
+	cp ./src/script.pdf "${artifact_path}"
 	echo -e "\tgit add -f ${artifact_path}"
 	git add -f "${artifact_path}"
 	echo -e "\tgit status"
