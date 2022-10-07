@@ -96,6 +96,8 @@ while true; do
 	cp ${artifact_path} ${release_artifact_path} # if the file is already present, cp overwrites the old one.
 	echo -e "\tgit add -f ${artifact_path}"
 	git add -f "${artifact_path}"
+	echo -e "\tgit add -f ${release_artifact_path}"
+	git add -f "${release_artifact_path}"
 	echo -e "\tgit status"
 	git status
 	echo -e "\tgit commit -m \"Automatic upload of script PDF\""
