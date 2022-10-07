@@ -65,8 +65,9 @@ echo -e "\tgit_hash_last_commit: ${git_hash_last_commit}" #last commit on master
 #config variables:
 git_branch_for_ci_job="branch-ci-${git_hash_last_commit}"
 artifact_dir="artifacts/latex/pdf/"
+release_artifact_dir="artifacts/release/"
 artifact_path="${artifact_dir}${git_hash_last_commit}.pdf"
-release_artifact_path="artifacts/release/script.pdf"
+release_artifact_path="${release_artifact_dir}script.pdf"
 
 ########################### CENTRAL EXIT POINT #####################################
 git switch -c ${git_branch_for_ci_job} #switch to new branch pointing to current HEAD
@@ -92,6 +93,7 @@ while true; do
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge ${deployment_remote_name}/${git_base_branch_for_artifacts} || quit 5 # this is possibly concurrent to another job creating the same merge commit.
 	echo -e "\tCopy script PDF"
 	mkdir -p ./${artifact_dir}
+	mkdir -p ./${release_artifact_dir}
 	cp ./src/script.pdf "${artifact_path}" # if the file is already present, cp overwrites the old one.
 	cp ${artifact_path} ${release_artifact_path} # if the file is already present, cp overwrites the old one.
 	echo -e "\tgit add -f ${artifact_path}"
