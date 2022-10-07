@@ -66,6 +66,7 @@ echo -e "\tgit_hash_last_commit: ${git_hash_last_commit}" #last commit on master
 git_branch_for_ci_job="branch-ci-${git_hash_last_commit}"
 artifact_dir="artifacts/latex/pdf/"
 artifact_path="${artifact_dir}${git_hash_last_commit}.pdf"
+release_artifact_path="artifacts/release/script.pdf"
 
 ########################### CENTRAL EXIT POINT #####################################
 git switch -c ${git_branch_for_ci_job} #switch to new branch pointing to current HEAD
@@ -92,6 +93,7 @@ while true; do
 	echo -e "\tCopy script PDF"
 	mkdir -p ./${artifact_dir}
 	cp ./src/script.pdf "${artifact_path}" # if the file is already present, cp overwrites the old one.
+	cp ${artifact_path} ${release_artifact_path} # if the file is already present, cp overwrites the old one.
 	echo -e "\tgit add -f ${artifact_path}"
 	git add -f "${artifact_path}"
 	echo -e "\tgit status"
