@@ -14,7 +14,7 @@ stages:
       strategy:
         matrix:
           ubuntu_20_04:
-            image_name: 'ubuntu-20.04'
+            image_name: 'ubuntu-22.04'
             agent_pool_name: 'Azure Pipelines'
             
       pool:
@@ -63,7 +63,7 @@ stages:
       strategy:
         matrix:
           ubuntu_20_04:
-            image_name: 'ubuntu-20.04'
+            image_name: 'ubuntu-22.04'
             agent_pool_name: 'Azure Pipelines'
             
       pool:
