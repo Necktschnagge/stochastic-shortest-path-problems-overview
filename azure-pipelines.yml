@@ -53,9 +53,9 @@ stages:
        - script: cd src && ../script/check_empty.sh
          displayName: "Check that error list is empty"
          condition: succeeded()         
-       - script: echo 'Check biber version...' && biber --version
-         displayName: "Check biber version"
-         condition: succeeded()
+#       - script: echo 'Check biber version...' && biber --version
+#         displayName: "Check biber version"
+#         condition: succeeded()
        - script: ./script/conditional_deploy_artifacts.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$(System.PullRequest.PullRequestNumber)"
          displayName: "Deploy PDF artifact"
          condition: succeeded()
@@ -102,9 +102,9 @@ stages:
        - script: cd src && ../script/check_empty.sh
          displayName: "Check that error list is empty"
          condition: succeeded()         
-       - script: echo 'Check biber version...' && biber --version
-         displayName: "Check biber version"
-         condition: succeeded()
+#       - script: echo 'Check biber version...' && biber --version
+#         displayName: "Check biber version"
+#         condition: succeeded()
        - script: ./script/master_deploy_release.sh "$(USER_NAME)" "$(PERSONAL_ACCESS_TOKEN)" "$(System.PullRequest.PullRequestNumber)"
          displayName: "Deploy PDF artifact"
          condition: succeeded()
