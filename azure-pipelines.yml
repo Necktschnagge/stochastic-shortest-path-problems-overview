@@ -32,7 +32,7 @@ stages:
          condition: succeeded()
        - script: |
             source ./texlive/texlive_install.sh && echo $PATH
-            sudo apt-get install biber gnuplot -y
+            sudo apt-get install gnuplot -y
             cd src
             texliveonfly script.tex || true
             pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex
@@ -81,7 +81,7 @@ stages:
          condition: succeeded()
        - script: |
             source ./texlive/texlive_install.sh && echo $PATH
-            sudo apt-get install biber gnuplot -y
+            sudo apt-get install gnuplot -y
             cd src
             texliveonfly script.tex || true
             pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex
