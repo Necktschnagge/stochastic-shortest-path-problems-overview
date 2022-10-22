@@ -27,12 +27,12 @@ stages:
        - script: git submodule update --init --recursive && echo $PATH
          displayName: "Init Git Submodules"
          condition: succeeded()
-       - script: sudo apt-get update #&& sudo apt-get install biber gnuplot -y
+       - script: sudo apt-get update && sudo apt-get install biber gnuplot -y
          displayName: "Install biber"
          condition: succeeded()
        - script: |
             source ./texlive/texlive_install.sh && echo $PATH
-            sudo apt-get install biber gnuplot -y
+            #sudo apt-get install biber gnuplot -y
             cd src
             texliveonfly script.tex || true
             pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex
@@ -76,12 +76,12 @@ stages:
        - script: git submodule update --init --recursive && echo $PATH
          displayName: "Init Git Submodules"
          condition: succeeded()
-       - script: sudo apt-get update #&& sudo apt-get install biber gnuplot -y
+       - script: sudo apt-get update && sudo apt-get install biber gnuplot -y
          displayName: "Install biber"
          condition: succeeded()
        - script: |
             source ./texlive/texlive_install.sh && echo $PATH
-            sudo apt-get install biber gnuplot -y
+            #sudo apt-get install biber gnuplot -y
             cd src
             texliveonfly script.tex || true
             pdflatex -shell-escape -synctex=1 -interaction=nonstopmode script.tex
