@@ -17,33 +17,53 @@
 
 
 % MATH SYMBOLS
+\input{../latex-std/math-std.tex}
 \input{../latex-std/symb-math.tex}
-
-\usepackage{lipsum}
+\input{../latex-std/math-de.tex}
 
 \title{Example of \LaTeX{} in a git repository with Azure Pipelines}
-\author{by someone}
+\author{Maximilian Starke}
 \affil{some institute}
 \date{\today}
 
 
+\usepackage{ragged2e}
+\usepackage{framed}
+\usepackage{tabularx}
+
+\DeclareMathOperator*{\argmin}{\arg\min}
+
+\usepackage{relsize}
+
+\usepackage{xcolor}
+
+\qedsymbol{\ensuremath{_\Box}}
+
+\usepackage{chngcntr}
+\counterwithin{figure}{section}
+
+%\documentclass[ngerman]{article}
+%\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{simpleinvoice}
 \begin{document}
-
-% title page:
-\maketitle
-\vspace{3em}
-\tableofcontents
-\pagebreak
-
-\section{some Section}
-
-\lipsum[1-3]
-
-\section{recommendations}
-
-We really suggest you to read \cite{Any00} and \cite{NoO15}
-
-\printbibliography
-
-
+	\setinvoicetitle{Rechnung}
+	\setinvoicenumber{2020/4273}
+	\setreceivername{Peter Pinguin}
+	\setreceiveraddress{Hauptstr. 73\\ 12345 Neustadt}
+	\setname{Gerda Gecko}
+	\setaddress{Bahnhofstr. 42 \\ 12345 Neustadt}{Bahnhofstr. 42 | 12345 Neustadt}
+	\setphonenumber{+49 1234 56789}
+	\setemail{mail@example.com}
+	\setyourref{Ihre Bestellung vom 11. Juli 2020}
+	\setourref{DE12345678}
+	\setinvoicedate{\today}
+	\setdeadline{30}
+	\additem{5 Plüschpinguine}{25,00 \euro}{16}{125,00 \euro}
+	\additem{5 Bücher}{20,00 \euro}{5}{100,00 \euro}
+	\setsubtotal{225,00 \euro}
+	\setvat{25,00 \euro}
+	\settotal{250,00 \euro}
+	\setaccountnumber{IBAN: DE12345678901234567890 BIC: MEINEBANK42}
+	\makeinvoice
 \end{document}
