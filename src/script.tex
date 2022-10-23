@@ -42,6 +42,27 @@
 \usepackage{chngcntr}
 \counterwithin{figure}{section}
 
+\DeclareOption{german}{\def \INV@lang {deu}}
+\DeclareOption{ngerman}{\def \INV@lang {deu}}
+
+\def \INV@text@invoice@deu {Rechnung}
+\def \INV@text@ourref@deu {USt-ID-Nr.}
+\def \INV@text@yourref@deu {Ihr Zeichen}
+\def \INV@text@invnum@deu {Rechnungsnummer}
+\def \INV@text@invdate@deu {Rechnungsdatum}
+\def \INV@text@deadline@deu {Fällig}
+\def \INV@text@description@deu {Beschreibung}
+\def \INV@text@itemprice@deu {Einzelpreis}
+\def \INV@text@vat@deu {Umsatzsteuer}
+\def \INV@text@itemtotal@deu {Gesamtpreis}
+\def \INV@text@subtotal@deu {Zwischensumme}
+\def \INV@text@total@deu {Summe}
+\def \INV@text@paymentinfo@deu {Daten für Ihre Zahlung}
+\def \INV@text@totallong@deu {Betrag}
+\def \INV@text@accountnum@deu {Bankverbindung}
+\def \INV@text@warning@deu {Bitte zahlen Sie innerhalb von 30 Tagen nach Erhalt der Rechnung.}
+
+
 %\documentclass[ngerman]{article}
 %\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
