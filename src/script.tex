@@ -1,4 +1,4 @@
-\documentclass[a4paper]{article}
+\documentclass[ngerman]{article}
 
 % LANGAGE
 \input{../latex-std/lang-de.tex}
@@ -7,8 +7,8 @@
 % DOCUMENT PRE POST META
 \input{../latex-std/doc-pre-post.tex}
 
-\input{../latex-std/doc-biber.tex}
-\addbibresource{bibliography.bib}
+%\input{../latex-std/doc-biber.tex}
+%\addbibresource{bibliography.bib}
 
 
 % TEXT STRUCTURE ENVIRONMENTS
@@ -21,70 +21,32 @@
 \input{../latex-std/symb-math.tex}
 \input{../latex-std/math-de.tex}
 
-\title{Example of \LaTeX{} in a git repository with Azure Pipelines}
-\author{Maximilian Starke}
-\affil{some institute}
-\date{\today}
 
-
-\usepackage{ragged2e}
-\usepackage{framed}
-\usepackage{tabularx}
-
-\DeclareMathOperator*{\argmin}{\arg\min}
-
-\usepackage{relsize}
-
-\usepackage{xcolor}
-
-\qedsymbol{\ensuremath{_\Box}}
-
-\usepackage{chngcntr}
-\counterwithin{figure}{section}
-
-\DeclareOption{german}{\def \INV@lang {deu}}
-\DeclareOption{ngerman}{\def \INV@lang {deu}}
-
-\def \INV@text@invoice@deu {Rechnung}
-\def \INV@text@ourref@deu {USt-ID-Nr.}
-\def \INV@text@yourref@deu {Ihr Zeichen}
-\def \INV@text@invnum@deu {Rechnungsnummer}
-\def \INV@text@invdate@deu {Rechnungsdatum}
-\def \INV@text@deadline@deu {Fällig}
-\def \INV@text@description@deu {Beschreibung}
-\def \INV@text@itemprice@deu {Einzelpreis}
-\def \INV@text@vat@deu {Umsatzsteuer}
-\def \INV@text@itemtotal@deu {Gesamtpreis}
-\def \INV@text@subtotal@deu {Zwischensumme}
-\def \INV@text@total@deu {Summe}
-\def \INV@text@paymentinfo@deu {Daten für Ihre Zahlung}
-\def \INV@text@totallong@deu {Betrag}
-\def \INV@text@accountnum@deu {Bankverbindung}
-\def \INV@text@warning@deu {Bitte zahlen Sie innerhalb von 30 Tagen nach Erhalt der Rechnung.}
-
-
-%\documentclass[ngerman]{article}
 %\usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{simpleinvoice}
-\begin{document}
+\usepackage{custominvoice}
+
 	\setinvoicetitle{Rechnung}
-	\setinvoicenumber{2022/1}
-	\setreceivername{Annette Betke}
-	\setreceiveraddress{Lassallestr. 11A\\ 04860 Torgau}
-	\setname{Maximilian Starke\\ Freiberuflicher IT-Berater}
-	\setaddress{Hübnerstr. 28 \\ 01187 Dresden}{Hübnerstr. 28 | 01187 Dresden}
-	\setphonenumber{+49 174 711 9787}
-	\setemail{maximilian.starke@medionmail.com}
-	\setyourref{}
-	\setourref{22-01}
-	\setinvoicedate{01. September 2022}
-	\setdeadline{60}
-	\additem{individuelle Beratung}{50,00 \euro}{0}{50,00 \euro}
-	%\additem{5 Bücher}{20,00 \euro}{5}{100,00 \euro}
-	\setsubtotal{50,00 \euro}
-	\setvat{0,00 \euro}
-	\settotal{50,00 \euro}
-	\setaccountnumber{IBAN: DE07 5001 0517 5424 1972 92 BIC: INGDDEFFXXX}
+\setinvoicenumber{2022/1}
+\setreceivername{Annette Betke}
+\setreceiveraddress{Lassallestr. 11A\\ 04860 Torgau}
+\setname{Maximilian Starke\\ Freiberuflicher IT-Berater}
+\setaddress{Hübnerstr. 28 \\ 01187 Dresden}{Hübnerstr. 28 | 01187 Dresden}
+\setphonenumber{+49 174 711 9787}
+\setemail{maximilian.starke@medionmail.com}
+\setyourref{}
+\setourref{22-01}
+\setinvoicedate{01. September 2022}
+\setdeadline{60}
+\additem{individuelle Beratung}{50,00 \euro}{0}{50,00 \euro}
+%\additem{5 Bücher}{20,00 \euro}{5}{100,00 \euro}
+\setsubtotal{50,00 \euro}
+\setvat{0,00 \euro}
+\settotal{50,00 \euro}
+\setaccountnumber{IBAN: DE07 5001 0517 5424 1972 92 BIC: INGDDEFFXXX}
+
+
+\pagenumbering{gobble}
+\begin{document}
 	\makeinvoice
 \end{document}
