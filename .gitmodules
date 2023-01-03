@@ -1,0 +1,3 @@
+[submodule "latex-std"]
+	path = latex-std
+	url = https://github.com/Necktschnagge/latex-std
