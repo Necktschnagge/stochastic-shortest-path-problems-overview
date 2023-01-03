@@ -1,0 +1,49 @@
+\documentclass[a4paper]{article}
+
+% LANGAGE
+\input{../latex-std/lang-de.tex}
+\input{../latex-std/lang-de-extensions.tex}
+
+% DOCUMENT PRE POST META
+\input{../latex-std/doc-pre-post.tex}
+
+\input{../latex-std/doc-biber.tex}
+\addbibresource{bibliography.bib}
+
+
+% TEXT STRUCTURE ENVIRONMENTS
+\input{../latex-std/articul-comments.tex}
+\input{../latex-std/articul-structure.tex}
+
+
+% MATH SYMBOLS
+\input{../latex-std/symb-math.tex}
+
+\usepackage{lipsum}
+
+\title{Example of \LaTeX{} in a git repository with Azure Pipelines}
+\author{by someone}
+\affil{some institute}
+\date{\today}
+
+
+\begin{document}
+
+% title page:
+\maketitle
+\vspace{3em}
+\tableofcontents
+\pagebreak
+
+\section{some Section}
+
+\lipsum[1-3]
+
+\section{recommendations}
+
+We really suggest you to read \cite{Any00} and \cite{NoO15}
+
+\printbibliography
+
+
+\end{document}
