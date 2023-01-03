@@ -109,7 +109,7 @@ echo "Start uploading pdf build artifact..."
 LEFT_TRIES=10
 while true; do
 	echo -e "\tCheckout branch ${git_branch_artifacts}"
-	(git fetch https://${git_username}:${git_access_token}@github.com/${user_repo_id} && git checkout ${git_branch_artifacts} --) || quit 4
+	(git fetch ${deployment_remote_name} && git checkout ${deployment_remote_name}/${git_branch_artifacts} --) || quit 4
 	echo -e "\tgit merge ${deployment_remote_name}/${git_base_branch_for_artifacts}"
 	git -c user.name="CI for Necktschnagge" -c user.email="ci-for-necktschnagge@example.org" merge ${deployment_remote_name}/${git_base_branch_for_artifacts} || quit 5 # this is possibly concurrent to another job creating the same merge commit.
 	echo -e "\tCopy script PDF"
