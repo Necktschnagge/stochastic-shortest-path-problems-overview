@@ -1,0 +1,1117 @@
+\documentclass[onlymath]{beamer}
+%\usepackage[affil-it]{authblk}
+
+
+\usetheme{default}
+\usecolortheme{beaver}
+
+\setbeamercolor{block title}{use=structure,fg=white,bg=structure.fg!75!black}
+\setbeamercolor{block body}{parent=normal text,use=block title,bg=block title.bg!10!bg}
+
+\addtobeamertemplate{navigation symbols}{}{%
+	\usebeamerfont{footline}%
+	\usebeamercolor[fg]{footline}%
+	\hspace{1em}%
+	\insertframenumber/\inserttotalframenumber
+}
+
+%quasi-historischer Header:
+\usepackage{verbatim}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{ulem}
+%\usepackage{scrextend}
+%
+%\usepackage{microtype} % get rid of bad boxes (overful hbox) in bibliography {https://www.mrunix.de/forums/showthread.php?76019-Biblatex-Overfull-Boxes-im-Literaturverzeichnis-beheben-kein-minimal-bsp}
+%
+%\usepackage{csquotes} % {"When using babel or polyglossia with biblatex, loading csquotes is recommended to ensure that quoted texts are typeset according to the rules of your main language."} {https://tex.stackexchange.com/questions/229638/package-biblatex-warning-babel-polyglossia-detected-but-csquotes-missing/229653}
+%
+%\usepackage[backend=biber]{biblatex}
+%\addbibresource{bibliography.bib}
+%
+%%\usepackage{algorithm}
+%%\usepackage{algorithmicx}[noend]
+\usepackage{bbold}
+%\usepackage[noend]{algpseudocode}
+\usepackage{colonequals}
+%
+%\usepackage[official]{eurosym} % € - Symbol
+%
+\newcommand{\mc}{Markow-Kette}
+
+\title{Analyse eines Forschungsthemas\\
+Stochastic Shortest Paths
+}
+\author{Maximilian Starke}
+\institute[VFU] % (optional)
+{
+	\inst{}%
+	Fakultät für Informatik\\
+	Technische Universität Dresden
+}
+\date{\today}
+
+
+%\logo{\includegraphics[height=1.5cm]{lion-logo.png}}
+
+
+%
+\usepackage{mathtools}
+%\usepackage{ragged2e}
+%
+%\usepackage{framed}
+%\usepackage{amsmath, amssymb}
+%\usepackage{enumerate}
+%\usepackage{tabularx}
+%
+\DeclareMathOperator*{\argmin}{\arg\min}
+%
+\usepackage{pgfplots}
+\pgfplotsset{width=10cm,compat=1.10}
+\usepgfplotslibrary{fillbetween}
+%\newcolumntype{P}[1]{>{\centering\arraybackslash}p{#1}}
+%
+%\usepackage{listings}
+%
+%\newcolumntype{M}[1]{>{\centering\arraybackslash}m{#1}}
+%\newcolumntype{L}[1]{>{\flushleft\arraybackslash}m{#1}}
+%
+%
+\usepackage{tikz}
+%\usepackage{verbatim}
+%
+\usetikzlibrary{%
+	arrows,
+	shapes,
+	shapes.misc,% wg. rounded rectangle
+	shapes.arrows,%
+	chains,%
+	matrix,%
+	positioning,% wg. " of "
+	backgrounds,
+	fit,
+	petri,
+	scopes,%
+	decorations.pathmorphing,% /pgf/decoration/random steps | erste Graphik
+	shadows,%
+	calc,
+	angles,
+	positioning,
+	quotes,
+	patterns
+}
+%#1
+\tikzstyle{vertex}=[circle, minimum size=20pt, line width = 1pt, draw = black]
+\tikzstyle{acdot}=[circle, inner sep=0pt, minimum size=5pt, line width = 1pt, fill = black]
+\tikzstyle{target} = [vertex, double, double distance = 1pt]
+\tikzstyle{edge} = [draw,shorten > = 1pt, shorten < = 1pt, line width=1pt,->]
+\tikzstyle{medge} = [draw, line width = 8pt, yellow!50]
+\tikzstyle{weight} = [font=\small]
+\tikzstyle{selected edge} = [draw,line width=5pt,-,red!50]
+\tikzstyle{ignored edge} = [draw,line width=5pt,-,black!20]
+
+\usepackage{relsize}
+%
+%\usepackage{xcolor}
+%% maybe install minted some day and make syntax highlighting###
+%
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+\usepackage{amsmath, amssymb, amsxtra, amsthm}
+\usepackage{mathrsfs}
+%\usepackage{enumerate}
+%\usepackage{multicol} % multiple collums in enumerate
+%
+%\usepackage[thmmarks,amsmath,hyperref,noconfig]{ntheorem} 
+%% erlaubt es, Sätze, Definitionen etc. einfach durchzunummerieren.
+\newtheorem{satz}{Satz}[section] % Nummerierung nach Abschnitten
+\newtheorem{proposition}[satz]{Proposition}
+\newtheorem{korollar}[satz]{Korollar}
+%\newtheorem{vermutung}[satz]{Vermutung}
+\newtheorem*{partproof}{Beweis.}
+%
+%\theorembodyfont{\upshape}
+%\newtheorem{beispiel}[satz]{Beispiel}
+%\newtheorem{bemerkung}[satz]{Bemerkung}
+%\newtheorem{algorithmus}[satz]{Algorithmus}
+%%%%%%\newtheorem{beweis}[beispiel]{Beweis}
+
+%
+%\theoremstyle{nonumberplain}
+%\theoremheaderfont{\itshape}
+%\theorembodyfont{\normalfont}
+%\theoremseparator{.}
+%\theoremsymbol{\ensuremath{_\Box}}
+%\newtheorem{beweis}{Beweis}
+%\newtheorem{beweiss}{Beweisskizze}
+%
+%\qedsymbol{\ensuremath{_\Box}}
+%
+%\usepackage{chngcntr}
+%\counterwithin{figure}{section}
+%
+\tikzstyle{block} = [rectangle, draw, fill=blue!40, 
+text width=7em, text centered, rounded corners, minimum height=5em, node distance= 4.5cm, line width = 2pt]
+%
+%
+\tikzstyle{cblock} = [rectangle, draw, fill=blue!40, 
+text width=7em, text centered, rounded corners, minimum height=5em, node distance= 3.0cm, line width = 2pt]
+%
+%
+\tikzstyle{line} = [draw, -latex', line width = 1pt]
+%
+%
+\tikzstyle{cloud} = [ fill = white, rectangle, draw, rounded corners, node distance=2cm,
+minimum height=2.5em]
+%
+\pgfdeclarelayer{bg}
+\pgfsetlayers{bg,main}	
+%
+\pgfdeclarelayer{foreground}
+\pgfdeclarelayer{background}
+%% tell TikZ how to stack them (back to front)
+\pgfsetlayers{bg,background,main,foreground}
+%
+%\newenvironment{meta}
+%{\begin{center} \Large \color{red} META: \hspace{2ex} \large \color{blue}}
+%	{\end{center}}
+%
+
+\AtBeginSection{\frame{\sectionpage}}
+\AtBeginSubsection{\frame{\subsectionpage}}
+\begin{document}	
+
+\frame{\titlepage}
+
+%\begin{frame}
+%	\frametitle{Inhalt}
+%	\tableofcontents
+%\end{frame}
+
+
+
+\section{Introduction}
+
+
+	
+
+\begin{frame}
+	\begin{itemize}
+		\item The \textit{simplest} shortest path problem
+		\begin{center}%#2
+			\begin{tikzpicture}[auto,swap,scale=3]
+			
+			% First we draw the vertices
+			\foreach \pos/\name in {{(0,0)/{0}}, {(1,0)/1}, {(0.5,0.5)/{2}}, {(0,1)/3}, {(2,0)/4}, {(1.5,0.5)/{5}}, {(1,1)/6}}
+			\node[vertex] (\name) at \pos {$\name$};
+			
+			% First we draw the vertices
+			\foreach \pos/\name in {{(2,1)/7}}
+			\node[target] (\name) at \pos {$\name$};
+			
+			% Connect vertices with edges and draw weights
+%			\foreach \source/ \dest /\weight in {
+%				1/2/{\frac{1}{2}}
+%				2/6/{1},
+%				5/6/{1},
+%				6/5/{1}
+%			}
+%			\path[edge] (\source) to[bend left] node[weight]{$\weight$} (\dest);
+
+
+
+			
+			% Connect vertices with edges and draw weights
+%			\foreach \source/ \dest /\weight in {
+%				1/3/{\frac{1}{2}}
+%				3/4/{\frac{1}{2}},
+%				4/5/{\frac{1}{5}}
+%			}
+%			\path[edge] (\source) to[bend right] node{$\weight$} (\dest);
+			
+			% Connect vertices with edges and draw weights
+			\foreach \source/ \dest /\weight in {
+				0/1/{},
+				0/2/{},
+				0/3/{},
+				1/2/{},
+				2/3/{},
+				2/6/{},	
+				3/6/{},
+				4/7/{},
+				5/1/{},
+				5/4/{},
+				5/7/{},
+				6/5/{},
+				6/7/{}	
+			}
+			\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+
+			\only<3>{
+				\foreach \source/ \dest /\weight in {
+					0/2/{},
+					0/3/{},
+					3/6/{},
+					2/6/{},	
+					6/7/{}	
+				}
+				\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);
+			}
+			
+%			\foreach \source/ \dest /\weight in {
+%				4/4/{\frac{4}{5}}
+%			}
+%			\path[edge] (\source) to[loop right] node[weight]{$\weight$} (\dest);
+			
+			% Draw initial state
+			\path[edge] (-0.5,0) to (0);
+			
+			\end{tikzpicture}
+		\end{center}
+		\pause
+		\item Task
+		\begin{itemize}
+			\item Find the shortest path (\textit{number of hops})!
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
+
+
+
+\begin{frame}
+\begin{itemize}
+	\item The \textit{classical, non-stochastic, deterministic} shortest path problem
+	\begin{center}%#2
+		\begin{tikzpicture}[auto,swap,scale=3]
+		
+		% First we draw the vertices
+		\foreach \pos/\name in {{(0,0)/{0}}, {(1,0)/1}, {(0.5,0.5)/{2}}, {(0,1)/3}, {(2,0)/4}, {(1.5,0.5)/{5}}, {(1,1)/6}}
+		\node[vertex] (\name) at \pos {$\name$};
+		
+		% First we draw the vertices
+		\foreach \pos/\name in {{(2,1)/7}}
+		\node[target] (\name) at \pos {$\name$};
+		
+		% Connect vertices with edges and draw weights
+		%			\foreach \source/ \dest /\weight in {
+		%				1/2/{\frac{1}{2}}
+		%				2/6/{1},
+		%				5/6/{1},
+		%				6/5/{1}
+		%			}
+		%			\path[edge] (\source) to[bend left] node[weight]{$\weight$} (\dest);
+		
+		
+		
+		
+		% Connect vertices with edges and draw weights
+		%			\foreach \source/ \dest /\weight in {
+		%				1/3/{\frac{1}{2}}
+		%				3/4/{\frac{1}{2}},
+		%				4/5/{\frac{1}{5}}
+		%			}
+		%			\path[edge] (\source) to[bend right] node{$\weight$} (\dest);
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest /\weight in {
+			0/1/{1},
+			0/2/{3},
+			0/3/{8},
+			1/2/{1},
+			2/3/{2},
+			2/6/{7},	
+			3/6/{4},
+			4/7/{7},
+			5/1/{2},
+			5/4/{3},
+			5/7/{5},
+			6/5/{2},
+			6/7/{9}	
+		}
+		\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+		
+		\only<3>{
+			\foreach \source/ \dest /\weight in {
+				0/1/{1},
+				1/2/{1},
+				2/3/{2},
+				3/6/{4},
+				5/7/{5},
+				6/5/{2}
+			}
+			\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);
+		}
+		
+		
+		\only<5>{
+			\foreach \source/ \dest /\weight in {
+				0/1/{1},
+				1/2/{1},
+				2/3/{2},
+				3/6/{4},
+				4/7/{7},
+				5/7/{5},
+				6/5/{2}
+			}
+			\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);
+		}
+		
+		%			\foreach \source/ \dest /\weight in {
+		%				4/4/{\frac{4}{5}}
+		%			}
+		%			\path[edge] (\source) to[loop right] node[weight]{$\weight$} (\dest);
+		
+		% Draw initial state
+		\path[edge] (-0.5,0) to (0);
+		
+		\end{tikzpicture}
+	\end{center}
+	\pause
+	\item Task
+	\begin{itemize}
+		\item Find the path with the minimal weight sum!
+		\onslide<4->{\item Give a strategy to always reach the goal while collecting minimal weight!}
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}
+\begin{itemize}
+	\item The \textit{stochastic} shortest path problem
+	\begin{center}%#2
+		\hspace{-1.5cm}\begin{tikzpicture}[auto,swap,scale=3]
+		%\small
+		
+		% Connect vertices with edges and draw weights
+%			\foreach \source/ \dest /\weight in {
+%				1/2/{\frac{1}{2}}
+%				2/6/{1},
+%				5/6/{1},
+%				6/5/{1}
+%			}
+%			\path[edge] (\source) to[bend left] node[weight]{$\weight$} (\dest);
+
+
+
+
+% Connect vertices with edges and draw weights
+%			\foreach \source/ \dest /\weight in {
+%				1/3/{\frac{1}{2}}
+%				3/4/{\frac{1}{2}},
+%				4/5/{\frac{1}{5}}
+%			}
+%			\path[edge] (\source) to[bend right] node{$\weight$} (\dest);
+
+		% First we draw the action dots
+		\foreach \pos/\name in {{(-0.2,0)/{a0}}, {(-0.5,0.3)/{b0}}, {(0.5,-0.2)/{a1}}, {(0.2,0.5)/{a2}}, {(0.5,0.8)/{b2}}, {(-0.2,1)/{a3}}, {(2.3,0)/{a4}}, {(1.5,0.2)/{a5}}, {(1.8,0.5)/{b5}}, {(1.3,1)/{a6}}}
+		\node[acdot] (\name) at \pos {};
+
+
+		% First we draw the vertices
+		\foreach \pos/\name in {{(-0.5,0)/{0}}, {(0.5,-0.5)/1}, {(0.5,0.5)/{2}}, {(-0.5,1)/3}, {(2,0)/4}, {(1.5,0.5)/{5}}, {(1,1)/6}}
+		\node[vertex] (\name) at \pos {$s_{\name}$};
+		
+		% First we draw the vertices
+		\foreach \pos/\name in {{(2.5,1)/7}}
+		\node[target] (\name) at \pos {$s_{\name}$};
+		
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest /\weight in {
+			0/a0/{\alpha},
+			0/b0/{\beta},
+			a0/1/{\frac{1}{3} \colon 1},
+			a0/2/{\frac{2}{3} \colon 3},
+			b0/3/{1 \colon 8},
+			1/a1/{\alpha},
+			a1/2/{1 \colon 1},
+			2/a2/{\alpha},
+			2/b2/{\beta},
+			a2/3/{1 \colon 2},
+			b2/6/{1 \colon 7},
+			3/a3/{\alpha},
+			a3/6/{1 \colon 4},
+			4/a4/{\alpha},
+			a4/7/{1 \colon 7},
+			5/a5/{\alpha},
+			5/b5/{\beta},
+			a5/1/{\frac{1}{3} \colon 2},
+			a5/4/{\frac{2}{3} \colon 3},
+			b5/7/{1 \colon 5},
+			6/a6/{\alpha},
+			a6/5/{\frac{1}{2} \colon 2},
+			a6/7/{\frac{1}{2} \colon 9}	
+		}
+		\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+		
+		
+		%			\foreach \source/ \dest /\weight in {
+		%				4/4/{\frac{4}{5}}
+		%			}
+		%			\path[edge] (\source) to[loop right] node[weight]{$\weight$} (\dest);
+		
+		% Draw initial state
+		\path[edge] (-1,0) to (0);
+		
+		%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = (1,1)--(0,0)--(2,0)};
+		\end{tikzpicture}
+	\end{center}
+	\pause
+	\item Markov Decision Process (MDP)
+	\pause
+	\item Task
+	\begin{itemize}
+		\item Give a strategy to reach the goal with minimal \textit{expected} accumulated weights!
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{MDP - Markov Decision Process (I)}
+	\begin{block}{definition}
+		An MDP is a tuple
+		\[ \mathcal{M} = (S, Act, P, s_{init}, wgt)
+		\] \pause
+		where
+		\begin{itemize}
+			\item $S$ is a finite set of states. \pause
+			\item $Act$ is a finite set of actions. \pause
+			\item $P: S \times Act \dashrightarrow Distr(S)$ maps every enabled state - action - pair $(s,\alpha)$ to a probability distribution over the states. \pause
+			\item $s_{init} \in S$ is some designated initial state. \pause
+			\item $wgt : S \times Act \to \mathbb{Z}$ is some weight (reward) function.
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\newcommand{\rawdiaplus}{%
+	\begin{tikzpicture}
+	\useasboundingbox (-0.7ex, -0.9ex) rectangle (0.7ex, 0.9ex);
+	\node (w) at (-0.7ex,0) {};
+	\node (e) at (+0.7ex,0) {};
+	\node (s) at (0,-0.9ex) {};
+	\node (n) at (0,+0.9ex) {};
+	\draw (n.center) -- (e.center) -- (s.center) -- (w.center) -- (n.center);
+	\draw (n.center) -- (s.center);
+	\draw (e.center) -- (w.center);
+	\end{tikzpicture}
+}
+\begin{frame}
+	\frametitle{MDP - Markov Decision Process (II)}
+	\begin{block}{Paths}
+		\[
+			\pi \in \mathrm{Paths}(\mathcal{M})
+		\] \pause \begin{itemize}
+			\item $\pi = (s_0,\alpha_0,s_1,\alpha_1, \dots)$ \pause
+			\item $\pi$ is some maximal finite or infinite path \pause
+		\end{itemize}
+	\end{block}
+	Let $F \subseteq S$ be some set of goal states... \pause
+	\begin{block}{accumulated weights until reaching a goal}
+	\[
+	\rawdiaplus F : \mathrm{Paths}(\mathcal{M}^{\mathfrak{S}}) \to \mathbb{Q} :
+	\]
+	\[ 
+	\rawdiaplus F (\pi) = \bigg\{\begin{array}{lr}
+	wgt(\hat{\pi}), & \text{$\hat{\pi}$ is shortest prefix of $\pi$ s.t. $\mathrm{last}(\hat{\pi}) \in F$  }\\
+	\infty, & \text{otherwise, i.e. $\pi \nvDash \diamondsuit F$}
+	\end{array}
+	\]
+	\end{block}
+
+\end{frame}
+\begin{comment}
+	
+\section{Essential Definitions}
+
+\begin{frame}
+\begin{itemize}
+	\item MDP
+	\item Expectation
+	\item Conditional Expectation
+	\item Variance-penalized Expectation
+	\item schedulers, kind of schedulers...
+\end{itemize}
+\end{frame}
+\end{comment}
+
+\section{The classic stochastic shortest path problem}
+
+\begin{frame}
+\frametitle{The classic stochastic shortest path problem}
+	\begin{itemize}
+		\item given:
+		\begin{itemize}
+			\item a single goal state \pause
+			\item positive cycle condition: There is no cycle $\pi$ with ${\mathrm{wgt}(\pi)} \leq 0$ \pause
+			\item goal is reachable from each state \pause
+		\end{itemize}
+		\item objective: Minimize the expected accumulated weight until reaching goal state.\[
+			\mathbb{E}_{\mathcal{M},s}^{inf}(\rawdiaplus goal) \coloneqq \inf_{\mathfrak{S} \in \mathrm{Schedulers}(M)}\mathbb{E}_{\mathcal{M},s}^{\mathfrak{S}}(\rawdiaplus goal)
+		\] \pause
+		\item Well known for a long time:
+		\begin{itemize}
+			\item There exists an optimal memoryless deterministic scheduler $\mathfrak{S}$. \pause
+			\item $\mathfrak{S}$ is computable by solving a LP \pause
+			\item iterative algorithm: \pause
+			\begin{itemize}
+				\item start at any feasible scheduler \pause
+				\item iterative improvement \pause
+				\item stop at an optimal vertex of the LP (corresponding to some MD scheduler)
+			\end{itemize}
+		\end{itemize}
+	\end{itemize}
+\end{frame}%[3]
+
+\begin{frame}
+\frametitle{The classic stochastic shortest path problem}
+\begin{itemize}
+	\item Can we do it better? \pause $\longrightarrow$ \textcolor{red}{YES! - using \textbf{spider construction}!} \pause
+	\item given:
+	\begin{itemize}
+		\item a single goal state
+		\onslide<3>{\item positive cycle condition: There is no cycle $\pi$ with ${\mathrm{wgt}(\pi)} \leq 0$} \pause
+		\item $\mathcal{M}$ is an MDP with arbitrary integer weights \pause
+		\item goal is reachable from each state \pause
+	\end{itemize}
+	\item The following can be solved in polynomial time:
+	\begin{itemize}
+		\item Check: $\mathbb{E}_{\mathcal{M},s}^{inf}(\rawdiaplus \mathrm{goal}) > - \infty$?
+		\item Compute $\mathbb{E}_{\mathcal{M},s}^{inf}$ if it is finite
+	\end{itemize}
+
+\end{itemize}
+\end{frame}%[1]
+
+\begin{frame}
+	\frametitle{Spider Construction}
+	\begin{itemize}
+		\item Idea: construct a new MDP $\mathcal{N}$ from the given MDP $\mathcal{M}$ \pause
+		\item Pick a 0-BSCC $\mathcal{E}$ of $\mathcal{M}$ and some vertex $s_0$ in $\mathcal{E}$. \pause
+		\item $\mathcal{M} \mapsto \mathcal{N} \coloneqq \mathrm{Spider}_{\mathcal{E}, s_0}(\mathcal{M})$ \pause
+		\item The spider construction is done by applying the following steps:
+		\begin{enumerate}
+			\item Remove all actions $(s, \alpha_s) \in \mathcal{E}$ \pause
+			\item Add actions $(s, \tau)$ for all $s\in \mathcal{E} \setminus \{s_0\}$ such that
+			\begin{itemize}
+				\item $P_{\mathcal{N}}(s,\tau,s_0) \coloneqq 1$ \pause
+				\item $wgt_{\mathcal{N}}(s,\tau) \coloneqq wgt (s, s_0)$ \pause
+			\end{itemize}
+			\item For each $s\in \mathcal{E}\setminus\{s_0\}$ and $\beta \in \mathrm{Act}_{\mathcal{M}}(s)\setminus\{\alpha_s\}$ let us replace $(s,\beta)$ by $(s_0,\beta)$ where
+			\begin{itemize}
+				\item $P_{\mathcal{N}}(s_0,\beta,u) \coloneqq P_{\mathcal{M}}(s,\beta,u)$
+				\item $wgt_{\mathcal{N}}(s_0,\beta) + wgt (s, s_0) = wgt_{\mathcal{M}}(s,\beta)$
+			\end{itemize}
+		\end{enumerate}
+	\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Classification of paths}
+	A path $\pi \in \mathrm{InfPaths}(\mathcal{M})$ is called 
+	\begin{itemize}
+		\item pumping $\ratio\Leftrightarrow \liminf_{n \to \infty}(\mathrm{wgt}(\mathrm{pref(\pi, n)})) = \infty$ \pause
+		\item \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent $\ratio\Leftrightarrow$ \begin{tabular}{c} $\limsup_{n \to \infty}$ \\ $\liminf_{n \to \infty}$ \end{tabular} $=$ \begin{tabular}{c} ${\infty}$ \\ ${-\infty}$ \end{tabular} \pause
+		\item gambling $\ratio\Leftrightarrow$ $\pi$ is positively and negatively weight divergent \pause
+		\item bounded from below $\ratio\Leftrightarrow \liminf_{n \to \infty} \mathrm{wgt}(\mathrm{pref}(\pi,n)) \in \mathbb{Z}$
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Classification of end components}
+We distinguish end components by the following types
+\begin{itemize}
+	\item pumping ECs: $\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}(\pi \text{ is pumping}) = 1$ \pause
+	\item \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent ECs:\\ \hspace{-2ex}$\exists \text{ scheduler } \mathfrak{S}: \mathbb{Pr}\Big(\pi \text{ is }$ \begin{tabular}{c}(positively) \\ negatively \end{tabular} weight divergent $\Big) = 1$ \pause
+	\item gambling ECs: There is a scheduler s.t. $\mathbb{E}(\mathrm{MP}) = 0$ and it is positively and negatively weight divergent \pause
+	\item bounded EC: There exists an upper bound and a lower bound
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\begin{block}{Check Weight-Divergence of a SCC}
+	\begin{itemize}
+		\item can be done in \textbf{PTime} \pause
+		\item two cases:
+		\begin{itemize}
+			\item "yes, weight-divergent" : finds a gambling or a pumping scheduler \pause
+			\item "no" : returns an \textit{equivalent} MDP $\mathcal{N}$ without 0-ECs 
+		\end{itemize}
+	\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}
+\begin{itemize}
+	\item The \textit{stochastic} shortest path problem
+	\begin{center}%#2
+		\hspace{-1.5cm}\begin{tikzpicture}[auto,swap,scale=3]
+		%\small
+		
+		% Connect vertices with edges and draw weights
+		%			\foreach \source/ \dest /\weight in {
+		%				1/2/{\frac{1}{2}}
+		%				2/6/{1},
+		%				5/6/{1},
+		%				6/5/{1}
+		%			}
+		%			\path[edge] (\source) to[bend left] node[weight]{$\weight$} (\dest);
+		
+		
+		
+		
+		% Connect vertices with edges and draw weights
+		%			\foreach \source/ \dest /\weight in {
+		%				1/3/{\frac{1}{2}}
+		%				3/4/{\frac{1}{2}},
+		%				4/5/{\frac{1}{5}}
+		%			}
+		%			\path[edge] (\source) to[bend right] node{$\weight$} (\dest);
+		
+		% First we draw the action dots
+		\foreach \pos/\name in {{(-0.2,0)/{a0}}, {(-0.5,0.3)/{b0}}, {(0.5,-0.2)/{a1}}, {(0.2,0.5)/{a2}}, {(0.5,0.8)/{b2}}, {(-0.2,1)/{a3}}, {(2.3,0)/{a4}}, {(1.5,0.2)/{a5}}, {(1.8,0.5)/{b5}}, {(1.3,1)/{a6}}}
+		\node[acdot] (\name) at \pos {};
+		
+		
+		% First we draw the vertices
+		\foreach \pos/\name in {{(-0.5,0)/{0}}, {(0.5,-0.5)/1}, {(0.5,0.5)/{2}}, {(-0.5,1)/3}, {(2,0)/4}, {(1.5,0.5)/{5}}, {(1,1)/6}}
+		\node[vertex] (\name) at \pos {$s_{\name}$};
+		
+		% First we draw the vertices
+		\foreach \pos/\name in {{(2.5,1)/7}}
+		\node[target] (\name) at \pos {$s_{\name}$};
+		
+		
+		% Connect vertices with edges and draw weights
+		\foreach \source/ \dest /\weight in {
+			0/a0/{\alpha},
+			0/b0/{\beta},
+			a0/1/{\frac{1}{3} \colon 10},
+			a0/2/{\frac{2}{3} \colon 3},
+			b0/3/{1 \colon 8},
+			1/a1/{\alpha},
+			a1/2/{1 \colon 1},
+			2/a2/{\alpha},
+			2/b2/{\beta},
+			a2/3/{1 \colon 2},
+			b2/6/{1 \colon 7},
+			3/a3/{\alpha},
+			a3/6/{1 \colon 4},
+			4/a4/{\alpha},
+			a4/7/{1 \colon 7},
+			5/a5/{\alpha},
+			5/b5/{\beta},
+			a5/1/{\frac{1}{3} \colon 2},
+			a5/4/{\frac{2}{3} \colon 3},
+			b5/7/{1 \colon 5},
+			6/a6/{\alpha},
+			a6/5/{\frac{1}{2} \colon 2},
+			a6/7/{\frac{1}{2} \colon 9}	
+		}
+		\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+		% Connect vertices with edges and draw weights
+		
+		\only<2->{
+			\foreach \source/ \dest /\weight in {
+				1/a1/{\alpha},
+				3/a3/{\alpha},
+				4/a4/{\alpha},
+				6/a6/{\alpha}
+			}
+			\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);		
+		}
+		\only<3->{		
+			\foreach \source/ \dest /\weight in {
+				2/a2/{\alpha}
+			}
+			\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);
+		}
+		\only<4->{		
+			\foreach \source/ \dest /\weight in {
+				5/b5/{\beta}
+			}
+			\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);
+		}
+		\only<5->{		
+			\foreach \source/ \dest /\weight in {
+				0/a0/{\alpha}
+			}
+			\path[edge, draw=red] (\source) to node[weight]{$\weight$} (\dest);
+		}
+		
+		%			\foreach \source/ \dest /\weight in {
+		%				4/4/{\frac{4}{5}}
+		%			}
+		%			\path[edge] (\source) to[loop right] node[weight]{$\weight$} (\dest);
+		
+		% Draw initial state
+		\path[edge] (-1,0) to (0);
+		
+		%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = (1,1)--(0,0)--(2,0)};
+		\end{tikzpicture}
+	\end{center}
+	\item Markov Decision Process (MDP)
+	\item Task
+	\begin{itemize}
+		\item Give a strategy to reach the goal with minimal \textit{expected} accumulated weights!
+	\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\section{Different variants of the stochastic shortest path problem}
+
+\begin{frame}
+	\frametitle{conditional expected accumulated weights}
+	Assume:
+	\begin{itemize}
+		\item ...to not reach goal with probability $1$ \pause
+		\item ...having non-negative integer weights \pause
+		\item ...having two sets of states $F,G \subseteq S$ \pause
+	\end{itemize}
+	\begin{block}{Maximizing the conditional expected accumulated weight}
+		\[
+			\mathbb{CE} \coloneqq \mathbb{E}(\rawdiaplus \mathrm{goal} \mid \diamondsuit \mathrm{goal}) \pause
+		\] 
+		\[
+			\mathbb{CE} \coloneqq \mathbb{E}(\rawdiaplus F \mid \diamondsuit G) \pause
+		\] 
+		\[
+			\mathbb{CE}^{max} \coloneqq \sup_{\mathfrak{S} \in \mathfrak{V}}\mathbb{E}_{\mathcal{M},s_{init}}^{\mathfrak{S}}(\rawdiaplus F \mid \diamondsuit G) \pause
+		\] 
+		\[
+			\mathfrak{V} \coloneqq \{\mathfrak{S} \in \mathrm{Schedulers}(\mathcal{M}) \mid \mathbb{Pr}_{\mathcal{M},s_{init}}^{\mathfrak{S}}(\diamondsuit G) > 0 \text{ and } \]\[ \hspace{20ex} \mathbb{Pr}_{\mathcal{M},s_{init}}^{\mathfrak{S}}(\diamondsuit F \mid \diamondsuit G) = 1 \}
+		\]		
+	\end{block}
+\end{frame}
+
+
+\begin{comment}
+	
+\begin{frame}
+	\frametitle{conditional expected accumulated reward}
+	Given:
+	\begin{itemize}
+		\item MDP $\mathcal{M}$ with non-negative integer weights
+		\item two sets of states $F, G \subseteq \mathrm{States}(\mathcal{M})$
+	\end{itemize}
+	\begin{definition}
+		\[
+		\mathbb{CE}^{max} \coloneqq \sup_{\mathfrak{S} \in S}(\mathcal{E}_{\mathcal{M}, s_init}^{\mathfrak{S}}(\boxplus F \mid \diamondsuit G))
+		\]
+		where $S$ is the set of schedulers: %\in \mathrm{schedulers}(\mathcal{M})
+		\[
+		S \coloneqq \{\mathfrak{S} \mid \mathbb{Pr}_{\mathcal{M},s_init}^{\mathfrak{S}}(\diamondsuit G) > 0 \land \mathbb{Pr}_{\mathcal{M},s_init}^{\mathfrak{S}}(\diamondsuit F \mid \diamondsuit G) = 1\}
+		\]
+		
+	\end{definition}
+	
+\end{frame}
+\end{comment}
+
+\begin{frame}
+	\frametitle{conditional expected accumulated reward}
+	\begin{center}%#2
+		\hspace{-1.5cm}\begin{tikzpicture}[auto,swap,scale=3]
+	
+			% First we draw the action dots
+			\foreach \pos/\name in {{(0.42,1)/{a0}}, {(1.3,0.3)/{a1}}, {(2,-0.3)/{b1}}}
+			\node[acdot] (\name) at \pos {};
+			
+			% First we draw the vertices
+			\foreach \pos/\name in {{(0,1)/0}, {(1,0)/1}, {(3,0)/3}}
+			\node[vertex] (\name) at \pos {$s_{\name}$};
+			
+			% First we draw the vertices
+			\foreach \pos/\name in {{(2,1)/2}}
+			\node[target] (\name) at \pos {$s_{\name}$};
+			
+			
+			% Connect vertices with edges and draw weights
+			\foreach \source/ \dest /\weight in {
+				0/a0/{\alpha},
+				1/a1/{\alpha},
+				1/b1/{\beta},
+				a0/2/{\frac{1}{2} \colon r},
+				a0/1/{\frac{1}{2} \colon 0},
+				a1/2/{1 \colon 0},
+				b1/3/{\frac{1}{2} \colon 1}
+%				b1/1/{\frac{1}{2} \colon 1}
+			}
+			\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+
+			% Connect vertices with edges and draw weights
+			\foreach \source/ \dest /\weight in {
+				b1/1/{\frac{1}{2} \colon 1}
+			}
+			\path[edge] (\source) to[bend right] node[weight]{$\weight$} (\dest);
+			
+			
+			% Draw initial state
+			%\path[edge] (-1,0) to (0);
+			
+			%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = (1,1)--(0,0)--(2,0)};
+		\end{tikzpicture}
+	\end{center} \pause
+	\begin{block}{Finding the best scheduler...}
+		$\mathfrak{S}_n \colon $ select $\beta^n \alpha$, $n \in \mathbb{N}\cup\{\infty\}$ \pause
+		\[
+			\mathbb{CE} = \frac{\frac{r}{2}+\frac{1}{2}\cdot \frac{1}{2}^n \cdot n}{\frac{1}{2}+\frac{1}{2}^{n+1}} \hspace{10ex} \text{ choose scheduler } \mathfrak{S}_{r+2}
+		\]
+	\end{block}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{complexity: conditional expected accumulated rewards}
+\begin{itemize}
+	\item There is a \textbf{PTime algorithm} to decide: \texttt{Is $\mathbb{CE}^{max}$ finite?} \pause
+	\item There is a \textbf{pseudo-PTime algorithm} to \texttt{calculate an upperbound $\mathbb{CE}^{ub} \geq \mathbb{CE}^{max}$} \pause
+	\item \textit{If we have $F=G$ and $\forall s \in \mathrm{States}(\mathcal{M}): s \vDash \exists \diamondsuit G \Rightarrow \mathbb{Pr}_{\mathcal{M},s}^{min}(\diamondsuit G) > 0$ } there is a \textbf{PTime algorithm} to \texttt{calculate an upperbound $\mathbb{CE}^{ub} \geq \mathbb{CE}^{max}$} \pause
+	\item The problem \texttt{Decide if $\mathbb{CE}^{max} \bowtie t$} where we have
+	\begin{itemize}
+		\item $t\in \mathbb{Q}\dots$ some rational threshold \pause
+		\item $\bowtie \in \{<,\leq,\geq,>\}$ \pause
+	\end{itemize} is \textbf{PSpace-hard}, solvable in \textbf{ExpTime} and \textit{for acyclic MDPs} \textbf{PSpace-complete} \pause
+	\item In \textbf{ExpTime} we can \texttt{compute $\mathbb{CE}^{max}$ together with an optimal scheduler}
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Checking finiteness}
+	\begin{itemize}
+		\item \textbf{PTime} algorithm: given $\mathcal{M}, F, G$, two possible outcomes:
+		\begin{enumerate}[(1)]
+			\item $\mathbb{CE}^{max} = \infty$
+			\item $\mathbb{CE}^{max}$ is finite, equivalent MDP $\mathcal{N}$ with two trap states $goal, fail$
+		\end{enumerate}
+	\end{itemize}
+\pause
+\begin{block}{equivalence of $\mathcal{M}$ and $\mathcal{N}$, properties of $\mathcal{N}$}
+	\[
+		\mathbb{E}_{\mathcal{M},s_{init}}^{max} (\rawdiaplus F \mid \diamondsuit G) = \mathbb{E}_{\mathcal{N},s_{init}}^{max} (\rawdiaplus goal \mid \diamondsuit goal)
+	\]
+	\pause
+	in $\mathcal{N}$ the state $goal$ is reachable from all states $s \in S_\mathcal{N} \setminus \{fail\}$ and \[
+		\mathbb{Pr}_{\mathcal{N},s}^{min}\Big(\diamondsuit(goal \lor fail)\Big) = 1
+	\]
+	\pause
+	$\mathcal{N}$ has no \textit{critical} scheduler $\mathfrak{S}$: $\mathbb{Pr}^{\mathfrak{S}}(\diamondsuit fail) = 1$ and there is a reachable positive $\mathfrak{S}$-cycle.
+\end{block}
+
+\end{frame}
+
+\begin{frame}
+	\frametitle{Threshold Algorithm}
+	We assume that we have such an MDP $\mathcal{N}$. \pause
+	\begin{block}{Observation}
+		\begin{itemize}
+			\item $\exists$ saturation point $t \in \mathbb{N}$ such that \pause
+			\begin{itemize}
+				\item after $\pi$ with $\mathrm{wgt}(\pi) \geq t$ we can rely on a memoryless, deterministic scheduler maximizing the probability to reach $goal$. \pause
+				\item Until reaching $t$ a deterministic reward-based scheduler is sufficient.
+			\end{itemize}
+		\end{itemize}
+	\end{block}
+\pause
+	\begin{block}{Threshold Algorithm}
+		\begin{itemize}
+			\item input: MDP $\mathcal{N}$ as before, threshold $t \in \mathbb{Q}_{\geq 0}$\pause
+			\item output:\begin{enumerate}[\text{case} (1)]
+				\item "no", we do not have $\mathbb{CE}^{max}>t$
+				\item "yes", $\mathbb{CE}^{max}>t$ and we found a deterministic, reward-based scheduler $\mathfrak{S}$ s.t. \pause $\mathfrak{S}$ is memoryless after some saturation point.
+			\end{enumerate}
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+\frametitle{What about paths not reaching $goal$?}
+\onslide<4->{\[
+\oplus goal(\pi) \coloneqq \bigg\{\begin{array}{lr}
+	\rawdiaplus(\pi), & \pi \vDash \diamondsuit F \\
+	0, & \text{otherwise, i.e. $\pi \nvDash \diamondsuit F$}
+\end{array} 
+\]}
+\begin{tabular}{|p{5cm}|p{5cm}|}
+\hline
+conditional expectation & partial expectation \\ \hline \pause 
+$\mathbb{CE}$ & $\mathbb{PE}$ \\ \hline \pause
+$\mathbb{CE} = \mathbb{E}(\rawdiaplus \mathrm{goal}\mid \diamondsuit \mathrm{goal})$ & $\pi \nvDash \diamondsuit\mathrm{goal} \Rightarrow \mathrm{wgt}'(\pi)\coloneqq0$ \\ \hline \pause \pause
+may lead to quite high $\mathbb{CE}$ paired with a low probability of reaching goal & good approximation for \newline maximizing probability of reaching goal and reward until goal\\ \hline
+\end{tabular}
+\pause
+
+\vspace{2ex}
+For both we know...
+\begin{itemize}
+	\item \textbf{PTime} algorithm to check finiteness of $\mathbb{CE}^{max}$ ($\mathbb{PE}^{max}$) \pause
+	\item Both have a saturation point: reward-based schedulers vs. memoryless, det. schedulers
+\end{itemize}
+\end{frame}
+
+
+
+\begin{frame}
+\begin{center}%#2
+	\hspace{-1.5cm}\begin{tikzpicture}[auto,swap,scale=3]
+	
+	% First we draw the action dots
+	\foreach \pos/\name in {{(0.42,1)/{a0}}, {(1.3,0.3)/{a1}}, {(2,-0.3)/{b1}}}
+	\node[acdot] (\name) at \pos {};
+	
+	% First we draw the vertices
+	\foreach \pos/\name in {{(0,1)/0}, {(1,0)/1}, {(3,0)/3}}
+	\node[vertex] (\name) at \pos {$s_{\name}$};
+	
+	% First we draw the vertices
+	\foreach \pos/\name in {{(2,1)/2}}
+	\node[target] (\name) at \pos {$s_{\name}$};
+	
+	
+	% Connect vertices with edges and draw weights
+	\foreach \source/ \dest /\weight in {
+		0/a0/{\alpha},
+		1/a1/{\alpha},
+		1/b1/{\beta},
+		a0/2/{\frac{1}{2} \colon r},
+		a0/1/{\frac{1}{2} \colon 0},
+		a1/2/{1 \colon 0},
+		b1/3/{\frac{1}{2} \colon 1}
+		%				b1/1/{\frac{1}{2} \colon 1}
+	}
+	\path[edge] (\source) to node[weight]{$\weight$} (\dest);
+	
+	% Connect vertices with edges and draw weights
+	\foreach \source/ \dest /\weight in {
+		b1/1/{\frac{1}{2} \colon 1}
+	}
+	\path[edge] (\source) to[bend right] node[weight]{$\weight$} (\dest);
+	
+	
+	% Draw initial state
+	%\path[edge] (-1,0) to (0);
+	
+	%\path pic[draw, angle radius=9mm, angle eccentricity=1.2, "xyz"] {angle = (1,1)--(0,0)--(2,0)};
+	\end{tikzpicture}
+\end{center} \pause
+	\begin{block}{Finding the best scheduler...}
+		$\mathfrak{S}_n \colon $ select $\beta^n \alpha$, $n \in \mathbb{N}\cup\{\infty\}$ \pause
+		\[
+			\mathbb{CE} = \frac{\frac{r}{2}+\frac{1}{2}\cdot \frac{1}{2}^n \cdot n}{\frac{1}{2}+\frac{1}{2}^{n+1}} \hspace{10ex} \text{ choose scheduler } \mathfrak{S}_{r+2} \pause
+		\]
+		\[
+			\mathbb{PE} = \frac{1}{2} r + \frac{1}{2} \cdot \frac{1}{2}^n \cdot n \hspace{10ex} \text{ choose scheduler $\mathfrak{S}_{1}$ or $\mathfrak{S}_{2}$}
+		\]
+	\end{block}
+\end{frame}
+
+
+
+\begin{frame}
+	\frametitle{Switching to integer weights...}
+	\begin{itemize}
+		\item It's not ensured that a saturation point exists \pause
+		\item Optimal schedulers may need infinite memory \pause
+		\item Optimal values may even become irrational \pause
+		\item LPs are not anymore sufficient for solving \pause
+		\item There are approximation methods using LPs
+	\end{itemize}
+\end{frame}
+
+\section{Keep an eye on the variance}
+
+\begin{frame}
+	\frametitle{Variance-penalized expectation}
+	Given:
+	\begin{itemize}
+		\item MDP $\mathcal{M}$ with non-negative integer weights \pause
+		\item only one trap state $goal$ which is reachable from all other states \pause
+		\item all states are reachable from $s_{init}$
+	\end{itemize} \pause
+	\begin{block}{Variance-penalized expectation}
+		\[
+		\mathbb{VPE}[\lambda]_{\mathcal{M}}^{\mathfrak{S}} \coloneqq \mathbb{E}_{\mathcal{M}}^{\mathfrak{S}}(\rawdiaplus goal) - \lambda \cdot \mathbb{V}_{\mathcal{M}}^{\mathfrak{S}}(\rawdiaplus goal)
+		\] \pause
+		\[
+		\mathbb{VPE}[\lambda]_{\mathcal{M}}^{max} \coloneqq \sup_{\mathfrak{S}} \mathbb{VPE}[\lambda]_{\mathcal{M}}^{\mathfrak{S}}
+		\]
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{complexity result}
+	\begin{itemize}
+		\item Computing a variance-minimal scheduler among all $\mathbb{E}$-optimal schedulers is doable in \textbf{PTime}. The scheduler can be chosen memoryless. \pause
+		\item In \textbf{ExpSpace} we can compute $\mathbb{VPE}^{max}$ and a deterministic scheduler as witness. \pause
+		\item The threshold problem, i.e. checking $\mathbb{VPE}^{max} \geq t$ is decidable in \textbf{NExpTime} and is known to be \textbf{ExpTime-hard}.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\begin{block}{\textbf{PTime} algorithm for chosing the best$_{(variance)}$ scheduler among all $\mathbb{E}$-optimal ones.}
+		\begin{enumerate}
+			\item PTime transformation $\mathcal{M} \mapsto \mathcal{M}'$ such that \begin{itemize} \pause
+				\item $\mathcal{M}'$ has no 0-ECs \pause
+				\item There are mappings from schedulers of $\mathcal{M}$ to $\mathcal{M}'$ and vice versa s.t. \begin{itemize} \pause
+					\item $\mathbb{E}, \mathbb{V}$ are preserved \pause
+				\end{itemize}
+			\end{itemize}
+			\item Transformation $\mathcal{M}' \mapsto \mathcal{M}''$ such that \begin{itemize} \pause
+				\item All actions not leading to $\mathbb{E}^{max}$ are removed.\pause
+				\item $\mathcal{M}''$ has no end components \pause
+				\item All schedulers of $\mathcal{M}''$ have equal value for $\mathbb{E}$. \pause
+			\end{itemize}
+			\item Solve a system of linear equations to find $\mathbb{V}^{min}$ + witnessing scheduler \pause \begin{itemize}
+				\item The scheduler can be chosen memoryless and deterministic
+			\end{itemize}
+		\end{enumerate}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Applications}
+	\begin{itemize}
+		\item Worst-case expected termination times of probabilistic programs \pause
+		\item Finding optimal controls for a motion planning scenario having random external influences \pause
+		\item Traffic control systems, energy grids \pause
+		\item Decision making in financial markets \pause
+	\end{itemize}
+	\textcolor{red}{\textbf{Limits of applicability?}}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Percentile queries}
+	\begin{block}{The problem}
+		Given a
+		\begin{itemize}
+			\item $\mathbb{Z}$-weighted MDP $\mathcal{M}$ \pause
+			\item weight threshold $t \in \mathcal{M}$ \pause
+			\item probability threshold $\alpha \in [0,1] \cap \mathbb{Q}$ \pause
+		\end{itemize}
+		\textbf{Decide:} \texttt{Is there a scheduler such that $\mathbb{Pr}(\rawdiaplus(\pi) \leq t) \geq \alpha$?}\pause
+		\begin{itemize}
+			\item ...\textbf{PSpace-hard} \pause
+			\item ...decidable in \textbf{pseudo-PTime}\pause
+			\item ...There is an optimal deterministic scheduler, computable in \textbf{ExpTime}
+		\end{itemize}
+	\end{block}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Tools}
+	\begin{itemize}
+		\item Storm model checker
+		\item Prism model checker
+	\end{itemize}
+\end{frame}
+
+% idee für diplomarbeit
+% partial expectation: saturation point finden, darüber MD scheduler, darunter zb mit LP lösen.
+% CE: satur. point finden, darunter kompliziert mehrfach mit threshold algorithmus optimale entscheidungen finden.
+
+
+\end{document}
